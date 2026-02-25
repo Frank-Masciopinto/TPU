@@ -1,0 +1,9 @@
+<div id="carousel-active" class="related similar products-container carousel-active">
+  <ul class="productGrid productGrid--maxCol{{ columns }} similar" data-product-type="similar" {{#if settings.data_tag_enabled}} data-list-name="Similar Products" {{/if}}>
+        {{#if settings.data_tag_enabled}}
+            {{> components/products/carousel products=product.similar_by_views list="Customers Also Viewed"}}
+        {{else}}
+            {{> components/products/carousel products=product.similar_by_views}}
+        {{/if}}
+  </ul>
+</div>

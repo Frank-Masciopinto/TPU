@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ head.title }}</title>
+    {{{ head.meta_tags }}}
+    {{{ head.config }}}
+    <link href="{{ head.favicon }}" rel="shortcut icon">
+    {{#block "head"}}{{/block}}
+    {{{ stylesheet '/assets/css/theme.css' }}}
+    {{{ checkout.checkout_head }}}
+    {{{ stylesheet '/assets/css/optimized-checkout.css' }}}
+    {{getFontsCollection font-display='block'}}
+</head>
+<body class="main{{#if theme_settings.body_width '===' 960}} nine-sixty{{/if}} {{#if theme_settings.body_width '===' 1170}} eleven-seventy {{/if}} {{#if theme_settings.body_width '===' 1280}} twelve-eighty {{/if}} {{#if theme_settings.body_width '===' 1366}} thirteen-sixty-six {{/if}} {{#if theme_settings.body_width '===' 1440}} fourteen-forty {{/if}} {{#if theme_settings.header-layout '!==' 'in-container'}} header-full-width{{/if}} {{#if theme_settings.header-layout '===' 'in-container'}} header-in-container{{/if}}">
+  <svg data-src="{{cdn 'img/icon-sprite.svg'}}" class="icons-svg-sprite"></svg>
+
+  {{#block "page"}}{{/block}} 
+
+  
+
+  {{{snippet 'header'}}}
+        <svg data-src="{{cdn 'img/icon-sprite.svg'}}" class="icons-svg-sprite"></svg>
+
+        {{#and settings.privacy_cookie settings.is_eu_ip_address}}
+            {{> components/common/cookie}}
+        {{/and}}
+
+  <script>window.__webpack_public_path__ = "{{cdn 'assets/dist/'}}";</script>
+       <script src="{{cdn 'assets/dist/theme-bundle.main.js'}}"></script>
+
+       <script>
+           // Exported in app.js
+           window.stencilBootstrap("{{page_type}}", {{jsContext}}).load();
+       </script>
+
+    {{{footer.scripts}}}
+    {{{snippet 'footer'}}}
+
+</body> 
+</html>

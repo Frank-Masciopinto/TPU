@@ -1,0 +1,35 @@
+{{#if theme_settings.new_products_in_carousels '===' false}}
+<div class="new-products-container carousel-inactive">
+  <h2 class="container-header page-heading">{{lang 'products.new' }}</h2>
+<!-- NEW PRODUCTS NO CAROUSELS -->
+  <ul class="productGrid productGrid--maxCol{{ columns }} new-products" data-product-type="new" {{#if settings.data_tag_enabled}} data-list-name="New Products" {{/if}}>
+    {{#if settings.data_tag_enabled}}
+      {{#each products}}
+        <li class="product">
+          {{>components/products/card show_compare=../show_compare show_rating=../settings.show_product_rating theme_settings=../theme_settings customer=../customer event="list" position=(add @index 1)}}
+        </li>
+      {{/each}}
+    {{else}}
+      {{#each products}}
+        <li class="product">
+          {{>components/products/card show_compare=../show_compare show_rating=../settings.show_product_rating theme_settings=../theme_settings customer=../customer}}
+        </li>
+      {{/each}}
+    {{/if}}
+  </ul>
+</div>
+{{/if}}
+
+{{#if theme_settings.new_products_in_carousels '===' true}}
+  <!-- NEW PRODUCTS IN CAROUSELS -->
+  <div id="carousel-active" class="new products-container carousel-active">
+    <h2 class="container-header page-heading">{{lang 'products.new' }}</h2>
+    <ul class="productGrid productGrid--maxCol{{ columns }}" data-product-type="new">
+    {{#if settings.data_tag_enabled}}
+      {{> components/products/carousel settings=../settings products=products list="New Products"}}
+    {{else}}
+      {{> components/products/carousel products=products}}
+    {{/if}}
+    </ul>
+  </div>
+{{/if}}

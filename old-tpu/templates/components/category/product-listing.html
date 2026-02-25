@@ -1,0 +1,49 @@
+{{> components/products/filter sort=pagination.category.sort}}
+
+{{#if theme_settings.product_layout_view '===' 'grid'}}
+  <form class="grid-only" action="{{urls.compare}}" method='POST' {{#if settings.data_tag_enabled}} data-list-name="Category: {{category.name}}" {{/if}} data-product-compare>
+    {{#if settings.data_tag_enabled}}
+      {{> components/products/grid products=category.products show_compare=category.show_compare theme_settings=theme_settings event="list" }}
+    {{else}}
+      {{> components/products/grid products=category.products show_compare=category.show_compare theme_settings=theme_settings}}
+    {{/if}}
+  </form>
+{{/if}}
+
+{{#if theme_settings.product_layout_view '===' 'list'}}
+  <form class="list-only" action="{{urls.compare}}" method='POST' {{#if settings.data_tag_enabled}} data-list-name="Category: {{category.name}}" {{/if}} data-product-compare>
+    {{#if settings.data_tag_enabled}}
+      {{> components/products/list products=category.products show_compare=category.show_compare theme_settings=theme_settings event="list" }}
+    {{else}}
+      {{> components/products/list products=category.products show_compare=category.show_compare theme_settings=theme_settings}}
+    {{/if}}
+  </form>
+{{/if}}
+
+{{#if theme_settings.product_layout_view '===' 'both_grid_default'}}
+  <form class="both-grid-default" action="{{urls.compare}}" method='POST' {{#if settings.data_tag_enabled}} data-list-name="Category: {{category.name}}" {{/if}} data-product-compare>
+    {{#if settings.data_tag_enabled}}
+      {{> components/products/grid-default products=category.products show_compare=category.show_compare theme_settings=theme_settings event="list" }}
+      {{> components/products/list products=category.products show_compare=category.show_compare theme_settings=theme_settings event="list" }}
+    {{else}}
+      {{> components/products/grid-default products=category.products show_compare=category.show_compare theme_settings=theme_settings}}
+      {{> components/products/list products=category.products show_compare=category.show_compare theme_settings=theme_settings}}
+    {{/if}}
+    <div class="clear"></div>
+  </form>
+{{/if}}
+
+{{#if theme_settings.product_layout_view '===' 'both_list_default'}}
+  <form class="both-list-default" action="{{urls.compare}}" method='POST' {{#if settings.data_tag_enabled}} data-list-name="Category: {{category.name}}" {{/if}} data-product-compare>
+    {{#if settings.data_tag_enabled}}
+      {{> components/products/list-default products=category.products show_compare=category.show_compare theme_settings=theme_settings event="list" }}
+      {{> components/products/grid products=category.products show_compare=category.show_compare theme_settings=theme_settings event="list" }}
+    {{else}}
+      {{> components/products/list-default products=category.products show_compare=category.show_compare theme_settings=theme_settings}}
+      {{> components/products/grid products=category.products show_compare=category.show_compare theme_settings=theme_settings}}
+    {{/if}}
+    <div class="clear"></div>
+  </form>
+{{/if}}
+
+{{> components/common/paginator pagination.category}}

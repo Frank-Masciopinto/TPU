@@ -1,0 +1,9 @@
+<div id="carousel-active" class="related recommended products-container carousel-active">
+  <ul class="productGrid productGrid--maxCol{{ columns }} related" data-product-type="related" {{#if settings.data_tag_enabled}} data-list-name="Related Products" {{/if}}>
+        {{#if settings.data_tag_enabled}}
+            {{> components/products/carousel products=product.related_products list="Related Products"}}
+        {{else}}
+            {{> components/products/carousel products=product.related_products}}
+        {{/if}}
+  </ul>
+</div>

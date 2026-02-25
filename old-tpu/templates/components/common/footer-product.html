@@ -1,0 +1,550 @@
+{{{region name="footer_above_full_width--global"}}}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.js" defer=""></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js" defer=""></script>
+<footer class="footer" role="contentinfo">
+	{{#if settings.show_newsletter_box}}
+	    <div class="footer-top newsletter">
+	        <div class="content newsletter">
+	            <div class="" data-section-type="newsletterSubscription">
+	                {{> components/common/subscription-form}}
+					<div class="clear"></div>
+	            </div>
+	      			<div class="clear"></div>
+	        </div>
+	    </div>
+		<div class="global-region screen-width below-footer-newsletter">
+			<div class="global-region body-width">
+				{{{region name="footer_below_newsletter--global"}}}
+			</div>
+		</div>
+	{{/if}}
+    <div class="container">
+        <section class="footer-info">
+	        <article class="footer-info-col footer-info-col--small" data-section-type="storeInfo">
+	                <h5 class="footer-info-heading">Contact Us</h5>
+	                <div class="regular">
+	                    <address>{{nl2br settings.address}}</address>
+	                </div>
+					<div class="global-region container-width"> <!-- can be used for SSL Certificate Seal -->
+						{{{region name="footer_below_contact--global"}}}
+					</div>
+	        </article>
+	        <article class="footer-info-col footer-info-col--small" data-section-type="footer-webPages">
+	            <h5 class="footer-info-heading">Accounts & Orders</h5>
+	            <div class="regular">
+	                <ul class="footer-info-list">
+	                	{{#if settings.gift_certificates_enabled}}
+	                        <li>
+	                            <a href="/giftcertificates.php">Gift Certificates</a>
+	                        </li>
+	                    {{/if}}
+						{{#if settings.show_wishlist}}
+							<li>
+								<a href="/wishlist.php">Wishlist</a>
+							</li>
+						{{/if}}
+	                    {{#if settings.account_creation_enabled}}
+	                        {{#if customer}}
+	                            <li><a class="navUser-action" href="{{urls.account.index}}">{{lang 'common.account'}}</a></li>
+	                            <li><a class="navUser-action" href="{{urls.auth.logout}}">{{lang 'common.logout'}}</a></li>
+															<li>
+					                        <a href="/account.php?action=order_status">Order Status</a>
+					                    </li>
+	                        {{else}}
+	                            <li><a class="navUser-action" href="{{urls.auth.login}}">{{lang 'common.login'}}</a>
+	                            {{#if settings.account_creation_enabled}}
+	                                <span class="navUser-or">{{lang 'common.or'}}</span> <a class="navUser-action" href="{{urls.auth.create_account}}">{{lang 'common.sign_up'}}</a></li>
+	                            {{/if}}
+	                        {{/if}}
+	                    {{/if}}
+						{{#if theme_settings.show_shipping_returns_link}}
+	                    	<li>
+								<a href="{{theme_settings.shipping_returns_url}}">{{theme_settings.shipping_returns_link_name}}</a>
+	                    	</li>
+						{{/if}}
+	                </ul>
+	            </div>
+				<div class="global-region container-width"> <!-- can be used for SSL Certificate Seal -->
+					{{{region name="footer_below_account--global"}}}
+				</div>
+	        </article>
+	        <article class="footer-info-col footer-info-col--small" data-section-type="footer-categories">
+	            <h5 class="footer-info-heading">Quick Links</h5>
+	            <div class="regular">
+	                <ul class="footer-info-list">
+	                    {{#each pages}}
+	                    <li>
+	                        <a href="{{url}}">{{name}}</a>
+	                    </li>
+	                    {{/each}}
+	                </ul>
+	            </div>
+				<div class="global-region container-width">
+					{{{region name="footer_below_quick_links--global"}}} <!-- can be used for SSL Certificate Seal -->
+				</div>
+	        </article>
+
+	        <article class="footer-info-col footer-info-col--small" data-section-type="footer-categories">
+				{{#if settings.blog_enabled}}
+	                <h5 class="footer-info-heading recent-posts-heading">Recent Blog Posts</h5>
+	                <div class="blog regular">
+	                    <ul class="footer-info-list">
+	                        {{#each (limit blog.recent_posts theme_settings.footer_blog_posts_count)}}
+	                            <li><a href="{{url}}">{{title}}</a></li>
+	                        {{/each}}
+	                    </ul>
+	                </div>
+				{{/if}}
+	            <div class="social-media">
+	                {{> components/common/social-links}}
+	            </div>
+				<div class="global-region container-width"> 	<!-- can be used for SSL Certificate Seal -->
+					{{{region name="footer_below_social_links--global"}}}
+				</div>
+	        </article>
+	        <div class="clear"></div>
+	        {{> components/common/payment-icons}}
+			<div class="global-region container-width below-payment-icons"> <!-- can be used for SSL Certificate Seal -->
+			  {{{region name="footer_below_payment_icons--global"}}}
+			</div>
+    	</section>
+        <div class="clear"></div>
+    </div>
+
+	<div class="global-region screen-width above-footer-creditsBar">
+		<div class="global-region body-width">
+			{{{region name="footer_above_credits_bar--global"}}} <!-- can be used for SSL Certificate Seal -->
+		</div>
+	</div>
+
+    <div class="footer-bottom">
+        <div class="content copyright">
+			<ul class="site-info">
+				{{#if theme_settings.show_copyright_footer}}
+					<li class="copyright"><span class="current-year">&copy; <span id="copyright_year"></span> {{settings.store_name}}</span></li>
+				{{/if}}
+
+				{{#if theme_settings.show_copyright_footer '===' true}}
+					{{#if theme_settings.show_sitemap_link '===' true}}
+						{{#if theme_settings.show_powered_by '===' true}}
+							<span class="separator"> | </span>
+						{{/if}}
+					{{/if}}
+				{{/if}}
+
+				{{#if theme_settings.show_copyright_footer '===' true}}
+					{{#if theme_settings.show_sitemap_link '===' true}}
+						{{#if theme_settings.show_powered_by '===' false}}
+							<span class="separator"> | </span>
+						{{/if}}
+					{{/if}}
+				{{/if}}
+
+				{{#if theme_settings.show_copyright_footer '===' true}}
+					{{#if theme_settings.show_sitemap_link '===' false}}
+						{{#if theme_settings.show_powered_by '===' true}}
+							<span class="separator"> | </span>
+						{{/if}}
+					{{/if}}
+				{{/if}}
+
+				{{#if theme_settings.show_sitemap_link}}
+					<li class="sitemap"><a href="{{urls.sitemap}}">{{lang 'sitemap.page_title'}}</a></li>
+				{{/if}}
+
+					{{#if theme_settings.show_sitemap_link '===' true}}
+						{{#if theme_settings.show_powered_by '===' true}}
+							<span class="separator"> | </span>
+						{{/if}}
+					{{/if}}
+
+				{{#if theme_settings.show_powered_by}}
+					<li class="built-by">Premium <a target="_blank" href="https://www.bigcommerce.com/">BigCommerce</a> Theme by <a class="lone-star-templates" target="_blank" href="http://lonestartemplates.com/">Lone Star Templates</a></li>
+				{{/if}}
+				<div class="clear"></div>
+			</ul>
+        </div>
+    </div>
+	<div class="global-region screen-width below-footer-creditsBar">
+		<div class="global-region body-width">
+			{{{region name="footer_below_credits_bar--global"}}} <!-- can be used for SSL Certificate Seal -->
+		</div>
+	</div>
+
+    <div id="topcontrol" class="backtoTop" title="Scroll Back to Top">
+        <svg class="icon back-to-top-icon" title="submit" alt="submit"><use xlink:href="#icon-caret-square-up"></use></svg>
+    </div>
+</footer>
+
+
+<!-- CALL MOST RECENT JQUERY LIBRARY -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+
+<script>
+  // WAIT FUNCTION FOR ELEMENT TO POPULATE
+  function waitForElement(elementPath, callBack){
+    window.setTimeout(function(){
+      if($(elementPath).length){
+        callBack(elementPath, $(elementPath));
+      }else{
+        waitForElement(elementPath, callBack);
+      }
+    },250)
+  }
+</script>
+
+<script>
+	$( document ).ready(function() {
+	    $('.slider').hover(
+	        function() {
+	            $(this).addClass('active');
+	        },
+	        function() {
+	            $(this).removeClass('active');
+	        }
+	    );
+	});
+</script>
+
+<!-- DO NOT SHOW PRODUCT CAROUSEL UNTIL PAGE COMPLETELY LOADS -->
+<script>
+	$(window).on("load", function(){
+    	$('.sidebar.right').fadeIn();
+		$('.similar-products-by-views').fadeIn();
+		$('.new-products-container').fadeIn();
+	});
+</script>
+
+<script>
+	if ($('#tab-customField1 span.custom-value').text().length >= 1) {
+		$('li.tab.customFieldOne').addClass('visible');
+		$('#tab-customField1 .custom-field-container').addClass('visible');
+	}
+</script>
+
+<script>
+    $('#tab-customField1 .custom-field-container:contains("customFieldTab1")').wrap("<div class='visible'></div>");
+</script>
+
+<script>
+	var customName = $('span.custom-name').first().text();
+	$('.tab.customFieldOne.visible a').text(customName);
+	$('div#tab-customField1 h3.tab-content-title').text(customName);
+</script>
+
+<!-- GET TITLE ATTRIBUTE OF SWATCH CHILD AND THEN APPLY IT TO THE PARENT ON HOVER -->
+<script>
+	$( "label.form-option.form-option-swatch" ).hover(function() {
+	    var title = $(this).find('span').attr("title");
+		$(this).prop('title', title);
+	});
+</script>
+
+<script>
+	$('section.productView-images a.productView-thumbnail-link').hover(function() {
+		$(this).toggleClass('is-active');
+	});
+</script>
+
+<script>
+	$(document).ready(function() {
+		$('.slider-for').slick({
+		 slidesToShow: 1,
+		 slidesToScroll: 1,
+		 infinite: false,
+		 arrows: true,
+		 fade: true,
+		 adaptiveHeight: true,
+		 asNavFor: '.slider-nav'
+		});
+		$('.slider-nav').slick({
+		 slidesToShow: 4,
+		 slidesToScroll: 1,
+		 asNavFor: '.slider-for',
+		 infinite: false,
+		 dots: false,
+		 centerMode: false,
+		 focusOnSelect: true
+		});
+	});
+
+	$('.slider-for> :last-child').remove();
+
+	$(window).on("load", function(){
+		$( ".slider-nav .slick-slide" ).last().addClass( "last" );
+	});
+
+
+	$(window).on("load", function(){
+		$( ".slick-arrow" ).on ('click', function() {
+			if  ( $(".slider-nav .slick-slide.last.slick-current.slick-active")[0] ) {
+				$(".slider-for .slick-next.slick-arrow").addClass('slick-disabled');
+			} else {
+				$(".slider-for .slick-next.slick-arrow").removeClass('slick-disabled');
+			}
+		});
+	});
+
+	$('.fancybox-content').on({ 'touchstart' : function(){ $('.fancybox-button').toggleClass('disabled'); } });
+
+	$('figure.productView-image').on("load", function(){
+		$('div#product-images-container').addClass('ready');
+		$('.productImageSlider.slider-for li').addClass('ready');
+	});
+
+	$(window).on("load", function(){
+		$('.slider-nav').show();
+	});
+</script>
+
+<script>
+	$(window).on("load", function(){
+		$('.product-thumbs-no-carousel').show();
+	});
+</script>
+
+<script>
+	$(document).ready(function() {
+		$("li.fancy-gallery").fancybox();
+	});
+</script>
+
+<script>
+	$(window).on("load", function(){
+		$('.productImageSlider').addClass('ready');
+	});
+</script>
+
+<script>
+	$( "a.navPage-subMenu-action.navPages-action.navPages-action-depth-max.has-subMenu" ).on ('click', function() {
+		window.location = this.href;
+	});
+</script>
+
+<script>
+	$('figure.listItem-figure').each(function() {
+		if ( $(this).find('img.listItem-image').length >= 2 ) {
+	    	$(this).addClass('multiple-images');
+		}
+	});
+</script>
+
+<!-- CUSTOM NAV ARROWS FOR FANCYBOX -->
+<script>
+	$(document).ready(function(){
+	    // var imgAlt = $('figure.productView-image img').attr('alt');
+	    // After Fancybox Loads
+	    $('[data-fancybox="gallery"]').fancybox({
+	        afterLoad : function( instance, current ) {
+				$('#body').addClass("fancy-arrows-visible");
+				$("<div class='hide-mobile-fancybox-nav-arrows arrows-visible'><span class='custom-text'><span class='hide'>Hide</span><span class='show'>Show</span> Nav Arrows</span></div>").insertAfter(".fancybox-infobar");
+				$(".hide-mobile-fancybox-nav-arrows").on ('click', function() {
+					$('#body.fancybox-active').toggleClass("fancy-arrows-visible");
+					$(this).toggleClass("arrows-visible");
+					$(".button-next.custom").toggleClass('hidden');
+					$(".button-previous.custom").toggleClass('hidden');
+				});
+		        $('.fancybox-navigation .fancybox-button--arrow_left').append('<a data-fancybox-previous class="button-previous custom" href="javascript:;"><i class="icon" aria-hidden="true"><svg class="custom-fancy-arrows custom"><use xlink:href="#icon-angle-left"></use></svg></i></a>');
+		        $('.fancybox-navigation .fancybox-button--arrow_right').append('<a data-fancybox-next class="button-next custom" href="javascript:;"><i class="icon" aria-hidden="true"><svg class="custom-fancy-arrows custom"><use xlink:href="#icon-angle-right"></use></svg></i></a>');
+		        // $('.fancybox-content img').attr('alt', imgAlt);
+		        // $('.fancybox-content img').attr('title', imgAlt);
+		        current.$image.attr('alt', current.opts.$orig.find('img').attr('alt') );
+		        current.$image.attr('title', current.opts.$orig.find('img').attr('title') );
+	  		}
+		})
+	});
+</script>
+
+<!-- UPDATE MAIN IMAGE DATA ONCLICK OF THUMBNAILS -->
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.product.main.left .slider-nav .slick-slide').click(function(){
+             var thumbImgDataUpdate = $('.slick-active figure.productView-image img').attr('src');
+            $('.slick-active figure.productView-image').attr('data-image-gallery-main', thumbImgDataUpdate);
+            $('.slick-active figure.productView-image').attr('href', thumbImgDataUpdate);
+            $('.slick-active figure.productView-image').attr('data-image-gallery-zoom-image-url', thumbImgDataUpdate);
+            $('.slick-active figure.productView-image img').attr('src', thumbImgDataUpdate);
+
+            setTimeout(function() {
+ 				var imgDataUpdate = $('.slick-active figure.productView-image').attr('data-image-gallery-new-image-url');
+            	$('.slick-active figure.productView-image').attr('data-image-gallery-main', imgDataUpdate);
+            	$('.slick-active figure.productView-image').attr('href', imgDataUpdate);
+            	$('.slick-active figure.productView-image').attr('data-image-gallery-zoom-image-url', imgDataUpdate);
+            	$('.slick-active figure.productView-image img').attr('src', imgDataUpdate);
+			}, 700);
+    	});
+	});
+</script>
+<!-- Lone Star Templates DO NOT EDIT ABOVE THIS LINE -->
+
+<script>
+	// RUN THIS SCRIPT ONLY BEFORE THUMBNAILS HAVE BEEN CLICKED
+	$(document).on('click', ".productView.thumbnail-unclicked", function() {
+		$(".productView.thumbnail-unclicked div[data-product-option-change] input.form-radio").change(function() {
+		   setTimeout(function() {
+		     var updatedFirstSlideImgSrc = $('.main-image-container .slick-slide[data-slick-index="0"] figure img').attr('src');
+		   }, 1000);
+		});
+	});
+	$(document).ready( function() {
+		$("div[data-product-option-change] input.form-radio").change(function() {
+			console.log("swatch click");
+	 		setTimeout(function() {
+		    	var imgOptionSwatchDataUpdate = $('.main-image-container .slick-slide[data-slick-index="0"] figure img').attr('src');
+			    $('.slick-active figure.productView-image').attr('data-image-gallery-main', imgOptionSwatchDataUpdate);
+			    $('.slick-active figure.productView-image').attr('href', imgOptionSwatchDataUpdate);
+			    $('.slick-active figure.productView-image').attr('data-image-gallery-zoom-image-url', imgOptionSwatchDataUpdate);
+		    	$('.slick-active figure.productView-image img').attr('src', imgOptionSwatchDataUpdate);
+		    }, 1500);
+	 	});
+		$(".form-select").change(function() {
+			setTimeout(function() {
+				var imgOptionFormDataUpdate = $('.main-image-container .slick-slide[data-slick-index="0"] figure img').attr('data-zoom-image');
+			    $('.slick-active figure.productView-image img').attr('data-image-gallery-new-image-url', imgOptionFormDataUpdate);
+			    $('.slick-active figure.productView-image').attr('data-image-gallery-main', imgOptionFormDataUpdate);
+			    $('.slick-active figure.productView-image').attr('href', imgOptionFormDataUpdate);
+			    $('.slick-active figure.productView-image').attr('data-image-gallery-zoom-image-url', imgOptionFormDataUpdate);
+			    $('.slick-active figure.productView-image img').attr('src', imgOptionFormDataUpdatee);
+			}, 700);
+		});	 	
+ 	});	 
+</script>
+
+<script>
+	// CHECK TO SEE IF THUMBNAIL HAS BEEN CLICKED
+	$(document).ready( function() {
+		$(".slider-nav .slick-slide").on ('click', function() {
+			$('.productView').addClass('thumbnail-clicked');
+		});
+	});
+</script>
+
+ <!-- SCROLL TO REVIEWS IN TABS AND MAKE ACTIVE WHEN REVIEW LINK UP TOP IS CLICKED -->
+<script>
+	$(".productView-product .productView-reviewLink.reviewList > a").on ('click', function() {
+		$('html,body').animate({
+	            scrollTop: $(".productView-description").offset().top
+	    }, 1000);
+	    $('article.productView-description .tab').removeClass('is-active');
+	    $('article.productView-description .tab-content').removeClass('is-active');
+	    $("article.productView-description .tab.reviews").addClass('is-active');
+	    $("article.productView-description .tab-content.reviews").addClass('is-active');
+	    return false;
+	});
+</script>
+
+
+<!-- PAGINATION FOR REVIEWS ON PRODUCT PAGE SCROLL & ACTIVE REVIEWS TAB -->
+<script>
+	$(window).on("load", function(){
+		if (window.location.href.indexOf("#product-reviews") > -1) {
+			$("span.reviewList a").on ('click', function() {
+				$('html,body').animate({
+					scrollTop: $(".productView-description").offset().top
+				}, 1000);
+				$('.tab').removeClass('is-active');
+				$('.tab-content').removeClass('is-active');
+				$(".tab.reviews").addClass('is-active');
+				$(".tab-content.reviews").addClass('is-active');
+			});
+		}
+	});
+</script>
+
+<!-- PAGINATION FOR REVIEWS ON PRODUCT PAGE SCROLL & ACTIVE REVIEWS TAB -->
+<script>
+	$(window).on("load", function(){
+		if ((window.location.href.indexOf("#product-reviews") > -1) || (window.location.href.indexOf("?revpage") > -1)) {
+			$('html,body').animate({
+				scrollTop: $(".productView-description").offset().top
+			}, 1000);
+			$('.tab').removeClass('is-active');
+			$('.tab-content').removeClass('is-active');
+			$(".tab.reviews").addClass('is-active');
+			$(".tab-content.reviews").addClass('is-active');
+		}
+	});
+</script>
+
+<script>
+	$( "div#mobile-menu li a" ).hover(function() {
+		event.preventDefault();
+	});
+</script>
+
+
+<!-- FIX FOR Multiple Product Video not clickable -->
+<script>
+	$(document).ready(function(){
+	    $(".videoGallery-list li.videoGallery-item a.video").click(function(e){
+	        e.preventDefault();
+	        var videoID = $(this).attr("data-video-id");
+	        $(".videoGallery-main iframe#player").attr("src", "//www.youtube.com/embed/" + videoID);
+	        $("a.video.is-active").removeClass("is-active");
+	        $(this).addClass("is-active");
+	        $("iframe#player")[0].scrollIntoView(true);
+	    });
+	});
+</script>
+
+
+<script>
+$(document).ready(function(){
+	waitForElement("#carousel-active img",function(){
+		$('#carousel-active .slick-slider').fadeIn();
+	});
+});
+</script>
+
+<script>
+	$(document).ready(function(){
+		$(".productView-details .msrp-sale-regular-price-section .price-label").each(function() {
+	    if ($.trim($(this).html()).length > 0 )
+	        $(this).addClass('label-active');
+		});
+	});
+</script>
+
+<script>
+	$(document).ready(function(){
+		$(".productView-details span.price.price--non-sale").each(function() {
+	    if ($.trim($(this).html()).length <= 0 )
+	        $('.productView-details .price-section.current-price span.price-label.price-now-label').addClass('label-inactive');
+		});
+	});
+</script>
+
+<script>
+	$(document).ready(function(){
+	    if ($(".productView-details .price.price--non-sale")[0]) {
+	        $('.productView-details .price-now-label').addClass('label-active');
+		}
+	});
+</script>
+<script>
+	$(document).ready(function(){
+	    if (!$(".productView-details .price.price--non-sale")[0]) {
+	        $('.productView-details .price-now-label').addClass('label-inactive');
+		}
+	});
+</script>
+
+<script>
+	$(document).ready(function(){
+		$(".productView-details .productView-price div").each(function() {
+			if ( ($(".withTax")[0]) && ($(".withoutTax")[0]) ) {
+				$(this).parents('.productView-details').addClass('withTax-withoutTax-active');
+    		$('div.withoutTax').addClass("hide-msrp-nonSale-price-withoutTax");
+			} else {
+    		// Do something if class does not exist
+			}
+		});
+	});
+</script>
+
+<script>
+	$(window).on("load", function(){
+		$('section.productView-details').show();
+	});
+</script>

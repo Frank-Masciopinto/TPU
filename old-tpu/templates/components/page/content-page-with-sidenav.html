@@ -1,0 +1,36 @@
+{{> components/custom/sidenav}}
+
+<div class="page-content page-content">
+  {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+  <h1 class="page-heading">{{ page.title }}</h1>
+  {{#if page.sub_pages}}
+  <nav class="navBar navBar--sub">
+      <ul class="navBar-section account-navigation">
+      {{#each page.sub_pages}}
+          <li class="navBar-item"><a class="navBar-action" href="{{url}}">{{title}}</a></li>
+      {{/each}}
+      </ul>
+  </nav>
+  {{{region name="page_builder_content--global"}}} 
+  {{{region name="page_builder_content"}}}
+  {{/if}}
+    {{#replace '%%Syndicate%%' page.content}}
+        {{> components/page/rss_feed}}
+    {{else}}
+      {{{region name="page_builder_content_editor_area_top--global"}}}
+      {{{region name="page_builder_content_editor_area_top"}}}
+        <p>{{{page.content}}}</p>
+      {{{region name="page_builder_content_editor_area_bottom--global"}}}
+      {{{region name="page_builder_content_editor_area_bottom"}}}
+    {{/replace}}
+</div>
+{{#if page.feed}}
+    <ul>
+        {{#each page.feed}}
+            <li>
+                <h2><a href="{{url}}" target="_blank">{{title}}</a></h2>
+                <p>{{content}}</p>
+            </li>
+        {{/each}}
+    </ul>
+{{/if}}

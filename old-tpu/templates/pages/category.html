@@ -1,0 +1,131 @@
+---
+category:
+    shop_by_price: true
+    products:
+        limit: {{theme_settings.categorypage_products_per_page}}
+blog:
+    recent_posts:
+        limit: {{theme_settings.footer_blog_posts_count}}
+---
+
+{{inject "categoryProductsPerPage" theme_settings.categorypage_products_per_page}}
+{{#partial "head"}}
+    {{#if pagination.category.previous}}
+        <link rel="prev" href="{{pagination.category.previous}}">
+    {{/if}}
+    {{#if pagination.category.next}}
+        <link rel="next" href="{{pagination.category.next}}">
+    {{/if}}
+{{/partial}}
+{{#partial "page"}}
+{{{region name="category_below_menu--global"}}}
+{{{region name="category_below_menu"}}}
+{{> components/custom/category-sidenav}}
+
+<div class="category main {{#if theme_settings.top_pagination_visibility '===' false}}top-pagination-hidden {{/if}}{{#if theme_settings.bottom_pagination_visibility '===' false}}bottom-pagination-hidden{{/if}}{{#if theme_settings.product_layout_view '===' 'both_grid_default'}}grid-default{{/if}}{{#if theme_settings.product_layout_view '===' 'both_list_default'}}list-default{{/if}} {{#if category.faceted_search_enabled}} product-filtering-enabled {{else}} product-filtering-disabled{{/if}}">
+    {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+    <h1 class="container-header">{{category.name}}</h1>
+    {{{region name="category_below_header--global"}}}
+    {{{region name="category_below_header"}}}
+    {{#if banners.top}}
+        <div class="banners top" data-banner-location="top">
+          {{#each (limit banners.top_metadata 1)}}
+            <div class="banner" data-event-type="promotion" data-entity-id="{{this.id}}" data-name="{{this.banner-name}}" data-position="{{this.location}}" data-banner-id="{{this.banner-name}}">
+              <div data-event-type="promotion-click">
+                {{{this.content}}}
+              </div>
+            </div>
+          {{/each}}
+        </div>
+    {{/if}}
+    {{#if category.image}}
+        <div class="category-main-image">
+            <div class="category-header-image" style="background-image: url({{getImage category.image}});"></div>
+           <!--  <img class="category-header-image" src="{{getImage category.image 'zoom'}}"> -->
+        </div>
+    {{/if}}
+    {{{category.description}}}
+    {{{snippet 'categories'}}}
+    <div class="page category-grid">
+        <!--LONE STAR CUSTOM SUBCATEGORY GRID-->
+        {{#if category.subcategories}}
+            <div class="subcategory-grid">
+
+                <ul class="navList">
+                    {{#each category.subcategories}}
+                        <li class="subcategory-item">
+                            <div class="subcategory-link-container">
+                                <a class="subcateogory-image-link" href="{{url}}" alt="{{name}}">
+                                  {{#if image}}
+                                        <div class="subcategory-image uploaded" style="background-image: url('{{getImage image}}');"><br /></div></a>
+                                      {{else}}
+                                        <div class="subcategory-image placeholder-image"><br /></div></a>
+                                  {{/if}}
+                            </div>
+                                <a class="subcategory-link" href="{{url}}" alt="{{name}}"><span class="subcategory-name">{{name}}</span></a>
+                            <div class="clear"></div>
+                        </li>
+                    {{/each}}
+                </ul>
+        {{/if}}
+    </div>
+
+    <!-- GRID/LIST TOGGLE BUTTONS - GRID BY DEFAULT -->
+    {{#if theme_settings.product_layout_view '===' 'both_grid_default'}}
+      <div class="grid-list-view toggle">
+        <a class="toggle-link grid active default" href="#" title="Toggle Grid View"><svg class="toggle grid"><use xlink:href="#icon-grid"></use></svg></a>
+        <a class="toggle-link list secondary" href="#" title="Toggle List View"><svg class="toggle list"><use xlink:href="#icon-list"></use></svg></a>
+        <div class="clear"></div>
+      </div>
+    {{/if}}
+
+    <!-- GRID/LIST TOGGLE BUTTONS - LIST BY DEFAULT -->
+    {{#if theme_settings.product_layout_view '===' 'both_list_default'}}
+      <div class="grid-list-view toggle">
+        <a class="toggle-link list active default" href="#" title="Toggle List View"><svg class="toggle list"><use xlink:href="#icon-list"></use></svg></a>
+        <a class="toggle-link grid secondary" href="#" title="Toggle Grid View"><svg class="toggle grid"><use xlink:href="#icon-grid"></use></svg></a>
+        <div class="clear"></div>
+      </div>
+    {{/if}}
+
+        <main class="page-content {{#if theme_settings.product_layout_view '===' 'both_grid_default'}} both-grid-list-views {{/if}} {{#if theme_settings.product_layout_view '===' 'both_list_default'}} both-grid-list-views{{/if}}" id="product-listing-container">
+            {{#if category.products}}
+                {{> components/category/product-listing columns=theme_settings.category_brand_search_column_count settings=../settings}}
+            {{else}}
+                <p>{{lang 'categories.no_products'}}</p>
+            {{/if}}
+        </main>
+
+        <div class="compare">
+            <a class="navUser-action navUser-item--compare" href="{{urls.compare}}" data-compare-nav>{{lang 'Compare Selected'}}</a>
+        </div>
+
+        {{{region name="category_below_content--global"}}}
+        {{{region name="category_below_content"}}}
+
+        <div class="clear"></div>
+        {{#if banners.bottom}}
+          {{#if settings.data_tag_enabled}}
+            <div class="banners bottom" data-banner-location="bottom">
+              {{#each (limit banners.bottom_metadata 1)}}
+                <div class="banner" data-event-type="promotion" data-entity-id="{{this.id}}" data-name="{{this.banner-name}}" data-position="{{this.location}}" data-name="{{this.banner-name}}">
+                  <div data-event-type="promotion-click">
+                    {{{this.content}}}
+                   </div>
+                 </div>
+               {{/each}}
+             </div>
+             {{else}}
+               <div class="banners bottom" data-banner-location="bottom">
+                 <div class="banner">
+                   {{{limit banners.bottom 1}}}
+                 </div>
+               </div>
+             {{/if}}
+         {{/if}}
+         {{{region name="category_below_bottom_banner--global"}}} 
+         {{{region name="category_below_bottom_banner"}}}
+    </div>
+</div>
+{{/partial}}
+{{> layout/base}}

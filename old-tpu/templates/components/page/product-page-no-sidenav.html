@@ -1,0 +1,40 @@
+<div class="product-schema">
+  <div id="product-page-no-sidenav">
+  {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+
+  {{#each product.shipping_messages}}
+
+      {{> components/common/alert-info message}}
+  {{/each}}
+    {{> components/products/product-view schema=true  }}
+
+    {{> components/products/tabs}}
+
+    {{{region name="product_below_content--global"}}} 
+    {{{region name="product_below_content"}}}
+
+    <div class="clear"></div>
+</div>
+
+<div class="similar-products-by-views">
+    {{#if product.similar_by_views}}
+        <h2 class="container-header">You May Also Like...</h2>
+            {{> components/products/similar products=product.similar_by_views columns=theme_settings.related_products_column_count list="Customers Also Viewed"}}
+    {{/if}}
+     <div class="clear"></div>
+</div>
+
+</div>
+</div>
+</div>
+
+<div id="carousel-active" class="related products-container carousel-active">
+<div class="sidebar right">
+   {{#if product.related_products}}
+      <h2 class="container-header">Recommended</h2>
+      <ul class="productGrid productGrid--maxCol{{ columns }} related" data-product-type="related" {{#if settings.data_tag_enabled}} data-list-name="Related Products" {{/if}}>
+      {{> components/products/carousel-vertical products=product.related_products columns=theme_settings.related_products_column_count list="Related Products"}}
+      </ul>
+  {{/if}}
+</div>
+</div>

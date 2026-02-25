@@ -1,0 +1,817 @@
+// GENERAL UNIVERSAL RULES
+section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card figure.card-figure {
+  max-height: unset !important;
+}
+section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card .card-body {
+  min-height: auto !important;
+}
+section.quickSearchResults article.card {
+  min-height: auto !important;
+}
+section#quickSearch.quickSearchResults article.card {
+  display: flex !important;
+}
+section#quickSearch.quickSearchResults .card-text.add-to-cart-button {
+  width: 100% !important;
+  float: none !important;
+  position: static !important;
+  top: initial;
+  margin-top: 0 !important;
+  padding-left: 0;
+}
+body.main section#quickSearch.quickSearchResults .card-text.add-to-cart-button a.button.button--small.card-figcaption-button {
+  width: auto !important;
+  float: none;
+  max-width: 100% !important;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  min-height: 33px;
+  line-height: 31px;
+}
+#quicksearch .card-text.add-to-cart-button.call-for-price span.line-one {
+  padding-bottom: 0 !important;
+}
+body.main section#quickSearch.quickSearchResults .card-text.add-to-cart-button a.button.button--small.card-figcaption-button.call-for-price {
+  line-height: initial !important;
+  padding-top: 10px;
+  /*padding-bottom: 0px;*/
+  padding-bottom: 10px;
+}
+body.main section#quickSearch.quickSearchResults .productGrid .product {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+body.main section#quickSearch.quickSearchResults .productGrid[data-list-name="Quick Search Results"] {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border: 1px solid stencilColor("sideNav-borderColor");
+  padding: 10px;
+  // padding-bottom: 20px;
+}
+section#quickSearch.quickSearchResults article.card .card-body {
+  padding-left: 10px;
+}
+body.main section#quickSearch.quickSearchResults .productGrid[data-list-name="Quick Search Results"] .msrp-and-regular-separate-lines.before-sale-price-hidden .msrp-sale-regular-price-section {
+  height: 24px !important;
+}
+body.main section#quickSearch.quickSearchResults .productGrid[data-list-name="Quick Search Results"] .msrp-hidden.msrp-and-regular-separate-lines .msrp-sale-regular-price-section {
+  height: 24px !important;
+}
+section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card .card-body {
+  background-color: stencilColor("card-bgColor") !important;
+  padding-bottom: 5px;
+}
+section#quickSearch .card-text span.price-label {
+  font-size: 12px;
+}
+section#quickSearch.quickSearchResults .card-figcaption-body {
+  position: absolute;
+  top: initial !important;
+  bottom: 0px;
+  left: 0;
+  transform: initial !important;
+}
+section#quickSearch.quickSearchResults li.product figure img {
+  padding: 0;
+}
+
+body.main div#menu.center-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults .productGrid .product {
+  width: 100% !important;
+}
+body.main div#menu.center-logo.sticky section#quickSearch.quickSearchResults .productGrid[data-list-name="Quick Search Results"] {
+  padding: 0;
+}
+div#menu.center-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card figure.card-figure {
+  float: left;
+  // width: auto;
+}
+div#menu.center-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults article.card {
+  display: flex !important;
+}
+div#menu.center-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card .card-body {
+  float: left;
+  width: auto;
+}
+div#menu.center-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults article.card {
+  margin-bottom: 5px;
+}
+div#menu.center-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults article.card {
+  display: flex !important;
+}
+.center-logo.search-container.not-sticky#menu section#quickSearch.quickSearchResults {
+  width: 100% !important;
+}
+
+
+
+
+body.main div#menu.right-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults .productGrid .product {
+  width: 100% !important;
+}
+body.main div#menu.right-logo.sticky section#quickSearch.quickSearchResults .productGrid[data-list-name="Quick Search Results"] {
+  padding: 0;
+}
+div#menu.right-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card figure.card-figure {
+  float: left;
+  // width: auto;
+}
+div#menu.right-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults article.card {
+  display: flex !important;
+}
+div#menu.right-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card .card-body {
+  float: left;
+  width: auto;
+}
+div#menu.right-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults article.card {
+  margin-bottom: 5px;
+}
+div#menu.right-logo.sticky .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults article.card {
+  display: flex !important;
+}
+.right-logo.search-container.not-sticky#menu section#quickSearch.quickSearchResults {
+  width: 100% !important;
+}
+
+
+
+
+
+.search-container.sticky#menu a.modal-close.custom-quick-search {
+  z-index: 99999999;
+  top: 24px;
+}
+.search-container.sticky#menu .right.searchbar {
+  margin-top: 0;
+}
+.search-container.sticky#menu section.quickSearchResults {
+  margin-top: 4px;
+}
+
+
+
+div#menu.center-logo.sticky figure.card-figure {
+  // width: 25%;
+  // height: auto;
+}
+
+// CENTER LOGO QUICKSEARCH LAYOUT
+div#menu.center-logo .navPages-quickSearch.right.searchbar.center section.quickSearchResults li.product {
+  width: 25% !important;
+}
+body.main div#menu.center-logo .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults .productGrid .product {
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+}
+div#menu.center-logo .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults article.card {
+  display: block !important;
+  margin-bottom: 1rem;
+}
+div#menu.center-logo.not-sticky .navPages-quickSearch.right.searchbar.center section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card figure.card-figure {
+  width: 100% !important;
+  float: none;
+}
+div#menu.center-logo.not-sticky .navPages-quickSearch.right.searchbar.center section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card .card-body {
+  width: 100% !important;
+  float: none;
+}
+div#menu.center-logo .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults .card-text.add-to-cart-button {
+  width: 100% !important;
+}
+body.main div#menu.center-logo .navPages-quickSearch.right.searchbar.center section#quickSearch.quickSearchResults .card-text.add-to-cart-button a.button.button--small.card-figcaption-button {
+  display: inline-block !important;
+  // padding: 5px 15px;
+  width: 100% !important;
+}
+// RIGHT LOGO QUICKSEARCH LAYOUT
+div#menu.right-logo.not-sticky .navPages-quickSearch.right.searchbar.right section.quickSearchResults li.product {
+  width: 25% !important;
+}
+body.main div#menu.right-logo .navPages-quickSearch.right.searchbar.right section#quickSearch.quickSearchResults .productGrid .product {
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+}
+div#menu.right-logo.not-sticky .navPages-quickSearch.right.searchbar.right section#quickSearch.quickSearchResults article.card {
+  display: block !important;
+  margin-bottom: 1rem;
+}
+div#menu.right-logo.not-sticky .navPages-quickSearch.right.searchbar.right section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card figure.card-figure {
+  width: 100% !important;
+  float: none;
+}
+div#menu.right-logo.not-sticky .navPages-quickSearch.right.searchbar.right section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card .card-body {
+  width: 100% !important;
+  float: none;
+}
+div#menu.right-logo .navPages-quickSearch.right.searchbar.right section#quickSearch.quickSearchResults .card-text.add-to-cart-button {
+  width: 100% !important;
+}
+body.main div#menu.right-logo .navPages-quickSearch.right.searchbar.right section#quickSearch.quickSearchResults .card-text.add-to-cart-button a.button.button--small.card-figcaption-button {
+  display: inline-block !important;
+  // padding: 5px 15px;
+  width: 100% !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: unset !important;
+}
+
+#quickSearch-mask {
+  position:absolute;
+  left:0;
+  top:0;
+  background-color:#26262c;
+  display:none;
+  height: 100% !important;
+  z-index: 999;
+}
+#header-quicksearch-mask {
+  position:absolute;
+  left:0;
+  top:0;
+  background-color:#26262c;
+  // display:none;
+  height: 100% !important;
+  z-index: 9999999;
+}
+header.header.quicksearch-active {
+  position: static;
+}
+section.quickSearchResults {
+  z-index: 9999999;
+}
+.card-text.add-to-cart-button.call-for-price.current-price {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+
+
+
+
+
+
+/*******************************************************************************************/
+/*   MEDIA QUERIES  */
+/*******************************************************************************************/
+@media only screen and (max-width : 1000px) {
+// SHOW MSRP & NON-SALE ON SEPARATE LINES REGARDLESS OF SETTINGS TO ACCOMMODATE FOR LESS SPACE AT THIS BREAKPOINT
+article.card.msrp-visible.before-sale-price-visible .price-section.price-section--withoutTax.rrp-price--withoutTax[style="display: none;"] {
+  display: block !important;
+  opacity: 0 !important;
+}
+article.card.msrp-visible.before-sale-price-visible .price-section.price-section--withTax.rrp-price--withTax[style="display: none;"] {
+  display: block !important;
+  opacity: 0 !important;
+}
+.msrp-sale-regular-price-section {
+  height: 42px !important;
+}
+.price-section.price-section--withoutTax.rrp-price--withoutTax {
+  display: block;
+  padding-right: 0 !important;
+}
+.price-section.price-section--withoutTax.non-sale-price--withoutTax {
+  display: block;
+  padding-right: 0 !important;
+}
+.price-section.price-section--withTax.rrp-price--withTax {
+  display: block;
+  padding-right: 0 !important;
+}
+.price-section.price-section--withTax.non-sale-price--withTax {
+  display: block;
+  padding-right: 0 !important;
+}
+article.card.msrp-hidden .price-section.price-section--withoutTax.rrp-price--withoutTax {
+  display: none;
+  padding-right: 0 !important;
+}
+article.card.msrp-hidden .price-section.price-section--withTax.rrp-price--withTax {
+  display: none;
+  padding-right: 0 !important;
+}
+article.card.msrp-hidden .msrp-sale-regular-price-section {
+  height: 24px !important;
+}
+// SHOW SKU & BRAND ON SEPARATE LINES REGARDLESS OF SETTINGS TO ACCOMMODATE FOR LESS SPACE AT THIS BREAKPOINT
+article.card.brand-active.sku-active .card-sku-brand-section {
+  height: 37px;
+}
+article.card.brand-active.sku-active .card-sku-brand-section h4.card-text.brand {
+  display: block;
+}
+article.card.brand-active.sku-active .card-sku-brand-section h4.card-text.sku {
+  display: block;
+}
+article.card.brand-active.sku-active .card-sku-brand-section span.brand-sku-divider {
+    display: none;
+}
+section#quickSearch a.button.button--small.card-figcaption-button {
+  font-size: 12px;
+}
+}
+
+
+
+@media only screen and (max-width : 800px) {
+section.quickSearchResults li.product {
+  width: 33.33333% !important;
+}
+div#menu.center-logo .navPages-quickSearch.right.searchbar.center section.quickSearchResults li.product {
+  width: 33.33333% !important;
+}
+div#menu.right-logo .navPages-quickSearch.right.searchbar.right section.quickSearchResults li.product {
+  width: 33.33333% !important;
+}
+body.main section#quickSearch.quickSearchResults .productGrid .product {
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+}
+section#quickSearch.quickSearchResults article.card {
+  display: block !important;
+}
+section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card figure.card-figure {
+  width: 100% !important;
+}
+section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card .card-body {
+  width: 100% !important;
+}
+section#quickSearch.quickSearchResults .card-text.add-to-cart-button {
+  width: 100% !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+body.main section#quickSearch.quickSearchResults .card-text.add-to-cart-button a.button.button--small.card-figcaption-button {
+  display: inline-block !important;
+  padding: 5px 15px;
+  width: 100% !important;
+}
+.search-buttons-container {
+  padding-bottom: 5px;
+  background: stencilColor("mobileMenu-bgColor");
+}
+.search-buttons-container div.align-right {
+  float: right;
+}
+#search-action-buttons a.reset.quicksearch {
+  display: inline-block;
+  position: static;
+  width: 85px;
+  margin-right: 5px;
+}
+#search-action-buttons a.modal-close.custom-quick-search {
+  display: none;
+  position: static;
+  width: 25.63px;
+}
+section.quickSearchResults {
+    margin-top: 0px;
+}
+section#quickSearch .productGrid[data-list-name="Quick Search Results"] article.card .card-body {
+  padding-bottom: 15px;
+}
+section#quickSearch.quickSearchResults .card-text.add-to-cart-button {
+  margin-top: 5px !important;
+}
+section#quickSearch.quickSearchResults .card-text.add-to-cart-button a.button.button--small.card-figcaption-button {
+  // padding: 0.57143rem 1.5rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 15px !important;
+  padding-right: 15px !important;
+}
+// SET MSRP & NON-SALE BACK TO SETTINGS FOR THIS BREAKPOINT
+article.card.msrp-visible.before-sale-price-visible .price-section.price-section--withoutTax.rrp-price--withoutTax[style="display: none;"] {
+  display: none !important;
+}
+article.card.msrp-visible.before-sale-price-visible .price-section.price-section--withTax.rrp-price--withTax[style="display: none;"] {
+  display: none !important;
+}
+.msrp-sale-regular-price-section {
+  height: 24px !important;
+}
+.price-section.price-section--withoutTax.rrp-price--withoutTax {
+  display: inline;
+  padding-right: 10px !important;
+}
+.price-section.price-section--withoutTax.non-sale-price--withoutTax {
+  display: inline;
+  padding-right: 10px !important;
+}
+.price-section.price-section--withTax.rrp-price--withTax {
+  display: inline;
+  padding-right: 10px !important;
+}
+.price-section.price-section--withTax.non-sale-price--withTax {
+  display: inline;
+  padding-right: 10px !important;
+}
+article.card.msrp-visible.msrp-and-regular-separate-lines.before-sale-price-visible .price-section.price-section--withoutTax.rrp-price--withoutTax {
+  display: block;
+  padding-right: 0 !important;
+}
+article.card.msrp-visible.msrp-and-regular-separate-lines.before-sale-price-visible .price-section.price-section--withoutTax.non-sale-price--withoutTax {
+  display: block;
+  padding-right: 0 !important;
+}
+article.card.msrp-visible.msrp-and-regular-separate-lines.before-sale-price-visible .price-section.price-section--withTax.rrp-price--withTax {
+  display: block;
+  padding-right: 0 !important;
+}
+article.card.msrp-visible.msrp-and-regular-separate-lines.before-sale-price-visible .price-section.price-section--withTax.non-sale-price--withTax {
+  display: block;
+  padding-right: 0 !important;
+}
+article.card.msrp-visible.msrp-and-regular-separate-lines.before-sale-price-visible .msrp-sale-regular-price-section {
+  height: 42px !important;
+}
+// SET SKU & BRAND BACK TO SETTINGS FOR THIS BREAKPOINT
+article.card.brand-active.sku-active .card-sku-brand-section {
+  height: 18px;
+}
+article.card.brand-active.sku-active .card-sku-brand-section h4.card-text.brand {
+  display: inline;
+}
+article.card.brand-active.sku-active .card-sku-brand-section h4.card-text.sku {
+  display: inline;
+}
+article.card.brand-active.sku-active .card-sku-brand-section span.brand-sku-divider {
+  display: inline;
+}
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 222.66px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 222.66px !important;
+  max-width: 222.66px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure {
+width: 100% !important;
+}
+// body.main.home.eleven-seventy .productGrid, body.main.home.fourteen-forty .productGrid, body.main.home.nine-sixty .productGrid, body.main.home.thirteen-sixty-six .productGrid, body.main.home.twelve-eighty .productGrid {
+//  margin-left: 0 !important;
+//  margin-right: 0 !important;
+// }
+}
+
+@media only screen and (max-width : 775px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 215.16px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 215.16px !important;
+  max-width: 215.16px !important;
+}
+}
+
+@media only screen and (max-width : 750px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 207.66px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 207.66px !important;
+  max-width: 207.66px !important;
+}
+}
+
+@media only screen and (max-width : 725px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 200.16px !important;
+}
+div#menu section#quickSearch.quickSearchResults figure.card-figure a.image-link {
+  width: 100% !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 200.16px !important;
+  max-width: 200.16px !important;
+  // z-index: 99999;
+  // display: block !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure {
+  float: none;
+}
+section#quickSearch.quickSearchResults article.card .card-body {
+  float: none;
+}
+}
+
+@media only screen and (max-width : 700px) {
+// SHOW MSRP & NON-SALE ON SEPARATE LINES REGARDLESS OF SETTINGS TO ACCOMMODATE FOR LESS SPACE AT THIS BREAKPOINT
+article.card.msrp-visible.before-sale-price-visible .price-section.price-section--withoutTax.rrp-price--withoutTax[style="display: none;"] {
+  display: block !important;
+  opacity: 0 !important;
+}
+article.card.msrp-visible.before-sale-price-visible .price-section.price-section--withTax.rrp-price--withTax[style="display: none;"] {
+  display: block !important;
+  opacity: 0 !important;
+}
+.msrp-sale-regular-price-section {
+  height: 42px !important;
+}
+.price-section.price-section--withoutTax.rrp-price--withoutTax {
+  display: block;
+  padding-right: 0 !important;
+}
+.price-section.price-section--withoutTax.non-sale-price--withoutTax {
+  display: block;
+  padding-right: 0 !important;
+}
+.price-section.price-section--withTax.rrp-price--withTax {
+  display: block;
+  padding-right: 0 !important;
+}
+.price-section.price-section--withTax.non-sale-price--withTax {
+  display: block;
+  padding-right: 0 !important;
+}
+section#quickSearch.quickSearchResults li.product .card a.button.button--small.card-figcaption-button {
+  font-size: 12px !important;
+}
+// SHOW SKU & BRAND ON SEPARATE LINES REGARDLESS OF SETTINGS TO ACCOMMODATE FOR LESS SPACE AT THIS BREAKPOINT
+article.card.brand-active.sku-active .card-sku-brand-section {
+  height: 37px;
+}
+article.card.brand-active.sku-active .card-sku-brand-section h4.card-text.brand {
+  display: block;
+}
+article.card.brand-active.sku-active .card-sku-brand-section h4.card-text.sku {
+  display: block;
+}
+article.card.brand-active.sku-active .card-sku-brand-section span.brand-sku-divider {
+    display: none;
+}
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 192.66px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 192.66px !important;
+  max-width: 192.66px !important;
+}
+}
+
+
+@media only screen and (max-width : 675px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 186.16px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 186.16px !important;
+  max-width: 186.16px !important;
+}
+}
+
+@media only screen and (max-width : 650px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 177.66px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 177.66px !important;
+  max-width: 177.66px !important;
+}
+}
+
+@media only screen and (max-width : 625px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 159.73px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 159.73px !important;
+  max-width: 159.73px !important;
+}
+}
+
+@media only screen and (max-width : 600px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 152.66px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 152.66px !important;
+  max-width: 152.66px !important;
+}
+}
+
+@media only screen and (max-width : 575px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 145.58px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 145.58px !important;
+  max-width: 145.58px !important;
+}
+}
+
+@media only screen and (max-width : 550px) {
+section.quickSearchResults li.product {
+  width: 50% !important;
+}
+.navPages-quickSearch.right.searchbar.center section.quickSearchResults li.product {
+  width: 50% !important;
+}
+.navPages-quickSearch.right.searchbar.right section.quickSearchResults li.product {
+  width: 50% !important;
+}
+// SET MSRP & NON-SALE BACK TO SETTINGS FOR THIS BREAKPOINT
+article.card.msrp-visible.before-sale-price-visible .price-section.price-section--withoutTax.rrp-price--withoutTax[style="display: none;"] {
+  display: none !important;
+}
+article.card.msrp-visible.before-sale-price-visible .price-section.price-section--withTax.rrp-price--withTax[style="display: none;"] {
+  display: none !important;
+}
+.price-section.current-price span.price {
+  font-size: 14px !important;
+  line-height: 14px !important;
+}
+.msrp-sale-regular-price-section {
+  height: 24px !important;
+}
+.price-section.price-section--withoutTax.rrp-price--withoutTax {
+  display: inline;
+  padding-right: 10px !important;
+}
+.price-section.price-section--withoutTax.non-sale-price--withoutTax {
+  display: inline;
+  padding-right: 10px !important;
+}
+.price-section.price-section--withTax.rrp-price--withTax {
+  display: inline;
+  padding-right: 10px !important;
+}
+.price-section.price-section--withTax.non-sale-price--withTax {
+  display: inline;
+  padding-right: 10px !important;
+}
+// SET SKU & BRAND BACK TO SETTINGS FOR THIS BREAKPOINT
+article.card.brand-active.sku-active .card-sku-brand-section {
+  height: 18px;
+}
+article.card.brand-active.sku-active .card-sku-brand-section h4.card-text.brand {
+  display: inline;
+}
+article.card.brand-active.sku-active .card-sku-brand-section h4.card-text.sku {
+  display: inline;
+}
+article.card.brand-active.sku-active .card-sku-brand-section span.brand-sku-divider {
+  display: inline;
+}
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 212.75px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 212.75px !important;
+  max-width: 212.75px !important;
+}
+}
+
+@media only screen and (max-width : 525px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 202.13px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 202.13px !important;
+  max-width: 202.13px !important;
+}
+}
+
+
+@media only screen and (max-width : 500px) {
+section#quickSearch.quickSearchResults li.product .card a.button.button--small.card-figcaption-button {
+  font-size: 10px !important;
+}
+body.main section#quickSearch.quickSearchResults .productGrid[data-list-name="Quick Search Results"] {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+section#quickSearch.quickSearchResults .card-text.add-to-cart-button a.button.button--small.card-figcaption-button {
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+}
+// SHOW MSRP & NON-SALE ON SEPARATE LINES REGARDLESS OF SETTINGS TO ACCOMMODATE FOR LESS SPACE AT THIS BREAKPOINT
+article.card.msrp-visible.before-sale-price-visible .price-section.price-section--withoutTax.rrp-price--withoutTax[style="display: none;"] {
+  display: block !important;
+  opacity: 0 !important;
+}
+article.card.msrp-visible.before-sale-price-visible .price-section.price-section--withTax.rrp-price--withTax[style="display: none;"] {
+  display: block !important;
+  opacity: 0 !important;
+}
+.msrp-sale-regular-price-section {
+  height: 42px !important;
+}
+.price-section.price-section--withoutTax.rrp-price--withoutTax {
+  display: block;
+  padding-right: 0 !important;
+}
+.price-section.price-section--withoutTax.non-sale-price--withoutTax {
+  display: block;
+  padding-right: 0 !important;
+}
+.price-section.price-section--withTax.rrp-price--withTax {
+  display: block;
+  padding-right: 0 !important;
+}
+.price-section.price-section--withTax.non-sale-price--withTax {
+  display: block;
+  padding-right: 0 !important;
+}
+// SHOW SKU & BRAND ON SEPARATE LINES REGARDLESS OF SETTINGS TO ACCOMMODATE FOR LESS SPACE AT THIS BREAKPOINT
+article.card.brand-active.sku-active .card-sku-brand-section {
+  height: 37px;
+}
+article.card.brand-active.sku-active .card-sku-brand-section h4.card-text.brand {
+  display: block;
+}
+article.card.brand-active.sku-active .card-sku-brand-section h4.card-text.sku {
+  display: block;
+}
+article.card.brand-active.sku-active .card-sku-brand-section span.brand-sku-divider {
+    display: none;
+}
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 196.5px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 196.5px !important;
+  max-width: 196.5px !important;
+}
+#quickSearch a.button.button--small.card-figcaption-button.quickview {
+  padding-left: 5px;
+  padding-right: 5px;
+  font-size: 10px !important;
+}
+#quickSearch .mobile-image-link .mobile-link-text {
+  padding-left: 5px;
+  padding-right: 5px;
+  font-size: 10px !important;
+}
+}
+
+@media only screen and (max-width : 475px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 174px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 174px !important;
+  max-width: 174px !important;
+}
+}
+
+@media only screen and (max-width : 450px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 164px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 164px !important;
+  max-width: 164px !important;
+}
+}
+
+
+@media only screen and (max-width : 400px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 144px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 144px !important;
+  max-width: 144px !important;
+}
+}
+
+
+@media only screen and (max-width : 380px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 136px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 136px !important;
+  max-width: 136px !important;
+}
+}
+
+@media only screen and (max-width : 360px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 128px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 128px !important;
+  max-width: 128px !important;
+}
+}
+
+@media only screen and (max-width : 340px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 120px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 120px !important;
+  max-width: 120px !important;
+}
+}
+
+@media only screen and (max-width : 320px) {
+div#menu section#quickSearch.quickSearchResults figure.card-figure {
+  min-height: 112px !important;
+}
+section#quickSearch.quickSearchResults figure.card-figure img {
+  max-height: 112px !important;
+  max-width: 112px !important;
+}
+}

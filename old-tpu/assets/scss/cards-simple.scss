@@ -1,0 +1,67 @@
+.card-body {
+  min-height: auto !important;
+}
+.home .card-body.purchase-ability.withoutTax {
+  min-height: auto !important;
+}
+.home .card-body.purchase-ability.withTax {
+  min-height: auto !important;
+}
+.home .card-body.purchase-ability {
+  min-height: auto !important;
+}
+#compare-page .card-body.top {
+  min-height: auto !important;
+}
+#compare-page p.card-text[data-test-info-type="productRating"] {
+  padding: 0;
+}
+#compare-page .compareTable-heading {
+  width: auto;
+  padding: 0;
+  text-align: left;
+  font-weight: 700;
+}
+#compare-page .compareTable-item.rating {
+  margin-top: 0;
+}
+.category .card-body.purchase-ability.withoutTax {
+  min-height: auto !important;
+}
+.category .card-body.purchase-ability.withTax {
+  min-height: auto !important;
+}
+.sidebar.right .card-body.purchase-ability {
+  min-height: auto !important;
+}
+.sidebar.right .card-body {
+  min-height: auto !important;
+}
+.card-text.add-to-cart-button {
+  position: static !important;
+  margin-top: 5px !important;
+  width: 100% !important;
+}
+body.main.nine-sixty .sidebar.right .card-text.add-to-cart-button {
+  width: 100% !important;
+}
+body.main.eleven-seventy .sidebar.right .card-text.add-to-cart-button {
+  width: 100% !important;
+}
+body.main.twelve-eighty .sidebar.right .card-text.add-to-cart-button {
+  width: 100% !important;
+}
+body.main.thirteen-sixty-six .sidebar.right .card-text.add-to-cart-button {
+  width: 100% !important;
+}
+body.main.fourteen-forty .sidebar.right .card-text.add-to-cart-button {
+  width: 100% !important;
+}
+// CATEGORY / COMPARE ACTIVE
+label.button.button--small.card-figcaption-button.compare {
+  float: none;
+}
+// LIST VIEW
+.listItem-actions .button {
+  margin-right: 15px;
+}

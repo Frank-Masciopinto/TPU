@@ -1,0 +1,175 @@
+---
+blog:
+    recent_posts:
+        limit: {{theme_settings.footer_blog_posts_count}}
+---
+{{#partial "page"}}
+{{inject 'comparisons' comparisons}}
+{{inject 'compareRemoveMessage' (lang 'compare.no_remove')}}
+{{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+<h1 class="page-heading">{{lang 'compare.header' products=comparisons.length}}</h1>
+<div id="compare-page" class="page compare-page category">
+    <main class="page-content no-sidenav" id="product-listing-container">
+      <!-- GRID VIEW ONLY -->
+
+      <form class="grid grid-only">
+                <ul class="productGrid grid-only productGrid--maxCol visible">
+                  {{#each comparisons}}
+                    <li class="product grid-view">
+                      <article id="{{#or customer (if ../theme_settings.restrict_to_login '===' true)}}pricing-restricted{{/or}}" class="card compare-disabled {{#if alternate}}card--alternate{{/if}} price-visibility{{#or customer (if ../theme_settings.restrict_to_login '===' true)}} restricted{{/or}} {{#if ../theme_settings.show_sale_price_label '===' true}}sale-label-active{{/if}} {{#if ../theme_settings.card-brand-name '===' true}}brand-sku-active brand-active{{/if}} {{#if ../theme_settings.card-brand-name '===' false}}brand-hidden{{/if}} {{#if ../theme_settings.card-sku '===' true}}brand-sku-active sku-active{{/if}} {{#if ../theme_settings.card-sku '===' false}}sku-hidden{{/if}} {{#if ../theme_settings.card-brand-sku-separate-lines '===' true}}brand-sku-separate-lines{{/if}} {{#if ../theme_settings.card-brand-2-lines '===' true}}brand-2-lines{{/if}} {{#if ../theme_settings.card-sku-2-lines '===' true}}sku-2-lines{{/if}} {{#if ../theme_settings.msrp-price '===' true}}msrp-visible{{else}}msrp-hidden{{/if}} {{#if ../theme_settings.msrp-before-sale-pricing-separate-lines '===' true}}msrp-and-regular-separate-lines{{/if}} {{#if ../theme_settings.before-sale-price '===' true}} before-sale-price-visible{{else}}before-sale-price-hidden{{/if}} {{#if ../theme_settings.card-title-lines '===' '1-line'}} card-title-one-line{{/if}} {{#if ../theme_settings.card-title-lines '===' '2-lines'}}card-title-two-lines{{/if}} {{#if ../theme_settings.card-title-lines '===' '3-lines'}}card-title-three-lines{{/if}} {{#if ../theme_settings.card-title-lines '===' '4-lines'}}card-title-four-lines{{/if}} {{#if ../theme_settings.current-price-on-two-lines '===' true}}current-price-on-two-lines {{/if}} {{#if ../theme_settings.price_ranges '===' true}}price-ranges-active{{/if}} {{#if ../theme_settings.card-text-align '===' 'center'}} center-align{{/if}} {{#if price.with_tax}} withTax{{/if}}{{#if price.without_tax}} withoutTax{{/if}}" {{#if settings.data_tag_enabled}} data-event-type="{{event}}" data-entity-id="{{id}}" data-position="{{position}}" data-name="{{name}}" data-product-category="{{#each category}}{{#if @last}}{{this}}{{else}}{{this}}, {{/if}}{{/each}}" data-product-brand="{{brand.name}}" data-product-price="{{#if price.with_tax}}{{price.with_tax.value}}{{else}}{{price.without_tax.value}}{{/if}}"  {{/if}}>
+                        <figure class="card-figure {{#if ../theme_settings.product_sale_badges_visibility '===' true}} sale-flag-active{{else}} sale-flag-inactive{{/if}}">
+                          <a class="image-link" href="{{url}}" {{#if settings.data_tag_enabled}} data-event-type="product-click" {{/if}}>
+                              <img class="card-image lazyload" data-sizes="auto" src="{{cdn 'img/loading.svg'}}" data-src="{{getImage image 'product_size' (cdn ../theme_settings.default_image_product)}}" alt="{{image.alt}}" title="{{image.alt}}">
+                              {{#if ../theme_settings.product_hover_images '===' 'active'}}
+                                {{#each (limit images 2)}}
+                                  {{#if @index '>' 0}}
+                                    <img class='card-image alt lazyload' src="{{cdn 'img/loading.svg'}}" data-src="{{getImage this 'productgallery_size' (cdn theme_settings.default_image_product)}}" alt="{{this.alt}}" title="{{this.alt}}">
+                                  {{/if}}
+                                {{/each}}
+                              {{/if}}
+                            </a>
+                            <a id ="remove" class="compareTable-removeProduct" data-comparison-remove href="{{#if remove_url}}{{remove_url}}{{else}}#{{/if}}">
+                                <svg class="icon">
+                                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-close"></use>
+                                </svg>
+                            </a>
+                        </figure>
+                        <div class="card-wrapper">
+                          <div class="card-body top with-as-low-as-pricing purchase-ability{{#if ../settings.show_product_rating}} ratings-on{{else}} ratings-off{{/if}}{{#if price.with_tax}} withTax{{/if}}{{#if price.without_tax}} withoutTax{{/if}}{{#or customer (if ../theme_settings.restrict_to_login '===' true)}} restricted{{/or}}" data-test-info-type="price">
+                            <div class="card-sku-brand-section {{#if ../theme_settings.card-brand-sku-separate-lines '===' true}} separate-lines {{/if}} {{#if ../theme_settings.card-brand-2-lines '===' true}} brand-two-lines {{/if}} {{#if ../theme_settings.card-sku-2-lines '===' true}} sku-two-lines {{/if}}">
+                              {{#if ../theme_settings.card-brand-name '===' true}}
+                                <h4 class="card-text brand {{#if ../theme_settings.card-brand-2-lines '===' true}} two-lines {{/if}}" data-test-info-type="brandName"><a class="brand-link" href="/brands/{{dashcase brand.name}}">{{brand.name}}</a></h4>
+                              {{/if}}
+                                 {{#if brand.name}}
+                                   {{#if sku}}
+                                     <span class="brand-sku-divider">|</span>
+                                   {{/if}}
+                                 {{/if}}
+                              <h4 class="card-text sku {{#if ../theme_settings.card-sku-2-lines '===' true}} two-lines {{/if}}">
+                                {{#if ../theme_settings.card-sku '===' true}}
+                                {{#if sku}}
+                                <a class="sku-link" href="{{url}}" {{#if settings.data_tag_enabled}} data-event-type="product-click" {{/if}}>
+                                  <span class="sku-label">{{lang 'sku'}}:</span>
+                                  <span class="sku-value" data-product-sku>{{sku}}</span>
+                                </a>
+                                {{/if}}
+                                {{/if}}
+                              </h4>
+                            </div>
+                            <h4 class="card-title">
+                                <a href="{{url}}">{{ name }}</a>
+                            </h4>
+
+                            {{#if ../settings.show_product_rating}}
+                                <p class="card-text" data-test-info-type="productRating">
+                                    <span class="rating--small">
+                                        {{> components/products/ratings rating=rating}}
+                                    </span>
+                                </p>
+                            {{/if}}
+
+                            <div class="price-visibility{{#or customer (if theme_settings.restrict_to_login '===' true)}} visible{{/or}}">
+                              {{#or ../customer (if ../theme_settings.restrict_to_login '!==' true)}}
+                                {{#if price_range}}
+                                  {{> components/products/price-range}}
+                                {{else}}
+                                  {{> components/products/price price=price}}
+                                {{/if}}
+                                {{else}}
+                                  {{> components/common/login-for-pricing}}
+                              {{/or}}
+                            </div>
+
+                            {{#or customer (if ../theme_settings.restrict_to_login '!==' true)}}
+                            {{#if show_cart_action}}
+                            <div class="card-text add-to-cart-button {{#if stock_level '<' 1}}{{#if out_of_stock_message '===' false}} no-button{{/if}}{{/if}}">
+                                    {{#if show_cart_action}}
+                                        {{#if has_options}}
+                                            <a href="{{url}}" class="button button--small card-figcaption-button" data-product-id="{{id}}">{{lang 'products.choose_options'}}</a>
+                                        {{/if}}
+                                        {{#if pre_order}}
+                                            <a href="{{url}}" class="button button--small card-figcaption-button">{{lang 'products.pre_order'}}</a>
+                                        {{/if}}
+                                        {{#if add_to_cart_url }}
+                                            <a href="{{add_to_cart_url}}" class="button button--small card-figcaption-button">{{lang 'products.add_to_cart'}}</a>
+                                        {{/if}}
+                                        {{#if out_of_stock_message }}
+                                            <a href="{{url}}" class="button button--small card-figcaption-button" data-product-id="{{id}}">{{out_of_stock_message}}</a>
+                                        {{/if}}
+                                        {{#if stock_level '<' 1}}
+                                          {{#if out_of_stock_message '===' false}}
+                                            <a href="{{url}}" class="button button--small card-figcaption-button false-stock-message" data-product-id="{{id}}">{{out_of_stock_message}}</a>
+                                          {{/if}}
+                                        {{/if}}
+                                    {{/if}}
+                             </div>
+                            {{/if}}
+                            {{/or}}
+                          </div>
+
+                          <div class="card-body bottom">
+                            <div class="card-text">
+                              <div class="brand">
+                                <span class="compareTable-headingText brand">Brand: </span>
+                                {{#if brand.name}}
+                                  <a href="{{brand.url}}">{{ brand.name }}</a>
+                                {{else}}
+                                  <span class="normal-text">{{lang 'common.not_applicable'}}</span>
+                                {{/if}}
+                              </div>
+                            <span class="compareTable-headingText">Description</span>
+                              <div class="normal-text">{{ summary }}</div>
+
+                              <div class="rating">
+                                  <div class="compareTable-heading">
+                                    <span class="compareTable-headingText rating">Rating</span>
+                                  </div>
+
+                                  <div class="compareTable-item rating">
+                                    {{#if ../settings.show_product_rating}}
+                                        <p class="card-text" data-test-info-type="productRating">
+                                            <span class="rating--small">
+                                                {{> components/products/ratings rating=rating}}
+                                            </span>
+                                        </p>
+                                    {{/if}}
+                                  </div>
+
+                              <div class="availability">
+                                  <span class="compareTable-headingText">Availability</span>
+                                  <div class="availability-text normal-text">
+                                    {{#if availability}}
+                                      {{ availability }}
+                                    {{else}}
+                                      {{lang 'common.not_applicable'}}
+                                    {{/if}}
+                                  </div>
+                              </div>
+
+                              <span class="compareTable-headingText">{{lang 'common.other_details'}}</span>
+                              <div class="custom-fields">
+                                  {{#if custom_fields}}
+                                      <ul>
+                                          {{#each custom_fields}}
+                                              <li><span class="name">{{name}}:</span><br /><span class="value">{{{value}}}</span></li>
+                                          {{/each}}
+                                      </ul>
+                                  {{else}}
+                                      {{lang 'common.not_applicable'}}
+                                  {{/if}}
+                               </div> <!-- custom-fields -->
+
+                              </div> <!-- card-text -->
+
+                       </div>   <!-- card-body -->
+                    </article>
+                    </li>
+                {{/each}}
+                </ul>
+      </form> <!-- grid only -->
+
+    </main>
+</div>
+
+{{/partial}}
+{{> layout/base}}

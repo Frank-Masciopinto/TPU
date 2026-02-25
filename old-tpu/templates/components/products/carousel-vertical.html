@@ -1,0 +1,46 @@
+<section class="carousel-vertical"
+    data-list-name="{{list}}"
+    data-slick='{
+        "dots": true,
+        "infinite": false,
+        "mobileFirst": false,
+        "slidesToShow": {{ columns }},
+        "slidesToScroll": {{ columns }},
+        "vertical": true,
+        "verticalSwiping": true,
+        "responsive": [
+        {
+          "breakpoint": 981,
+          "settings": {
+            "slidesToShow": 4,
+            "slidesToScroll": 4
+          }
+        },
+        {
+          "breakpoint": 801,
+          "settings": {
+            "vertical": false,
+            "verticalSwiping": false,
+            "slidesToShow": 3,
+            "slidesToScroll": 3,
+            "dots": false
+          }
+        },
+        {
+          "breakpoint": 551,
+          "settings": {
+            "vertical": false,
+            "verticalSwiping": false,
+            "slidesToShow": 2,
+            "slidesToScroll": 2,
+            "dots": false
+          }
+        }
+        ]
+    }'>
+      {{#each products}}
+        <li class="productCarousel-slide product">
+          {{> components/products/card settings=../settings show_rating=../settings.show_product_rating theme_settings=../theme_settings customer=../customer event="list" position=(add @index 1)}}
+        </li>
+      {{/each}}
+</section>

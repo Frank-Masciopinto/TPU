@@ -1,0 +1,37 @@
+---
+blog:
+    recent_posts:
+        limit: {{theme_settings.footer_blog_posts_count}}
+---
+
+{{#partial "head"}}
+
+{{{stylesheet '/assets/css/theme.css'}}}
+{{{ checkout.checkout_head }}}
+{{{stylesheet '/assets/css/parts-warehouse.css'}}}
+{{{ stylesheet '/assets/css/optimized-checkout.css' }}}
+{{ getFontsCollection }}
+
+<script type="text/javascript">
+    window.language = {{{langJson 'optimized_checkout'}}};
+</script>
+
+{{{head.scripts}}}
+
+{{/partial}}
+
+{{#partial "page"}}
+
+<svg data-src="{{cdn 'img/icon-sprite.svg'}}" class="icons-svg-sprite"></svg>
+
+{{> components/custom/checkout-header}}
+
+{{{ checkout.order_confirmation_content }}}
+
+{{> components/common/checkout-footer}}
+
+{{{ footer.scripts }}}
+
+{{/partial}}
+
+{{> layout/checkout}}

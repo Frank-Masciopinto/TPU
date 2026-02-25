@@ -1,0 +1,40 @@
+---
+product:
+    videos:
+        limit: {{theme_settings.productpage_videos_count}}
+    reviews:
+        limit: {{theme_settings.productpage_reviews_count}}
+    related_products:
+        limit: {{theme_settings.productpage_related_products_count}}
+    similar_by_views:
+        limit: {{theme_settings.productpage_similar_by_views_count}}
+blog:
+    recent_posts:
+        limit: {{theme_settings.footer_blog_posts_count}}
+---
+{{#partial "page"}}
+{{{region name="product_below_menu--global"}}} 
+{{{region name="product_below_menu"}}}
+<div class="recommended-visibility{{#if theme_settings.productpage_related_products_count '===' 0}} disabled{{/if}}">
+    <div class="product main left{{#if theme_settings.product_page_layout '!==' 'no-sidenav'}} product-page-with-sidenav{{/if}} {{#if theme_settings.product_page_layout '===' 'recommended-below'}}full-width {{/if}} {{#if theme_settings.product_page_layout '===' 'no-sidenav'}} no-sidenav{{/if}}">
+      <div class="recommended-position{{#if theme_settings.product_page_layout '===' 'recommended-below'}} below{{/if}}">
+        {{#if ../theme_settings.product_page_layout '===' 'no-sidenav'}}
+          {{> components/page/product-page-no-sidenav}}
+        {{/if}}
+        {{#if ../theme_settings.product_page_layout '===' 'with-sidenav'}}
+          {{> components/page/product-page-with-sidenav}}
+        {{/if}}
+        {{#if ../theme_settings.product_page_layout '===' 'recommended-below'}}
+          {{> components/page/product-page-with-recommended-below}}
+        {{/if}}
+    <div class="clear"></div>
+</div>
+<div class="clear"></div>
+</div>
+</div>
+</div>
+
+{{> components/products/schema}}
+
+{{/partial}}
+{{> layout/product-new}}

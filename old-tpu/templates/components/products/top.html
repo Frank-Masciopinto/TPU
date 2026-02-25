@@ -1,0 +1,35 @@
+{{#if theme_settings.top_products_in_carousels '===' false}}
+  <!-- TOP SELLERS NO CAROUSELS -->
+  <div class="top products-container carousel-inactive">
+    <h2 class="container-header page-heading">{{lang 'products.top'}}</h2>
+    <ul class="productGrid productGrid--maxCol{{ columns }} top-sellers" data-product-type="top_sellers" {{#if settings.data_tag_enabled}} data-list-name="Most Popular Products" {{/if}}>
+      {{#if settings.data_tag_enabled}}
+        {{#each products}}
+          <li class="product">
+            {{>components/products/card settings=../settings show_compare=../show_compare show_rating=../settings.show_product_rating theme_settings=../theme_settings customer=../customer event="list" position=(add @index 1)}}
+          </li>
+        {{/each}}
+      {{else}}
+        {{#each products}}
+          <li class="product">
+            {{>components/products/card settings=../settings show_compare=../show_compare show_rating=../settings.show_product_rating theme_settings=../theme_settings customer=../customer}}
+          </li>
+        {{/each}}
+      {{/if}}
+    </ul>
+  </div>
+{{/if}}
+
+{{#if theme_settings.top_products_in_carousels '===' true}}
+  <!-- TOP SELLERS IN CAROUSELS -->
+  <div id="carousel-active" class="top products-container carousel-active">
+    <h2 class="container-header page-heading">{{lang 'products.top'}}</h2>
+     <ul class="productGrid productGrid--maxCol{{ columns }} top-sellers" data-product-type="top_sellers" {{#if settings.data_tag_enabled}} data-list-name="Most Popular Products" {{/if}}>
+    {{#if settings.data_tag_enabled}}
+      {{> components/products/carousel settings=../settings products=products list="Top Products"}}
+    {{else}}
+      {{> components/products/carousel products=products}}
+    {{/if}}
+    </ul>
+  </div>
+{{/if}}

@@ -1,0 +1,156 @@
+<footer class="footer" role="contentinfo">
+	{{#if settings.show_newsletter_box}}
+    <div class="footer-top newsletter">
+        <div class="content newsletter">
+            <div class="" data-section-type="newsletterSubscription">
+                    {{> components/common/subscription-form}}
+										<div class="clear"></div>
+            </div>
+      			<div class="clear"></div>
+        </div>
+    </div>
+   {{/if}}
+    <div class="container">
+        <section class="footer-info">
+         <article class="footer-info-col footer-info-col--small" data-section-type="storeInfo">
+                <h5 class="footer-info-heading">Contact Us</h5>
+                <div class="regular">
+                    <address>{{nl2br settings.address}}</address>
+                </div>
+        </article>
+
+            <article class="footer-info-col footer-info-col--small" data-section-type="footer-webPages">
+                <h5 class="footer-info-heading">Accounts & Orders</h5>
+                <div class="regular">
+                <ul class="footer-info-list">
+                	{{#if settings.gift_certificates_enabled}}
+                        <li>
+                            <a href="/giftcertificates.php">Gift Certificates</a>
+                        </li>
+                    {{/if}}
+                        <li>
+                            <a href="/wishlist.php">Wishlist</a>
+                        </li>
+                    {{#if settings.account_creation_enabled}}
+                        {{#if customer}}
+                            <li><a class="navUser-action" href="{{urls.account.index}}">{{lang 'common.account'}}</a></li>
+                            <li><a class="navUser-action" href="{{urls.auth.logout}}">{{lang 'common.logout'}}</a></li>
+                        {{else}}
+                            <li><a class="navUser-action" href="{{urls.auth.login}}">{{lang 'common.login'}}</a>
+                            {{#if settings.account_creation_enabled}}
+                                <span class="navUser-or">{{lang 'common.or'}}</span> <a class="navUser-action" href="{{urls.auth.create_account}}">{{lang 'common.sign_up'}}</a></li>
+                            {{/if}}
+                        {{/if}}
+                    {{/if}}
+
+                    <li>
+                        <a href="/account.php?action=order_status">Order Status</a>
+                    </li>
+                    <li>
+                        <a href="/shipping-returns/">Shipping &amp; Returns</a>
+                    </li>
+                        <a href="{{urls.sitemap}}">{{lang 'sitemap.page_title'}}</a>
+                    </li>
+                </ul>
+                </div>
+            </article>
+
+            <article class="footer-info-col footer-info-col--small" data-section-type="footer-categories">
+                <h5 class="footer-info-heading">Quick Links</h5>
+                <div class="regular">
+                <ul class="footer-info-list">
+                    {{#each pages}}
+                    <li>
+                        <a href="{{url}}">{{name}}</a>
+                    </li>
+                    {{/each}}
+                </ul>
+                </div>
+            </article>
+
+            <article class="footer-info-col footer-info-col--small" data-section-type="footer-categories">
+
+							{{#if settings.blog_enabled}}
+                <h5 class="footer-info-heading recent-posts-heading">Recent Blog Posts</h5>
+                <div class="blog regular">
+                    <ul class="footer-info-list">
+                        {{#each blog.recent_posts}}
+                            <li><a href="{{url}}">{{title}}</a></li>
+                        {{/each}}
+                    </ul>
+                </div>
+							{{/if}}
+
+                <div class="social-media">
+                    {{> components/common/social-links}}
+                </div>
+            </article>
+            <div class="clear"></div>
+						{{#if theme_settings.geotrust_ssl_common_name}}
+							<div class="footer-geotrust-ssl-seal">
+								{{> components/common/geotrust-ssl-seal}}
+								<div class="clear"></div>
+							</div>
+						{{/if}}
+            {{> components/common/payment-icons}}
+
+        </section>
+
+        <div class="clear"></div>
+    </div>
+
+
+    <div class="footer-bottom">
+        <div class="content copyright">
+					<ul class="site-info">
+							{{#if theme_settings.show_copyright_footer}}
+											<li class="copyright"><span class="current-year">&copy; <span id="copyright_year"></span> {{settings.store_name}}</span></li>
+							{{/if}}
+							{{#if theme_settings.show_sitemap_link}}
+											<li class="sitemap"><a href="{{urls.sitemap}}"> | {{lang 'sitemap.page_title'}}</a></li>
+							{{/if}}
+											{{#if theme_settings.show_powered_by}}
+												<li class="built-by"> | Premium <a target="_blank" href="https://www.bigcommerce.com/">BigCommerce</a> Theme by <a class="lone-star-templates" target="_blank" href="http://lonestartemplates.com/">Lone Star Templates</a></li>
+											{{/if}}
+											<div class="clear"></div>
+						</ul>
+        </div>
+    </div>
+    <div id="topcontrol" class="backtoTop" title="Scroll Back to Top">
+          <svg class="icon back-to-top-icon" title="submit" alt="submit"><use xlink:href="#icon-caret-square-up"></use></svg>
+      </div>
+    </footer>
+
+
+<!-- CALL MOST RECENT JQUERY LIBRARY -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- GET CURRENT YEAR FOR COPYRIGHT -->
+<script type="text/javascript">
+    document.getElementById("copyright_year").innerHTML = new Date().getFullYear();
+</script>
+
+<script>
+    $('.custom-pages-nav li a.navPages-action.has-subMenu').hover(
+        function () {
+            $(this).siblings('div#menu .navPage-subMenu').show();
+        },
+        function () {
+            $(this).siblings('div#menu .navPage-subMenu').hide();
+        }
+    );
+</script>
+
+
+<script>
+    $('.mobileMenu-toggle').click(function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        $('body').toggleClass('has-activeNavPages');
+        $('header.header').toggleClass('is-open');
+    });
+
+    if ( $('.countPill').hasClass('countPill--positive') ){
+      $('.top-menu .right').addClass('shift-right');
+    }
+</script>

@@ -1,0 +1,37 @@
+---
+brands:
+blog:
+    recent_posts:
+        limit: {{theme_settings.footer_blog_posts_count}}
+---
+
+{{#partial "page"}}
+{{{region name="brands_below_menu"}}}
+{{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+
+<main class="page brands">
+    <h1 class="page-heading">{{lang 'brand.label'}}</h1>
+    {{{region name="brands_below_header"}}}
+    <ul class="brandGrid">
+        {{#each brands}}
+            <li class="brand">
+                <article class="card {{#if alternate}}card--alternate{{/if}}">
+                    <figure class="card-figure">
+                        <a href="{{url}}">
+                            <img class="card-image" src="{{getImage image 'brand_size' (cdn ../theme_settings.default_image_brand)}}" alt="{{name}}" title="{{name}}">
+                        </a>
+                    </figure>
+                    <div class="card-body">
+                        <h2 class="card-title">
+                            <a href="{{url}}">{{name}}</a>
+                        </h2>
+                    </div>
+                </article>
+            </li>
+        {{/each}}
+    </ul>
+    {{> components/common/paginator pagination.brands}}
+    {{{region name="brands_below_content"}}}
+</main>
+{{/partial}}
+{{> layout/base}}

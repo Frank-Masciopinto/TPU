@@ -1,0 +1,31 @@
+<div class="product-schema">
+  <div id="recommended-products-below">
+  {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
+
+  {{#each product.shipping_messages}}
+      {{> components/common/alert-info message}}
+  {{/each}}
+
+    {{> components/products/product-view schema=true  }}
+
+    {{{region name="product_below_content--global"}}}
+    {{{region name="product_below_content"}}} 
+
+    {{> components/products/tabs}}
+    <div class="clear"></div>
+
+{{#if product.similar_by_views}}
+  <div class="similar products section">
+      <h2 class="container-header">You May Also Like...</h2>
+          {{> components/products/similar products=product.similar_by_views columns=theme_settings.related_products_column_count list="Customers Also Viewed"}}
+  </div>
+  {{/if}}
+
+ {{#if product.related_products}}
+   <div class="related recommended products-section related-below">
+      <h2 class="container-header">Recommended</h2>
+      {{> components/products/related products=product.related_products columns=theme_settings.related_products_column_count}}
+   </div>
+{{/if}}
+</div>
+</div>

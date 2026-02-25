@@ -1,0 +1,39 @@
+<article class="blog">
+    <div class="blog-post-figure">
+        {{#if post.thumbnail}}
+            <figure class="blog-thumbnail">
+                <a href="{{post.url}}">
+                    <img class="lazyload" data-sizes="auto" src="{{cdn 'img/loading.svg'}}" data-src="{{getImage post.thumbnail 'blog_size'}}" alt="{{post.thumbnail.alt}}" title="{{post.thumbnail.alt}}">
+                </a>
+            </figure>
+        {{/if}}
+    </div>
+
+    <div class="blog-post-body">
+        <header class="blog-header">
+            <h2 class="blog-title">
+                <a href="{{post.url}}" data-maxlength="24">{{post.title}}</a>
+            </h2>
+            <p class="blog-date" data-maxlength="55">{{#if post.author}}{{lang 'blog.posted_by' name=post.author}} on {{/if}}{{post.date_published}}</p>
+        </header>
+
+        <div class="blog-post">
+            {{#if post.body}}
+                {{{post.body}}}
+            {{else}}
+                {{{post.summary}}}
+            {{/if}}
+        </div>
+
+        {{#if post.show_read_more}}
+        <div class="read-more">
+          <a class="read-more-button" href="{{url}}">read more</a>
+        </div>
+        {{/if}}
+
+        <div class="share">
+          {{>components/common/share}}
+        </div>
+
+    </div>
+</article>
