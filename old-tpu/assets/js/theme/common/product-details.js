@@ -10,6 +10,7 @@ import { normalizeFormData } from './utils/api';
 import { isBrowserIE, convertIntoArray } from './utils/ie-helpers';
 import bannerUtils from './utils/banner-utils';
 import Wishlist from '../wishlist';
+import { initEmailQuote } from './email-quote';
 
 export default class ProductDetails extends ProductDetailsBase {
     constructor($scope, context, productAttributesData = {}) {
@@ -442,6 +443,8 @@ export default class ProductDetails extends ProductDetailsBase {
 
             $cartCounter.addClass('cart-count--positive');
             $body.trigger('cart-quantity-update', quantity);
+
+            initEmailQuote(modal.$content, this.context?.customer || null);
 
             if (onComplete) {
                 onComplete(response);

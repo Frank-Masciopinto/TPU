@@ -5,6 +5,7 @@ import utils from '@bigcommerce/stencil-utils';
 import ShippingEstimator from './cart/shipping-estimator';
 import { defaultModal } from './global/modal';
 import swal from './global/sweet-alert';
+import { initCartPageEmailQuote } from './common/email-quote';
 
 export default class Cart extends PageManager {
     onReady() {
@@ -424,5 +425,7 @@ export default class Cart extends PageManager {
 
         // initiate shipping estimator module
         this.shippingEstimator = new ShippingEstimator($('[data-shipping-estimator]'));
+
+        initCartPageEmailQuote(this.context?.customer || null);
     }
 }
