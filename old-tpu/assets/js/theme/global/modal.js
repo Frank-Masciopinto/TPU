@@ -227,13 +227,7 @@ export class Modal {
 	    },2000)
 	  }
     $(document).ready(function(){
-      $('#modal .productView-image img').css("opacity", "0");
     	waitForElement("#modal .modal-body.quickView figure.productView-image img",function(){
-        var mainProductImgWidth = $('#modal .main-image-container').width();
-        $('#modal .main-image-container figure.productView-image').attr('style', 'min-height:' +mainProductImgWidth+ 'px !important');
-        $('#modal .main-image-container .slick-list.draggable').attr('style', 'max-height:' +mainProductImgWidth+ 'px !important');
-        $('#modal .main-image-container figure.productView-image img').attr('style', 'max-height:' +mainProductImgWidth+ 'px !important');
-        $('#modal .main-image-container figure.productView-image img').css("max-width", +mainProductImgWidth+"px");
         $("#modal .productView-details .msrp-sale-regular-price-section .price-label").each(function() {
           if ($.trim($(this).html()).length > 0 )
             $(this).addClass('label-active');

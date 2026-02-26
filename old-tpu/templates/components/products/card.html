@@ -19,21 +19,21 @@
         {{/or}}
 
         <a class="image-link desktop" href="{{url}}" {{#if settings.data_tag_enabled}} data-event-type="product-click" {{/if}}>
-            <img class='card-image primary lazyload' data-sizes="auto" src="{{cdn 'img/loading.svg'}}" data-src="{{getImage image 'productgallery_size' (cdn theme_settings.default_image_product)}}" alt="{{image.alt}}" title="{{image.alt}}" width="500" height="659">
+            <img class='card-image primary lazyload' data-sizes="auto" src="{{getImageSrcset image 1x='300w'}}" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" data-srcset="{{getImageSrcset image use_default_sizes=true}}" alt="{{image.alt}}" title="{{image.alt}}" width="300" height="300" loading="lazy">
             {{#if theme_settings.product_hover_images '===' 'active'}}
               {{#each (limit images 2)}}
                 {{#if @index '>' 0}}
-                  <img class='card-image alt lazyload' src="{{cdn 'img/loading.svg'}}" data-src="{{getImage this 'productgallery_size' (cdn theme_settings.default_image_product)}}" alt="{{this.alt}}" title="{{this.alt}}" width="500" height="659">
+                  <img class='card-image alt lazyload' src="{{getImageSrcset this 1x='300w'}}" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" data-srcset="{{getImageSrcset this use_default_sizes=true}}" alt="{{this.alt}}" title="{{this.alt}}" width="300" height="300" loading="lazy">
                 {{/if}}
               {{/each}}
             {{/if}}
           </a>
           <a class="image-link mobile" href="#0" {{#if settings.data_tag_enabled}} data-event-type="product-click" {{/if}}>
-              <img class='card-image primary lazyload' data-sizes="auto" src="{{cdn 'img/loading.svg'}}" data-src="{{getImage image 'productgallery_size' (cdn theme_settings.default_image_product)}}" alt="{{image.alt}}" title="{{image.alt}}" width="500" height="659">
+              <img class='card-image primary lazyload' data-sizes="auto" src="{{getImageSrcset image 1x='300w'}}" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" data-srcset="{{getImageSrcset image use_default_sizes=true}}" alt="{{image.alt}}" title="{{image.alt}}" width="300" height="300" loading="lazy">
               {{#if theme_settings.product_hover_images '===' 'active'}}
                 {{#each (limit images 2)}}
                   {{#if @index '>' 0}}
-                    <img class='card-image alt lazyload' src="{{cdn 'img/loading.svg'}}" data-src="{{getImage this 'productgallery_size' (cdn theme_settings.default_image_product)}}" alt="{{this.alt}}" title="{{this.alt}}" width="500" height="659">
+                    <img class='card-image alt lazyload' src="{{getImageSrcset this 1x='300w'}}" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" data-srcset="{{getImageSrcset this use_default_sizes=true}}" alt="{{this.alt}}" title="{{this.alt}}" width="300" height="300" loading="lazy">
                   {{/if}}
                 {{/each}}
               {{/if}}
@@ -482,21 +482,21 @@
         {{/or}}
 
         <a class="image-link desktop" href="{{url}}" {{#if settings.data_tag_enabled}} data-event-type="product-click" {{/if}}>
-            <img class='card-image primary lazyload' data-sizes="auto" src="{{cdn 'img/loading.svg'}}" data-src="{{getImage image 'productgallery_size' (cdn theme_settings.default_image_product)}}" alt="{{image.alt}}" title="{{image.alt}}" width="500" height="659">
+            <img class='card-image primary lazyload' data-sizes="auto" src="{{getImageSrcset image 1x='300w'}}" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" data-srcset="{{getImageSrcset image use_default_sizes=true}}" alt="{{image.alt}}" title="{{image.alt}}" width="300" height="300" loading="lazy">
             {{#if theme_settings.product_hover_images '===' 'active'}}
               {{#each (limit images 2)}}
                 {{#if @index '>' 0}}
-                  <img class='card-image alt lazyload' src="{{cdn 'img/loading.svg'}}" data-src="{{getImage this 'productgallery_size' (cdn theme_settings.default_image_product)}}" alt="{{this.alt}}" title="{{this.alt}}" width="500" height="659">
+                  <img class='card-image alt lazyload' src="{{getImageSrcset this 1x='300w'}}" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" data-srcset="{{getImageSrcset this use_default_sizes=true}}" alt="{{this.alt}}" title="{{this.alt}}" width="300" height="300" loading="lazy">
                 {{/if}}
               {{/each}}
             {{/if}}
           </a>
           <a class="image-link mobile" href="#0" {{#if settings.data_tag_enabled}} data-event-type="product-click" {{/if}}>
-              <img class='card-image primary lazyload' data-sizes="auto" src="{{cdn 'img/loading.svg'}}" data-src="{{getImage image 'productgallery_size' (cdn theme_settings.default_image_product)}}" alt="{{image.alt}}" title="{{image.alt}}" width="500" height="659">
+              <img class='card-image primary lazyload' data-sizes="auto" src="{{getImageSrcset image 1x='300w'}}" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" data-srcset="{{getImageSrcset image use_default_sizes=true}}" alt="{{image.alt}}" title="{{image.alt}}" width="300" height="300" loading="lazy">
               {{#if theme_settings.product_hover_images '===' 'active'}}
                 {{#each (limit images 2)}}
                   {{#if @index '>' 0}}
-                    <img class='card-image alt lazyload' src="{{cdn 'img/loading.svg'}}" data-src="{{getImage this 'productgallery_size' (cdn theme_settings.default_image_product)}}" alt="{{this.alt}}" title="{{this.alt}}" width="500" height="659">
+                    <img class='card-image alt lazyload' src="{{getImageSrcset this 1x='300w'}}" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" data-srcset="{{getImageSrcset this use_default_sizes=true}}" alt="{{this.alt}}" title="{{this.alt}}" width="300" height="300" loading="lazy">
                   {{/if}}
                 {{/each}}
               {{/if}}

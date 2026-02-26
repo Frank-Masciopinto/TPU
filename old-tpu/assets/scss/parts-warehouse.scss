@@ -7728,9 +7728,22 @@ figure.listItem-figure {
   background-color: stencilColor("card-figure-bgColor");
   position: relative;
   z-index: 1;
-}
-figure.listItem-figure {
-  min-height: 211px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+
+  a.image-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
 }
 .brand .page-content {
   top: -10px;
@@ -8617,7 +8630,6 @@ body.main
   margin-top: 20px;
 }
 .compare-page figure.listItem-figure {
-  min-height: 211px;
   float: none;
   width: 100%;
 }
@@ -26293,5 +26305,36 @@ body.main.nine-sixty
     color: #888;
     line-height: 1.5;
     margin-bottom: 24px;
+  }
+}
+
+// CSS aspect-ratio replacements for JS-driven square figure sizing
+section#quickSearch figure.card-figure {
+  aspect-ratio: 1 / 1;
+}
+
+.suggestiveCart figure.card-figure {
+  aspect-ratio: 1 / 1;
+}
+
+#modal .main-image-container figure.productView-image {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+}
+
+#body.product-page-layout .main-image-container figure.productView-image {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
   }
 }

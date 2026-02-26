@@ -22,14 +22,6 @@ export default function (secureBaseUrl, cartId) {
         if (utils.tools.storage.localStorageAvailable()) {
             localStorage.setItem('cart-quantity', quantity);
         }
-        // console.log('suggetiveCart loading');
-        // CUSTOM - SET FIGURE WIDTH TO EQUAL FIGURE HEIGHT TO KEEP FIGURE SQAURE
-        var figureWidth = $('.suggestiveCart figure.card-figure').width();
-        // console.log(figureWidth);
-        $('.suggestiveCart figure.card-figure img').attr('style', 'max-height:' +figureWidth+ 'px !important');
-        $('.suggestiveCart figure.card-figure').css({
-          'height': (figureWidth) + 'px'
-        });
     });
 
     $cart.on('click', event => {
