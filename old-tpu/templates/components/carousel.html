@@ -12,7 +12,11 @@
     <a href="{{url}}">
         <div class="heroCarousel-slide {{#if ../theme_settings.homepage_stretch_carousel_images}}stretch{{/if}} {{#if @first}}heroCarousel-slide--first{{/if}}">
             <div class="heroCarousel-image-wrapper">
-              <img class="heroCarousel-image" src="{{image}}" alt="{{alt_text}}" title="{{alt_text}}"/>
+              {{#if @first}}
+              <img class="heroCarousel-image" src="{{image}}" alt="{{alt_text}}" title="{{alt_text}}" fetchpriority="high"/>
+              {{else}}
+              <img class="heroCarousel-image lazyload" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" data-src="{{image}}" alt="{{alt_text}}" title="{{alt_text}}" loading="lazy"/>
+              {{/if}}
             </div>
             {{#if heading}}
                 {{> components/carousel-content show_background=true}}

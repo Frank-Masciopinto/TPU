@@ -1,2 +1,41 @@
-assets/dist
-node_modules
+# Dependencies
+node_modules/
+
+# Build outputs
+assets/dist/
+*.js.map
+
+# Stencil CLI (local config, may contain secrets)
+.stencil
+config.stencil.json
+secrets.stencil.json
+
+# Theme bundle
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs and temp
+*.log
+npm-debug.log*
+.npm
+.cache/
+tmp/
+temp/
+
+# Generated / parsed (e.g. tooling cache)
+parsed/
+
+# Optional: local env (uncomment if you add .env)
+# .env
+# .env.local
+# .env.*.local

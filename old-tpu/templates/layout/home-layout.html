@@ -7,13 +7,17 @@
   {{{ head.config }}}
   {{#block "head"}} {{/block}}
   <link href="{{ head.favicon }}" rel="shortcut icon">
+  <link rel="preconnect" href="https://staticw2.yotpo.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://ajax.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <script>
       // Change document class from no-js to js so we can detect this in css
       document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
   </script>
   <script async src="{{cdn 'assets/dist/theme-bundle.head_async.js' resourceHint='preload' as='script'}}"></script>
-  {{getFontsCollection font-display='block'}}
+  {{getFontsCollection font-display='swap'}}
   {{{stylesheet '/assets/css/theme.css'}}}
   {{{head.scripts}}}
   {{{head.rsslinks}}}
@@ -64,11 +68,12 @@
         {{> components/common/footer }}
 
         <script>window.__webpack_public_path__ = "{{cdn 'assets/dist/'}}";</script>
-       <script src="{{cdn 'assets/dist/theme-bundle.main.js'}}"></script>
+       <script defer src="{{cdn 'assets/dist/theme-bundle.main.js'}}"></script>
 
        <script>
-           // Exported in app.js
-           window.stencilBootstrap("{{page_type}}", {{jsContext}}).load();
+           window.addEventListener('DOMContentLoaded', function() {
+               window.stencilBootstrap("{{page_type}}", {{jsContext}}).load();
+           });
        </script>
 
        {{{footer.scripts}}}

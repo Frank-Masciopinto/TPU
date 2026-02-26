@@ -25,7 +25,7 @@
 }
 
 figure.card-figure {
-  // min-height: get-height(stencilString('productgallery_size')) !important;
+  min-height: get-height(stencilString('productgallery_size'));
 }
 
 body.main.home.eleven-seventy figure.card-figure {
@@ -65,6 +65,9 @@ body.main.home.twelve-eighty figure.card-figure {
     display: flex;
     margin: auto;
     width: auto;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 500 / 659;
 }
 
 .card-title {
@@ -89,6 +92,10 @@ body.main.home.twelve-eighty figure.card-figure {
         border: 0;
         color: inherit;
         font-size: inherit;
+    }
+
+    &[data-test-info-type="price"] {
+        min-height: 40px;
     }
 }
 
