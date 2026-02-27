@@ -1,6 +1,91 @@
 import utils from '@bigcommerce/stencil-utils';
 
 const SHIPPING_LOCATION_KEY = 'tpu_shipping_location';
+const CART_API = '/api/storefront/carts?include=lineItems.physicalItems.options,lineItems.digitalItems.options';
+
+/**
+ * Snapshot the current session cart and delete it so the next cart.itemAdd
+ * creates a fresh, single-product cart.  Returns everything needed to
+ * restore the cart afterwards.  Returns null when the cart is already empty.
+ */
+async function snapshotAndClearCart() {
+    const carts = await fetch(CART_API, { credentials: 'same-origin' }).then(r => r.json());
+    const cart = carts[0];
+    if (!cart) return null;
+
+    const physical = cart.lineItems.physicalItems || [];
+    const digital = cart.lineItems.digitalItems || [];
+    const giftCerts = cart.lineItems.giftCertificates || [];
+
+    const savedItems = [...physical, ...digital].map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        variantId: item.variantId,
+    }));
+
+    const savedGiftCerts = giftCerts.map(gc => ({
+        name: gc.name,
+        theme: gc.theme,
+        amount: gc.amount,
+        quantity: gc.quantity,
+        sender: gc.sender,
+        recipient: gc.recipient,
+        message: gc.message,
+    }));
+
+    const couponCodes = (cart.coupons || []).map(c => c.code);
+    const originalQuantity = physical.reduce((sum, i) => sum + i.quantity, 0)
+        + digital.reduce((sum, i) => sum + i.quantity, 0);
+
+    await fetch(`/api/storefront/carts/${cart.id}`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+    });
+
+    return { savedItems, savedGiftCerts, couponCodes, originalQuantity };
+}
+
+/**
+ * Recreate the cart from a previous snapshot and re-apply coupons.
+ * Failures are logged but never thrown so the caller's finally-block
+ * doesn't mask the original shipping-quote result.
+ */
+async function restoreCart(snapshot) {
+    try {
+        const body = { lineItems: snapshot.savedItems };
+        if (snapshot.savedGiftCerts.length > 0) {
+            body.giftCertificates = snapshot.savedGiftCerts;
+        }
+
+        const res = await fetch('/api/storefront/carts', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        const newCart = await res.json();
+        const newCartId = newCart?.id || newCart?.[0]?.id;
+
+        if (newCartId) {
+            for (const code of snapshot.couponCodes) {
+                try {
+                    await fetch(`/api/storefront/carts/${newCartId}/coupons`, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ couponCode: code }),
+                    });
+                } catch (e) {
+                    console.warn('[ShippingCalc] Could not re-apply coupon:', code, e);
+                }
+            }
+        }
+
+        $('body').trigger('cart-quantity-update', snapshot.originalQuantity);
+    } catch (err) {
+        console.error('[ShippingCalc] Failed to restore cart:', err);
+    }
+}
 
 const US_STATES = [
     { id: 1, name: 'Alabama', abbr: 'AL' },
@@ -215,8 +300,10 @@ export default class PDPShippingCalculator {
     // --- Core API flow ---
 
     /**
-     * Three-step flow: add temp cart item -> fetch quotes -> remove temp item.
-     * Keeps the real cart unaffected.
+     * Isolate the viewed product by snapshotting/clearing the session cart,
+     * adding only this product, fetching quotes, then restoring the original
+     * cart.  This ensures BigCommerce returns shipping methods applicable to
+     * the single product rather than the entire cart.
      */
     async calculateShipping(stateId, zip, shouldSave = true) {
         if (!this.productId) return;
@@ -226,10 +313,15 @@ export default class PDPShippingCalculator {
         this.clearError();
         this.updateSubmitState();
 
+        let snapshot = null;
+
         try {
+            // Snapshot and clear the existing cart so quotes are product-specific
+            snapshot = await snapshotAndClearCart();
+            console.log('[ShippingCalc] snapshot:', snapshot);
+
             const options = this.getOptionSelections();
 
-            // Build form data matching stencil-utils expectations
             const formData = new FormData();
             formData.append('action', 'add');
             formData.append('product_id', this.productId);
@@ -241,7 +333,6 @@ export default class PDPShippingCalculator {
                 }
             });
 
-            // Step 1: add product to cart
             const addResult = await new Promise((resolve, reject) => {
                 utils.api.cart.itemAdd(formData, (err, response) => {
                     if (err) return reject(new Error(err.message || 'Failed to add item'));
@@ -256,7 +347,6 @@ export default class PDPShippingCalculator {
                 ? addResult.data.cart_item.id
                 : null;
 
-            // Step 2: get shipping quotes
             const shippingParams = {
                 country_id: 226,
                 state_id: stateId,
@@ -270,16 +360,15 @@ export default class PDPShippingCalculator {
                 });
             });
 
-            // Step 3: remove temp cart item
             if (cartItemId) {
                 await new Promise(resolve => {
                     utils.api.cart.itemRemove(cartItemId, () => resolve());
                 });
             }
 
-            const quotes = this.parseShippingQuotes(
-                (quotesResult && quotesResult.content) || quotesResult,
-            );
+            const rawHtml = (quotesResult && quotesResult.content) || quotesResult;
+            console.log('[ShippingCalc] raw quotes HTML:', rawHtml);
+            const quotes = this.parseShippingQuotes(rawHtml);
             this.quotes = quotes;
 
             if (shouldSave) {
@@ -299,6 +388,9 @@ export default class PDPShippingCalculator {
             this.quotes = null;
             this.hideResults();
         } finally {
+            if (snapshot && snapshot.savedItems.length > 0) {
+                await restoreCart(snapshot);
+            }
             this.isLoading = false;
             this.hideLoading();
             this.updateSubmitState();
