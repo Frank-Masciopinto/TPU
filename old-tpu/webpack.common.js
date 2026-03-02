@@ -15,7 +15,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.js$/,
+                test: /\.(js|jsx)$/,
                 include: /(assets\/js|assets\\js|stencil-utils)/,
                 use: {
                     loader: 'babel-loader',
@@ -31,6 +31,7 @@ module.exports = {
                                 useBuiltIns: 'usage', // Tree-shake babel-polyfill
                                 targets: '> 1%, last 2 versions, Firefox ESR',
                             }],
+                            '@babel/preset-react',
                         ],
                     },
                 },
@@ -65,6 +66,7 @@ module.exports = {
         }),
     ],
     resolve: {
+        extensions: ['.js', '.jsx', '.json'],
         fallback:  { "url": require.resolve("url/") },
         alias: {
             jquery: path.resolve(__dirname, 'node_modules/jquery/dist/jquery.min.js'),
@@ -74,6 +76,8 @@ module.exports = {
             'slick-carousel': path.resolve(__dirname, 'node_modules/slick-carousel/slick/slick.min.js'),
             'svg-injector': path.resolve(__dirname, 'node_modules/svg-injector/dist/svg-injector.min.js'),
             sweetalert2: path.resolve(__dirname, 'node_modules/sweetalert2/dist/sweetalert2.min.js'),
+            '@/lib': path.resolve(__dirname, 'assets/js/lib'),
+            '@/components': path.resolve(__dirname, 'assets/js/components'),
         },
     },
 };

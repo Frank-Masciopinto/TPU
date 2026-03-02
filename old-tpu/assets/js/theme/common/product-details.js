@@ -214,7 +214,6 @@ export default class ProductDetails extends ProductDetailsBase {
             this.updateProductAttributes(productAttributesData);
             this.updateView(productAttributesData, productAttributesContent);
             bannerUtils.dispatchProductBannerEvent(productAttributesData);
-            $('body').trigger('shippingCalc:optionsChanged');
         });
     }
 

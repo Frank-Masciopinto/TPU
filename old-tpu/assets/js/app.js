@@ -92,6 +92,31 @@ window.stencilBootstrap = function stencilBootstrap(pageType, contextJSON = null
                         imported.default.load(context);
                     });
                 });
+
+                // Forum: detect /forum pages by URL and bootstrap the React app
+                const isForumPage = window.location.pathname.startsWith('/forum');
+                if (isForumPage && !window.__TPU_FORUM__) {
+                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                    window.__TPU_FORUM__ = {
+                        apiBase: isLocal ? 'http://localhost:8787' : 'https://cartertraileraxles.com',
+                        pageType: 'feed',
+                        customer: context.customer || null,
+                        loginUrl: (context.urls && context.urls.auth && context.urls.auth.login) || '/login.php',
+                    };
+                    document.body.classList.add('tpu-forum-page');
+                }
+
+                if (window.__TPU_FORUM__ && window.__TPU_FORUM__.pageType) {
+                    import('./theme/forum')
+                        .then((mod) => {
+                            if (mod && mod.default && typeof mod.default.load === 'function') {
+                                mod.default.load(context);
+                            }
+                        })
+                        .catch((e) => {
+                            console.warn('Forum app failed to load:', e);
+                        });
+                }
             });
         },
     };

@@ -1,0 +1,347 @@
+// =============================================================================
+// TPU - TRAILER PARTS UNLIMITED CUSTOM VARIABLES
+// =============================================================================
+// Industrial, heavy-duty aesthetic with safety-focused colors
+// =============================================================================
+
+
+// TPU Color Palette — aliased to CSS custom properties (see _tpu-themes.scss)
+// -----------------------------------------------------------------------------
+// These SCSS variables resolve to var(--tpu-*) so every component automatically
+// responds to the active theme (light / dark).  Non-color tokens (spacing,
+// typography, z-index …) remain plain SCSS values below.
+
+$tpu-bg-primary:            var(--tpu-bg-primary);
+$tpu-bg-secondary:          var(--tpu-bg-secondary);
+$tpu-bg-tertiary:           var(--tpu-bg-tertiary);
+$tpu-bg-elevated:           var(--tpu-bg-elevated);
+
+$tpu-accent-primary:        var(--tpu-accent-primary);
+$tpu-accent-secondary:      var(--tpu-accent-secondary);
+$tpu-accent-tertiary:       var(--tpu-accent-tertiary);
+$tpu-accent-success:        var(--tpu-accent-success);
+
+$tpu-text-primary:          var(--tpu-text-primary);
+$tpu-text-secondary:        var(--tpu-text-secondary);
+$tpu-text-tertiary:         var(--tpu-text-tertiary);
+$tpu-text-muted:            var(--tpu-text-muted);
+$tpu-text-inverse:          var(--tpu-text-inverse);
+
+$tpu-border-primary:        var(--tpu-border-primary);
+$tpu-border-secondary:      var(--tpu-border-secondary);
+$tpu-border-accent:         var(--tpu-border-accent);
+
+$tpu-glass-bg:              var(--tpu-glass-bg);
+$tpu-glass-border:          var(--tpu-glass-border);
+$tpu-overlay-dark:          var(--tpu-overlay-dark);
+$tpu-overlay-light:         var(--tpu-overlay-light);
+
+// Raw hex values for Sass color functions (lighten, darken, rgba).
+// These are compile-time constants — NOT theme-responsive.
+// Accent colors are constant across themes so this is safe.
+$tpu-accent-primary-raw:    #e62223;
+$tpu-accent-secondary-raw:  #ffc107;
+$tpu-accent-tertiary-raw:   #ef4444;
+$tpu-accent-success-raw:    #22c55e;
+$tpu-bg-primary-raw:        #1a1a1a;
+$tpu-bg-secondary-raw:      #2d2d2d;
+$tpu-bg-tertiary-raw:       #3f3f46;
+$tpu-bg-elevated-raw:       #404040;
+$tpu-text-primary-raw:      #f5f5f5;
+$tpu-text-secondary-raw:    #d4d4d8;
+$tpu-text-tertiary-raw:     #a1a1aa;
+$tpu-text-muted-raw:        #9ca3af;
+$tpu-border-primary-raw:    #3f3f46;
+$tpu-border-secondary-raw:  #52525b;
+
+
+// TPU Typography
+// -----------------------------------------------------------------------------
+
+// Font Families (loaded via Google Fonts)
+$tpu-font-headline:         "Oswald", "Bebas Neue", "Impact", sans-serif;
+$tpu-font-body:             "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+$tpu-font-mono:             "Roboto Mono", "Courier New", monospace;
+
+// Font Sizes (mobile-first, scale up with breakpoints)
+$tpu-text-xs:               0.75rem;    // 12px
+$tpu-text-sm:               0.875rem;   // 14px
+$tpu-text-base:             1rem;       // 16px
+$tpu-text-lg:               1.125rem;   // 18px
+$tpu-text-xl:               1.25rem;    // 20px
+$tpu-text-2xl:              1.5rem;     // 24px
+$tpu-text-3xl:              1.875rem;   // 30px
+$tpu-text-4xl:              2.25rem;    // 36px
+$tpu-text-5xl:              3rem;       // 48px
+$tpu-text-6xl:              3.75rem;    // 60px
+$tpu-text-7xl:              4.5rem;     // 72px
+$tpu-text-8xl:              6rem;       // 96px
+
+// Font Weights
+$tpu-font-light:            300;
+$tpu-font-regular:          400;
+$tpu-font-medium:           500;
+$tpu-font-semibold:         600;
+$tpu-font-bold:             700;
+$tpu-font-black:            900;
+
+// Line Heights
+$tpu-leading-none:          1;
+$tpu-leading-tight:         1.15;
+$tpu-leading-snug:          1.25;
+$tpu-leading-normal:        1.5;
+$tpu-leading-relaxed:       1.625;
+
+// Letter Spacing
+$tpu-tracking-tight:        -0.025em;
+$tpu-tracking-normal:       0;
+$tpu-tracking-wide:         0.05em;
+$tpu-tracking-wider:        0.1em;
+$tpu-tracking-widest:       0.2em;
+
+
+// TPU Spacing
+// -----------------------------------------------------------------------------
+
+$tpu-space-0:               0;
+$tpu-space-1:               0.25rem;    // 4px
+$tpu-space-2:               0.5rem;     // 8px
+$tpu-space-3:               0.75rem;    // 12px
+$tpu-space-4:               1rem;       // 16px
+$tpu-space-5:               1.25rem;    // 20px
+$tpu-space-6:               1.5rem;     // 24px
+$tpu-space-8:               2rem;       // 32px
+$tpu-space-10:              2.5rem;     // 40px
+$tpu-space-12:              3rem;       // 48px
+$tpu-space-16:              4rem;       // 64px
+$tpu-space-20:              5rem;       // 80px
+$tpu-space-24:              6rem;       // 96px
+$tpu-space-32:              8rem;       // 128px
+
+
+// TPU Border Radius
+// -----------------------------------------------------------------------------
+
+$tpu-radius-none:           0;
+$tpu-radius-sm:             0.125rem;   // 2px
+$tpu-radius-md:             0.25rem;    // 4px
+$tpu-radius-lg:             0.5rem;     // 8px
+$tpu-radius-xl:             0.75rem;    // 12px
+$tpu-radius-2xl:            1rem;       // 16px
+$tpu-radius-full:           9999px;
+
+
+// TPU Shadows
+// -----------------------------------------------------------------------------
+
+$tpu-shadow-sm:             var(--tpu-shadow-sm);
+$tpu-shadow-md:             var(--tpu-shadow-md);
+$tpu-shadow-lg:             var(--tpu-shadow-lg);
+$tpu-shadow-xl:             var(--tpu-shadow-xl);
+$tpu-shadow-glow-orange:    var(--tpu-shadow-glow-red);
+$tpu-shadow-glow-yellow:    var(--tpu-shadow-glow-yellow);
+
+
+// TPU Transitions
+// -----------------------------------------------------------------------------
+
+$tpu-transition-fast:       150ms ease-out;
+$tpu-transition-normal:     300ms ease-out;
+$tpu-transition-slow:       500ms ease-out;
+$tpu-transition-slower:     700ms ease-out;
+
+
+// TPU Z-Index
+// -----------------------------------------------------------------------------
+
+$tpu-z-base:                1;
+$tpu-z-dropdown:            100;
+$tpu-z-sticky:              200;
+$tpu-z-header:              300;
+$tpu-z-overlay:             400;
+$tpu-z-modal:               500;
+$tpu-z-tooltip:             600;
+$tpu-z-max:                 9999;
+
+
+// TPU Breakpoints (matching existing Stencil breakpoints)
+// -----------------------------------------------------------------------------
+
+$tpu-screen-sm:             480px;
+$tpu-screen-md:             768px;
+$tpu-screen-lg:             992px;
+$tpu-screen-xl:             1200px;
+$tpu-screen-2xl:            1440px;
+
+
+// TPU Animation Keyframes (for use in SCSS)
+// -----------------------------------------------------------------------------
+
+@keyframes tpu-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes tpu-fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes tpu-blur-in {
+    from {
+        opacity: 0;
+        filter: blur(10px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+@keyframes tpu-scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes tpu-shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+@keyframes tpu-pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(230, 34, 35, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(230, 34, 35, 0.6); }
+}
+
+@keyframes tpu-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+@keyframes tpu-word-rotate {
+    0%, 20% { opacity: 1; transform: translateY(0); }
+    25%, 95% { opacity: 0; transform: translateY(-100%); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tpu-grid-fade {
+    0% { opacity: 0; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0.15; }
+}
+
+@keyframes tpu-scroll-progress {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+@keyframes tpu-number-tick {
+    from { opacity: 0; transform: translateY(100%); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+// TPU Utility Mixins
+// -----------------------------------------------------------------------------
+
+// Glass morphism effect
+@mixin tpu-glass {
+    background: $tpu-glass-bg;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid $tpu-glass-border;
+}
+
+// Industrial card styling
+@mixin tpu-card {
+    background: $tpu-bg-secondary;
+    border: 1px solid $tpu-border-primary;
+    border-radius: $tpu-radius-lg;
+    box-shadow: $tpu-shadow-md;
+}
+
+// Safety accent border
+@mixin tpu-accent-border($position: bottom) {
+    border-#{$position}: 3px solid $tpu-accent-primary;
+}
+
+// Headline text style
+@mixin tpu-headline($size: $tpu-text-4xl) {
+    font-family: $tpu-font-headline;
+    font-size: $size;
+    font-weight: $tpu-font-bold;
+    line-height: $tpu-leading-tight;
+    letter-spacing: $tpu-tracking-wide;
+    text-transform: uppercase;
+    color: $tpu-text-primary;
+}
+
+// Body text style
+@mixin tpu-body($size: $tpu-text-base) {
+    font-family: $tpu-font-body;
+    font-size: $size;
+    font-weight: $tpu-font-regular;
+    line-height: $tpu-leading-normal;
+    color: $tpu-text-secondary;
+}
+
+// Shimmer button effect
+@mixin tpu-shimmer-button {
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent
+        );
+        animation: tpu-shimmer 2s infinite;
+    }
+}
+
+// Responsive font scaling (breakpoint-based fallback)
+@mixin tpu-responsive-text($min-size, $max-size) {
+    font-size: $min-size;
+    
+    @media (min-width: $tpu-screen-md) {
+        font-size: calc(#{$min-size} + (#{strip-unit($max-size)} - #{strip-unit($min-size)}) * 0.5);
+    }
+    
+    @media (min-width: $tpu-screen-lg) {
+        font-size: $max-size;
+    }
+}
+
+// Strip unit helper
+@function strip-unit($number) {
+    @if type-of($number) == "number" and not unitless($number) {
+        @return $number / ($number * 0 + 1);
+    }
+    @return $number;
+}
+
+
+// Fluid Typography Scale — removed for node-sass/LibSass compatibility.
+// old-tpu's Stencil CLI uses node-sass which chokes on clamp() with mixed units.
+// These are unused by the forum; re-add if migrating to Dart Sass.
+

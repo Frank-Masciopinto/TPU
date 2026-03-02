@@ -44,6 +44,8 @@
 @import "settings/citadel/citadel"; // 4
 @import "settings/stencil/stencil"; // 4
 @import "settings/layouts/layouts"; // 4
+@import "settings/tpu/tpu-variables"; // TPU design tokens
+@import "settings/tpu/tpu-themes"; // TPU CSS custom properties (light/dark)
 
 
 // Utilities
@@ -87,3 +89,4 @@
 @import "cards-quicksearch"; // 5
 @import "theme-editor-responsive"; // 6
 @import "custom"; // 7
+@import "components/tpu/tpu-forum"; // TPU Forum app styles

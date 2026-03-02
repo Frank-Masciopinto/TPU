@@ -1,0 +1,33 @@
+{{!--
+  TPU Forum mount (no legacy UI markup).
+  This partial must stay minimal: mount div + bootstrap config only.
+--}}
+
+<div id="tpu-forum-root"></div>
+<script nonce="{{nonce}}">
+  (function() {
+    // Auto-detect local vs production
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const apiBase = isLocal 
+      ? 'http://localhost:8787'  // Local Cloudflare Worker dev server
+      : 'https://cartertraileraxles.com';  // Production Worker URL
+    
+    // Build customer object from BigCommerce context (if logged in)
+    var customer = null;
+    {{#if customer}}
+    customer = {
+      id: {{customer.id}},
+      email: "{{customer.email}}",
+      name: "{{customer.name}}"
+    };
+    {{/if}}
+    
+    window.__TPU_FORUM__ = {
+      apiBase: apiBase,
+      pageType: "{{pageType}}",
+      customer: customer,
+      loginUrl: "{{urls.auth.login}}",
+    };
+  })();
+</script>
+

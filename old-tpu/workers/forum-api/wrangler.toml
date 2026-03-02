@@ -1,0 +1,44 @@
+name = "forum-api"
+main = "src/index.ts"
+compatibility_date = "2026-01-08"
+account_id = "9c6e4f899b70c79dda1a7600754df3cc"
+
+# Deploys to: cartertraileraxles.com (custom domain)
+
+# IMPORTANT:
+# - Do NOT expose any of these values in storefront JS.
+# - Set secrets via `wrangler secret put ...` (especially JWT secret and BigCommerce token).
+
+[vars]
+# The only allowed origin for browser calls (exact match), e.g. "https://trailerpartsunlimited.com"
+STOREFRONT_ORIGIN = "https://trailerpartsunlimited.com"
+
+# Supabase project base URL, e.g. "https://xxxxxxxxxxxxxxxxxxxx.supabase.co"
+SUPABASE_URL = "https://jvdcfxmafgjlsrnnvcdy.supabase.co"
+
+# Supabase anon public key (safe to store server-side; never ship service role key to browser)
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2ZGNmeG1hZmdqbHNybm52Y2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDIyNzYsImV4cCI6MjA4Mzk3ODI3Nn0.HRLrEgvlhAtUs51abOBPHSwlPWtSMhIyGuNxnXfUCaU"
+
+# BigCommerce store config
+BIGCOMMERCE_STORE_HASH = "2wzik2aols"
+# BigCommerce API Client ID (required for Customer Login JWT)
+BIGCOMMERCE_CLIENT_ID = "f4lxnl52w3shsff4b7plmf09i7wn60l"
+
+# Address Verification (Google Address Validation API):
+# Required for residential/commercial detection in checkout
+# Set via `wrangler secret put GOOGLE_ADDRESS_VALIDATION_KEY`
+# Enable API at: https://console.cloud.google.com/apis/library/addressvalidation.googleapis.com
+
+# LTL Freight Hub Lookup (optional):
+# For finding nearest freight terminals for residential LTL shipments
+# Set via `wrangler secret put XPO_API_KEY` or other carrier API keys
+
+# Email Quote System (Resend):
+# Required for sending branded quote emails to customers
+# Set via `wrangler secret put RESEND_API_KEY`
+# Get your API key at https://resend.com
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "76979f5df4de4a8482b9477837c2b6fe"
+preview_id = "df81d21c59384971994cf9a0146bdc42"

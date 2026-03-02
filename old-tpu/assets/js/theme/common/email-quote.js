@@ -14,6 +14,7 @@ function transformCart(apiCart) {
         return {
             id: item.id,
             product_id: item.productId,
+            variant_id: item.variantId,
             name: item.name || 'Unknown Product',
             sku: item.sku || '',
             quantity: item.quantity || 1,
@@ -21,7 +22,12 @@ function transformCart(apiCart) {
             total: { value: totalVal, formatted: formatPrice(totalVal) },
             image: item.imageUrl || '',
             url: item.url || '#',
-            options: (item.options || []).map(o => ({ name: o.name, value: o.value })),
+            options: (item.options || []).map(o => ({
+                name: o.name,
+                value: o.value,
+                nameId: o.nameId,
+                valueId: o.valueId,
+            })),
         };
     });
 
@@ -243,11 +249,13 @@ async function handleSubmit(e) {
             name: name || undefined,
             phone: phone || undefined,
             notes: notes || undefined,
+            storeUrl: window.location.origin,
             cart: {
                 id: currentCart.id,
                 items: currentCart.items.map(item => ({
                     id: item.id,
                     product_id: item.product_id,
+                    variant_id: item.variant_id,
                     name: item.name,
                     sku: item.sku,
                     quantity: item.quantity,

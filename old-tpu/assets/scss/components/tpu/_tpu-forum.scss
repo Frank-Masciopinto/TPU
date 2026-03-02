@@ -1,0 +1,853 @@
+// =============================================================================
+// TPU FORUM APP (React + shadcn/MagicUI components)
+// =============================================================================
+
+// Apply dark theme to parent containers when forum is present
+// Use :has() selector to target parents (modern browsers)
+// Fallback for older browsers: add body class via JS
+body:has(.tpu-forum),
+body.tpu-forum-page {
+    .main-content-wrapper,
+    .page,
+    .page-content,
+    .page-content--centered,
+    .body,
+    #main-content {
+        background-color: $tpu-bg-primary !important;
+        color: $tpu-text-primary !important;
+    }
+  
+    // Breadcrumbs dark mode
+    .breadcrumbs {
+        background-color: transparent !important;
+    
+        a {
+            color: $tpu-text-secondary !important;
+      
+            &:hover {
+                color: $tpu-accent-primary !important;
+            }
+        }
+    }
+  
+    // Page heading dark mode
+    .page-heading {
+        color: $tpu-text-primary !important;
+    }
+  
+    // Hide page heading and breadcrumbs on forum pages
+    .page-heading,
+    nav[aria-label="Breadcrumb"],
+    .breadcrumbs {
+        display: none !important;
+    }
+}
+
+.tpu-forum {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: $tpu-space-6 $tpu-space-4;
+    background-color: $tpu-bg-primary;
+    color: $tpu-text-primary;
+
+    * {
+        color: inherit;
+    }
+}
+
+.tpu-forum__page {
+    display: flex;
+    flex-direction: column;
+    gap: $tpu-space-4;
+}
+
+.tpu-forum__toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: $tpu-space-3;
+}
+
+.tpu-forum__search {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: $tpu-space-2;
+    align-items: center;
+}
+
+.tpu-forum__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $tpu-space-2;
+    align-items: center;
+}
+
+.tpu-forum__sort {
+    min-width: 180px;
+}
+
+.tpu-forum__header-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.tpu-forum__list {
+    display: flex;
+    flex-direction: column;
+    gap: $tpu-space-3;
+}
+
+.tpu-forum__thread-footer,
+.tpu-forum__comment-footer {
+    display: flex;
+    gap: $tpu-space-3;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.tpu-forum__vote {
+    display: inline-flex;
+    gap: $tpu-space-2;
+    align-items: center;
+}
+
+.tpu-forum__vote-score {
+    min-width: 44px;
+    text-align: center;
+}
+
+.tpu-forum__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $tpu-space-2;
+}
+
+.tpu-forum__tagrow {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: $tpu-space-2;
+    margin-left: $tpu-space-2;
+}
+
+.tpu-forum__actions {
+    margin-top: $tpu-space-3;
+}
+
+.tpu-forum__loadmore {
+    display: flex;
+    justify-content: center;
+    padding: $tpu-space-2 0;
+}
+
+.tpu-forum__thread-topbar {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.tpu-forum__drawer-body {
+    padding: $tpu-space-4 $tpu-space-6;
+    display: flex;
+    flex-direction: column;
+    gap: $tpu-space-3;
+}
+
+.tpu-forum__form {
+    display: flex;
+    flex-direction: column;
+    gap: $tpu-space-2;
+}
+
+.tpu-forum__comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: $tpu-space-3;
+}
+
+.tpu-forum__comment-block {
+    display: flex;
+    flex-direction: column;
+    gap: $tpu-space-2;
+}
+
+.tpu-forum__comment--child {
+    margin-left: $tpu-space-4;
+}
+
+// =============================================================================
+// Admin Styling - Royal Blue to highlight admin posts
+// =============================================================================
+
+// Admin badge - royal blue gradient to stand out from regular members
+.tpu-forum__badge--admin {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+    padding: 4px 12px !important;
+    font-size: 12px !important;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+}
+
+// Admin comment card - subtle left border and background highlight
+.tpu-forum__comment--admin {
+    border-left: 3px solid #3b82f6 !important;
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, transparent 50%) !important;
+    
+    // Ensure the card title stands out
+    [class*="CardTitle"],
+    .tpu-forum__badge--admin {
+        position: relative;
+    }
+}
+
+// Comment actions container
+.tpu-forum__comment-actions {
+    display: flex;
+    gap: $tpu-space-2;
+    align-items: center;
+}
+
+// Thread footer actions container
+.tpu-forum__thread-footer-actions {
+    display: flex;
+    gap: $tpu-space-2;
+    align-items: center;
+}
+
+// Thread topbar with admin delete button
+.tpu-forum__thread-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: $tpu-space-3;
+}
+
+.tpu-forum__richtext {
+    // Keep styles minimal; content is sanitized.
+    line-height: 1.6;
+
+    p { margin: 0 0 $tpu-space-3; }
+    ul, ol { margin: 0 0 $tpu-space-3; padding-left: 1.25rem; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre { overflow: auto; padding: $tpu-space-3; border: 1px solid $tpu-border-primary; border-radius: $tpu-radius-md; }
+    a { color: $tpu-accent-primary; }
+  
+    color: $tpu-text-primary;
+
+    code {
+        background-color: $tpu-bg-secondary;
+        color: $tpu-text-primary;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    pre {
+        background-color: $tpu-bg-secondary;
+        color: $tpu-text-primary;
+        border-color: $tpu-border-secondary;
+    }
+
+    a {
+        color: $tpu-accent-primary;
+
+        &:hover {
+            color: lighten($tpu-accent-primary-raw, 10%);
+        }
+    }
+}
+
+.tpu-forum__link {
+    text-decoration: none;
+    color: $tpu-accent-primary;
+
+    &:hover {
+        color: lighten($tpu-accent-primary-raw, 10%);
+    }
+}
+
+// =============================================================================
+// Sheet / Drawer — Radix Dialog styling (headless primitives need explicit CSS)
+// =============================================================================
+
+.tpu-sheet__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+
+    &[data-state="open"]   { animation: tpuFadeIn 200ms ease-out; }
+    &[data-state="closed"] { animation: tpuFadeOut 150ms ease-in forwards; }
+}
+
+.tpu-sheet__content {
+    position: fixed;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    background-color: $tpu-bg-secondary;
+    color: $tpu-text-primary;
+    border: 1px solid $tpu-border-primary;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+    outline: none;
+
+    &--bottom {
+        inset: auto 0 0 0;
+        max-height: 85vh;
+        border-radius: 16px 16px 0 0;
+        &[data-state="open"]   { animation: tpuSlideUp 250ms ease-out; }
+        &[data-state="closed"] { animation: tpuSlideDown 200ms ease-in forwards; }
+    }
+
+    &--right {
+        inset: 0 0 0 auto;
+        width: unquote("min(420px, 90vw)");
+        &[data-state="open"]   { animation: tpuSlideLeft 250ms ease-out; }
+        &[data-state="closed"] { animation: tpuSlideRight 200ms ease-in forwards; }
+    }
+
+    &--left {
+        inset: 0 auto 0 0;
+        width: unquote("min(420px, 90vw)");
+        &[data-state="open"]   { animation: tpuSlideRight 250ms ease-out; }
+        &[data-state="closed"] { animation: tpuSlideLeft 200ms ease-in forwards; }
+    }
+
+    &--top {
+        inset: 0 0 auto 0;
+        max-height: 85vh;
+        border-radius: 0 0 16px 16px;
+        &[data-state="open"]   { animation: tpuSlideDown 250ms ease-out; }
+        &[data-state="closed"] { animation: tpuSlideUp 200ms ease-in forwards; }
+    }
+}
+
+.tpu-sheet__close {
+    position: absolute;
+    top: $tpu-space-3;
+    right: $tpu-space-3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: $tpu-text-secondary;
+    cursor: pointer;
+    z-index: 1;
+
+    &:hover {
+        background-color: $tpu-bg-tertiary;
+        color: $tpu-text-primary;
+    }
+}
+
+.tpu-sheet__header {
+    padding: $tpu-space-6 $tpu-space-6 $tpu-space-3;
+}
+
+.tpu-sheet__footer {
+    padding: $tpu-space-3 $tpu-space-6 $tpu-space-6;
+}
+
+.tpu-sheet__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $tpu-text-primary;
+    margin: 0;
+}
+
+.tpu-sheet__description {
+    font-size: 0.875rem;
+    color: $tpu-text-secondary;
+    margin: $tpu-space-1 0 0;
+}
+
+@keyframes tpuFadeIn   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tpuFadeOut  { from { opacity: 1; } to { opacity: 0; } }
+@keyframes tpuSlideUp    { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes tpuSlideDown  { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+@keyframes tpuSlideLeft  { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes tpuSlideRight { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+
+// =============================================================================
+// COMPONENT BASE STYLES — headless Radix primitives need explicit CSS
+// =============================================================================
+
+// Card
+// -----------------------------------------------------------------------------
+.tpu-card {
+    background-color: $tpu-bg-secondary;
+    border: 1px solid $tpu-border-primary;
+    border-radius: $tpu-radius-lg;
+    color: $tpu-text-primary;
+    overflow: hidden;
+}
+
+.tpu-card__header {
+    padding: $tpu-space-4 $tpu-space-4 $tpu-space-2;
+}
+
+.tpu-card__title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: $tpu-text-primary;
+    margin: 0;
+}
+
+.tpu-card__description {
+    font-size: 0.875rem;
+    color: $tpu-text-secondary;
+    margin: $tpu-space-1 0 0;
+    line-height: 1.5;
+}
+
+.tpu-card__content {
+    padding: $tpu-space-2 $tpu-space-4 $tpu-space-4;
+}
+
+.tpu-card__footer {
+    padding: $tpu-space-2 $tpu-space-4 $tpu-space-4;
+}
+
+
+// Button
+// -----------------------------------------------------------------------------
+.tpu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $tpu-space-2;
+    white-space: nowrap;
+    font-weight: 500;
+    font-size: 0.875rem;
+    line-height: 1;
+    border-radius: $tpu-radius-md;
+    cursor: pointer;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+    outline: none;
+    border: 1px solid transparent;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    &--md { padding: 10px 18px; }
+    &--sm { padding: 6px 12px; font-size: 0.8125rem; }
+    &--lg { padding: 14px 28px; font-size: 1rem; }
+    &--icon { padding: 8px; }
+
+    &--default {
+        background-color: $tpu-accent-primary;
+        color: #ffffff;
+        border-color: $tpu-accent-primary;
+        &:hover { background-color: lighten($tpu-accent-primary-raw, 6%); }
+    }
+
+    &--secondary {
+        background-color: transparent;
+        color: $tpu-text-primary;
+        border-color: $tpu-border-secondary;
+        &:hover {
+            background-color: $tpu-bg-tertiary;
+            border-color: $tpu-text-tertiary;
+        }
+    }
+
+    &--outline {
+        background-color: transparent;
+        color: $tpu-text-primary;
+        border-color: $tpu-border-secondary;
+        &:hover {
+            background-color: $tpu-bg-tertiary;
+            border-color: $tpu-accent-primary;
+        }
+    }
+
+    &--destructive {
+        background-color: #dc2626;
+        color: #ffffff;
+        border-color: #dc2626;
+        &:hover { background-color: #b91c1c; border-color: #b91c1c; }
+    }
+
+    &--ghost {
+        background-color: transparent;
+        color: $tpu-text-primary;
+        &:hover { background-color: $tpu-bg-tertiary; }
+    }
+
+    &--link {
+        background-color: transparent;
+        color: $tpu-accent-primary;
+        text-decoration: underline;
+        padding: 0;
+        border: none;
+        &:hover { color: lighten($tpu-accent-primary-raw, 10%); }
+    }
+}
+
+
+// Badge
+// -----------------------------------------------------------------------------
+.tpu-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+
+    &--default {
+        background-color: $tpu-bg-tertiary;
+        color: $tpu-text-primary;
+        border-color: $tpu-border-secondary;
+    }
+
+    &--secondary {
+        background-color: $tpu-bg-tertiary;
+        color: $tpu-text-secondary;
+        border-color: $tpu-border-primary;
+    }
+
+    &--outline {
+        background-color: transparent;
+        color: $tpu-text-secondary;
+        border-color: $tpu-border-secondary;
+    }
+
+    &--success {
+        background-color: rgba($tpu-accent-success-raw, 0.15);
+        color: $tpu-accent-success;
+        border-color: rgba($tpu-accent-success-raw, 0.3);
+    }
+
+    &--destructive {
+        background-color: rgba($tpu-accent-tertiary-raw, 0.15);
+        color: $tpu-accent-tertiary;
+        border-color: rgba($tpu-accent-tertiary-raw, 0.3);
+    }
+
+    &--warning {
+        background-color: rgba($tpu-accent-secondary-raw, 0.15);
+        color: $tpu-accent-secondary;
+        border-color: rgba($tpu-accent-secondary-raw, 0.3);
+    }
+}
+
+
+// Input
+// -----------------------------------------------------------------------------
+.tpu-input {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: $tpu-text-primary;
+    background-color: $tpu-bg-tertiary;
+    border: 1px solid $tpu-border-secondary;
+    border-radius: $tpu-radius-md;
+    outline: none;
+    transition: border-color 150ms ease;
+
+    &::placeholder { color: $tpu-text-tertiary; }
+    &:focus { border-color: $tpu-accent-primary; }
+    &--error { border-color: $tpu-accent-tertiary; }
+}
+
+
+// Textarea
+// -----------------------------------------------------------------------------
+.tpu-textarea {
+    display: block;
+    width: 100%;
+    min-height: 100px;
+    padding: 10px 14px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: $tpu-text-primary;
+    background-color: $tpu-bg-tertiary;
+    border: 1px solid $tpu-border-secondary;
+    border-radius: $tpu-radius-md;
+    outline: none;
+    resize: vertical;
+    font-family: inherit;
+    transition: border-color 150ms ease;
+
+    &::placeholder { color: $tpu-text-tertiary; }
+    &:focus { border-color: $tpu-accent-primary; }
+}
+
+
+// Select (Radix portal-based dropdown)
+// -----------------------------------------------------------------------------
+.tpu-select__trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $tpu-space-2;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: $tpu-text-primary;
+    background-color: $tpu-bg-tertiary;
+    border: 1px solid $tpu-border-secondary;
+    border-radius: $tpu-radius-md;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 150ms ease;
+    white-space: nowrap;
+
+    &:hover { border-color: $tpu-text-tertiary; }
+    &:focus { border-color: $tpu-accent-primary; }
+
+    &[data-placeholder] { color: $tpu-text-tertiary; }
+}
+
+.tpu-select__icon {
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+
+.tpu-select__content {
+    position: relative;
+    z-index: 10000;
+    overflow: hidden;
+    background-color: $tpu-bg-secondary;
+    border: 1px solid $tpu-border-primary;
+    border-radius: $tpu-radius-md;
+    box-shadow: 0 10px 40px -8px rgba(0, 0, 0, 0.5);
+    color: $tpu-text-primary;
+
+    &--popper {
+        max-height: 300px;
+    }
+
+    &[data-state="open"]  { animation: tpuFadeIn 120ms ease-out; }
+    &[data-state="closed"] { animation: tpuFadeOut 80ms ease-in forwards; }
+}
+
+.tpu-select__viewport {
+    padding: $tpu-space-1;
+
+    &--popper {
+        width: 100%;
+        max-height: 280px;
+        overflow-y: auto;
+    }
+}
+
+.tpu-select__item {
+    display: flex;
+    align-items: center;
+    gap: $tpu-space-2;
+    padding: 8px 12px 8px 28px;
+    font-size: 0.875rem;
+    color: $tpu-text-primary;
+    border-radius: $tpu-radius-sm;
+    cursor: pointer;
+    outline: none;
+    position: relative;
+    user-select: none;
+
+    &:hover,
+    &[data-highlighted] {
+        background-color: $tpu-bg-tertiary;
+        color: $tpu-text-primary;
+    }
+
+    &[data-state="checked"] {
+        color: $tpu-accent-primary;
+    }
+}
+
+.tpu-select__item-indicator {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    color: $tpu-accent-primary;
+}
+
+.tpu-select__scroll-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    color: $tpu-text-tertiary;
+    cursor: default;
+}
+
+.tpu-select__label {
+    padding: 8px 12px 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $tpu-text-tertiary;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tpu-select__separator {
+    height: 1px;
+    margin: $tpu-space-1 0;
+    background-color: $tpu-border-primary;
+}
+
+
+// ToggleGroup
+// -----------------------------------------------------------------------------
+.tpu-toggle-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background-color: $tpu-bg-tertiary;
+    border: 1px solid $tpu-border-primary;
+    border-radius: $tpu-radius-md;
+    padding: 3px;
+}
+
+.tpu-toggle-group__item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: $tpu-text-tertiary;
+    background-color: transparent;
+    border: none;
+    border-radius: $tpu-radius-sm;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 150ms ease, color 150ms ease;
+    white-space: nowrap;
+
+    &:hover {
+        color: $tpu-text-primary;
+    }
+
+    &[data-state="on"] {
+        background-color: $tpu-bg-secondary;
+        color: $tpu-accent-primary;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+}
+
+
+// Tabs
+// -----------------------------------------------------------------------------
+.tpu-tabs__list {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    background-color: $tpu-bg-tertiary;
+    border: 1px solid $tpu-border-primary;
+    border-radius: $tpu-radius-md;
+    padding: 3px;
+}
+
+.tpu-tabs__trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: $tpu-text-tertiary;
+    background-color: transparent;
+    border: none;
+    border-radius: $tpu-radius-sm;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 150ms ease, color 150ms ease;
+    white-space: nowrap;
+
+    &:hover { color: $tpu-text-primary; }
+
+    &[data-state="active"] {
+        background-color: $tpu-bg-secondary;
+        color: $tpu-accent-primary;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+}
+
+.tpu-tabs__content {
+    margin-top: $tpu-space-3;
+}
+
+
+// Alert
+// -----------------------------------------------------------------------------
+.tpu-alert {
+    padding: $tpu-space-4;
+    border: 1px solid $tpu-border-primary;
+    border-radius: $tpu-radius-lg;
+    background-color: $tpu-bg-secondary;
+    color: $tpu-text-primary;
+
+    &--destructive {
+        border-color: rgba($tpu-accent-tertiary-raw, 0.4);
+        background-color: rgba($tpu-accent-tertiary-raw, 0.08);
+    }
+
+    &--success {
+        border-color: rgba($tpu-accent-success-raw, 0.4);
+        background-color: rgba($tpu-accent-success-raw, 0.08);
+    }
+
+    &--warning {
+        border-color: rgba($tpu-accent-secondary-raw, 0.4);
+        background-color: rgba($tpu-accent-secondary-raw, 0.08);
+    }
+}
+
+.tpu-alert__title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 0 0 $tpu-space-1;
+    color: inherit;
+}
+
+.tpu-alert__description {
+    font-size: 0.875rem;
+    color: $tpu-text-secondary;
+    line-height: 1.5;
+}
+
+
+// Progress
+// -----------------------------------------------------------------------------
+.tpu-progress {
+    position: relative;
+    height: 6px;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 9999px;
+    background-color: $tpu-bg-tertiary;
+}
+
+.tpu-progress__indicator {
+    height: 100%;
+    width: 100%;
+    background-color: $tpu-accent-primary;
+    border-radius: 9999px;
+    transition: transform 300ms ease;
+}
+

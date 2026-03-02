@@ -1,0 +1,311 @@
+// =============================================================================
+// TPU THEME SYSTEM — CSS Custom Properties
+// =============================================================================
+// Defines light (Apple-inspired) and dark theme tokens as CSS custom properties.
+// Light theme is the :root default; dark theme overrides via [data-theme="dark"].
+// Brand red (#e62223) stays constant across both themes.
+// =============================================================================
+
+
+// ---------------------------------------------------------------------------
+// Light Theme (default) — Apple-inspired
+// ---------------------------------------------------------------------------
+
+:root {
+    // Backgrounds
+    --tpu-bg-primary:           #ffffff;
+    --tpu-bg-secondary:         #f5f5f7;
+    --tpu-bg-tertiary:          #e8e8ed;
+    --tpu-bg-elevated:          #ffffff;
+
+    // Accent Colors (constant across themes)
+    --tpu-accent-primary:       #e62223;
+    --tpu-accent-secondary:     #f59e0b;
+    --tpu-accent-tertiary:      #ef4444;
+    --tpu-accent-success:       #16a34a;
+
+    // Text
+    --tpu-text-primary:         #1d1d1f;
+    --tpu-text-secondary:       #48484a;
+    --tpu-text-tertiary:        #6e6e73;
+    --tpu-text-muted:           #86868b;
+    --tpu-text-inverse:         #ffffff;
+
+    // Borders
+    --tpu-border-primary:       #d2d2d7;
+    --tpu-border-secondary:     #e5e5ea;
+    --tpu-border-accent:        rgba(230, 34, 35, 0.3);
+
+    // Glass / Overlay
+    --tpu-glass-bg:             rgba(255, 255, 255, 0.72);
+    --tpu-glass-border:         rgba(0, 0, 0, 0.08);
+    --tpu-overlay-dark:         rgba(0, 0, 0, 0.35);
+    --tpu-overlay-light:        rgba(0, 0, 0, 0.03);
+    --tpu-transition-overlay:   rgba(255, 255, 255, 0.94);
+
+    // Shadows
+    --tpu-shadow-sm:            0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --tpu-shadow-md:            0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+    --tpu-shadow-lg:            0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.06);
+    --tpu-shadow-xl:            0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+    --tpu-shadow-glow-red:      0 0 20px rgba(230, 34, 35, 0.2);
+    --tpu-shadow-glow-yellow:   0 0 20px rgba(245, 158, 11, 0.2);
+
+    // Misc
+    --tpu-logo-invert:          0;
+    --tpu-grid-opacity:         0.08;
+    --tpu-dot-opacity:           0.1;
+    --tpu-scrollbar-track:      #f5f5f7;
+    --tpu-scrollbar-thumb:      #c7c7cc;
+
+    // Footer
+    --tpu-footer-bg:            #f0f0f5;
+    --tpu-footer-bg-secondary:  #e8e8ed;
+    --tpu-footer-bg-elevated:   #ffffff;
+    --tpu-footer-text:          #1d1d1f;
+    --tpu-footer-text-secondary: rgba(0, 0, 0, 0.6);
+    --tpu-footer-text-muted:    rgba(0, 0, 0, 0.4);
+    --tpu-footer-border:        rgba(0, 0, 0, 0.08);
+    --tpu-footer-accent-hover:  #c44d30;
+    --tpu-footer-accent-glow:   rgba(230, 34, 35, 0.15);
+    --tpu-footer-shipping-bg:   rgba(22, 163, 74, 0.08);
+    --tpu-footer-shipping-text: #15803d;
+    --tpu-footer-shipping-border: rgba(22, 163, 74, 0.2);
+    --tpu-footer-shipping-glow: none;
+    --tpu-footer-fitment-bg:    linear-gradient(160deg, #f0f0f5 0%, #e8eaf2 40%, #ecedf5 70%, #f0f0f5 100%);
+    --tpu-footer-fitment-grid:  rgba(0, 0, 0, 0.035);
+    --tpu-footer-fitment-link-bg: #ffffff;
+    --tpu-footer-fitment-link-border: rgba(0, 0, 0, 0.15);
+    --tpu-footer-fitment-link-hover-bg: #ffffff;
+    --tpu-footer-fitment-link-hover-border: var(--tpu-accent-primary);
+    --tpu-footer-fitment-link-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    // Hero (text over dark image overlay — always needs light colors)
+    --tpu-hero-text:            #ffffff;
+    --tpu-hero-text-secondary:  rgba(255, 255, 255, 0.85);
+    --tpu-hero-text-muted:      rgba(255, 255, 255, 0.65);
+    --tpu-hero-overlay-end:     #ffffff;
+    --tpu-hero-gradient-color:  rgba(230, 34, 35, 0.12);
+    --tpu-hero-scroll-text:     rgba(255, 255, 255, 0.55);
+    --tpu-hero-scroll-border:   rgba(255, 255, 255, 0.25);
+    --tpu-hero-btn-primary-text: #ffffff;
+    --tpu-hero-btn-secondary-text: #ffffff;
+    --tpu-hero-btn-secondary-border: rgba(255, 255, 255, 0.4);
+    --tpu-hero-btn-secondary-hover-border: #ffffff;
+    --tpu-hero-btn-secondary-hover-bg: rgba(255, 255, 255, 0.12);
+
+    // Sidebar (faceted filters)
+    --tpu-sidebar-bg:             rgba(245, 245, 247, 0.85);
+    --tpu-sidebar-bg-solid:       #f5f5f7;
+    --tpu-sidebar-border:         rgba(0, 0, 0, 0.08);
+    --tpu-sidebar-border-hover:   rgba(0, 0, 0, 0.15);
+    --tpu-sidebar-text:           #1d1d1f;
+    --tpu-sidebar-text-muted:     rgba(0, 0, 0, 0.55);
+    --tpu-sidebar-text-dim:       rgba(0, 0, 0, 0.35);
+    --tpu-sidebar-hover-bg:       rgba(0, 0, 0, 0.04);
+    --tpu-sidebar-active-bg:      rgba(230, 34, 35, 0.06);
+    --tpu-sidebar-active-bg-hover: rgba(230, 34, 35, 0.1);
+    --tpu-sidebar-input-bg:       rgba(0, 0, 0, 0.03);
+    --tpu-sidebar-input-focus-bg: rgba(0, 0, 0, 0.05);
+    --tpu-sidebar-shadow:         0 4px 30px rgba(0, 0, 0, 0.08);
+    --tpu-sidebar-shadow-inset:   inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    --tpu-sidebar-scrollbar:      rgba(0, 0, 0, 0.15);
+    --tpu-sidebar-scrollbar-hover: rgba(0, 0, 0, 0.25);
+    --tpu-sidebar-indicator:      rgba(0, 0, 0, 0.1);
+
+    // PLP Toolbar
+    --tpu-toolbar-bg:             linear-gradient(135deg, rgba(245, 245, 247, 0.95) 0%, rgba(240, 240, 245, 0.98) 100%);
+    --tpu-toolbar-border:         rgba(0, 0, 0, 0.08);
+    --tpu-toolbar-shadow:         0 4px 24px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    --tpu-toolbar-separator:      rgba(0, 0, 0, 0.1);
+    --tpu-toolbar-btn-bg:         rgba(0, 0, 0, 0.04);
+    --tpu-toolbar-btn-border:     rgba(0, 0, 0, 0.1);
+    --tpu-toolbar-select-bg:      linear-gradient(135deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.02) 100%);
+    --tpu-toolbar-select-border:  rgba(0, 0, 0, 0.12);
+
+    // YouTube section
+    --yt-panel-bg:              #f5f5f7;
+    --yt-panel-border:          rgba(0, 0, 0, 0.06);
+    --yt-panel-gradient:        linear-gradient(180deg, rgba(230, 34, 35, 0.04) 0%, transparent 120px);
+    --yt-card-bg:               #ffffff;
+    --yt-card-border:           rgba(0, 0, 0, 0.1);
+    --yt-card-hover-border:     rgba(230, 34, 35, 0.4);
+    --yt-card-hover-bg:         #ffffff;
+    --yt-play-bg:               rgba(255, 255, 255, 0.85);
+    --yt-play-border:           rgba(0, 0, 0, 0.1);
+    --yt-play-hover-bg:         rgba(255, 255, 255, 0.95);
+    --yt-popover-bg:            #ffffff;
+    --yt-popover-border:        rgba(0, 0, 0, 0.08);
+    --yt-video-overlay:         rgba(0, 0, 0, 0.03);
+    --yt-video-bg:              #f0f0f0;
+    --yt-text-primary:          #1d1d1f;
+    --yt-text-secondary:        rgba(0, 0, 0, 0.65);
+    --yt-text-tertiary:         rgba(0, 0, 0, 0.5);
+    --yt-text-muted:            rgba(0, 0, 0, 0.4);
+    --yt-text-faint:            rgba(0, 0, 0, 0.3);
+    --yt-border-subtle:         rgba(0, 0, 0, 0.1);
+    --yt-chip-bg:               rgba(0, 0, 0, 0.05);
+    --yt-chip-border:           rgba(0, 0, 0, 0.12);
+    --yt-chip-hover-bg:         rgba(0, 0, 0, 0.08);
+    --yt-chip-hover-border:     rgba(0, 0, 0, 0.15);
+    --yt-chip-hover-text:       #1d1d1f;
+    --yt-btn-ghost-border:      rgba(0, 0, 0, 0.15);
+    --yt-btn-ghost-text:        rgba(0, 0, 0, 0.7);
+    --yt-btn-ghost-hover-bg:    rgba(0, 0, 0, 0.04);
+    --yt-btn-ghost-hover-border: rgba(0, 0, 0, 0.25);
+    --yt-btn-ghost-hover-text:  #1d1d1f;
+    --yt-badge-bg:              #e8e8ed;
+    --yt-badge-border:          #d2d2d7;
+}
+
+
+// ---------------------------------------------------------------------------
+// Dark Theme — Industrial / current
+// ---------------------------------------------------------------------------
+
+[data-theme="dark"] {
+    // Backgrounds
+    --tpu-bg-primary:           #1a1a1a;
+    --tpu-bg-secondary:         #2d2d2d;
+    --tpu-bg-tertiary:          #3f3f46;
+    --tpu-bg-elevated:          #404040;
+
+    // Accent Colors (constant)
+    --tpu-accent-primary:       #e62223;
+    --tpu-accent-secondary:     #ffc107;
+    --tpu-accent-tertiary:      #ef4444;
+    --tpu-accent-success:       #22c55e;
+
+    // Text
+    --tpu-text-primary:         #f5f5f5;
+    --tpu-text-secondary:       #d4d4d8;
+    --tpu-text-tertiary:        #a1a1aa;
+    --tpu-text-muted:           #9ca3af;
+    --tpu-text-inverse:         #1a1a1a;
+
+    // Borders
+    --tpu-border-primary:       #3f3f46;
+    --tpu-border-secondary:     #52525b;
+    --tpu-border-accent:        rgba(230, 34, 35, 0.5);
+
+    // Glass / Overlay
+    --tpu-glass-bg:             rgba(26, 26, 26, 0.8);
+    --tpu-glass-border:         rgba(255, 255, 255, 0.1);
+    --tpu-overlay-dark:         rgba(0, 0, 0, 0.7);
+    --tpu-overlay-light:        rgba(255, 255, 255, 0.05);
+    --tpu-transition-overlay:   rgba(10, 10, 10, 0.92);
+
+    // Shadows
+    --tpu-shadow-sm:            0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --tpu-shadow-md:            0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --tpu-shadow-lg:            0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+    --tpu-shadow-xl:            0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    --tpu-shadow-glow-red:      0 0 20px rgba(230, 34, 35, 0.4);
+    --tpu-shadow-glow-yellow:   0 0 20px rgba(255, 193, 7, 0.4);
+
+    // Misc
+    --tpu-logo-invert:          1;
+    --tpu-grid-opacity:         0.15;
+    --tpu-dot-opacity:           0.2;
+    --tpu-scrollbar-track:      #1a1a1a;
+    --tpu-scrollbar-thumb:      #3f3f46;
+
+    // Footer
+    --tpu-footer-bg:            #0d0d14;
+    --tpu-footer-bg-secondary:  #12121a;
+    --tpu-footer-bg-elevated:   #1a1a24;
+    --tpu-footer-text:          #ffffff;
+    --tpu-footer-text-secondary: rgba(255, 255, 255, 0.7);
+    --tpu-footer-text-muted:    rgba(255, 255, 255, 0.5);
+    --tpu-footer-border:        rgba(255, 255, 255, 0.1);
+    --tpu-footer-accent-hover:  #ff8555;
+    --tpu-footer-accent-glow:   rgba(230, 34, 35, 0.3);
+    --tpu-footer-shipping-bg:   rgba(46, 204, 113, 0.12);
+    --tpu-footer-shipping-text: #4ade80;
+    --tpu-footer-shipping-border: rgba(46, 204, 113, 0.25);
+    --tpu-footer-shipping-glow: 0 0 20px rgba(46, 204, 113, 0.08);
+    --tpu-footer-fitment-bg:    linear-gradient(160deg, #1a1a2e 0%, #16213e 40%, #1c1f3a 70%, #1a1a2e 100%);
+    --tpu-footer-fitment-grid:  rgba(255, 255, 255, 0.025);
+    --tpu-footer-fitment-link-bg: rgba(255, 255, 255, 0.06);
+    --tpu-footer-fitment-link-border: rgba(255, 255, 255, 0.2);
+    --tpu-footer-fitment-link-hover-bg: rgba(255, 255, 255, 0.12);
+    --tpu-footer-fitment-link-hover-border: rgba(255, 255, 255, 0.45);
+    --tpu-footer-fitment-link-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    // Hero (text over dark image overlay)
+    --tpu-hero-text:            #f5f5f5;
+    --tpu-hero-text-secondary:  rgba(255, 255, 255, 0.8);
+    --tpu-hero-text-muted:      rgba(255, 255, 255, 0.6);
+    --tpu-hero-overlay-end:     #1a1a1a;
+    --tpu-hero-gradient-color:  rgba(230, 34, 35, 0.2);
+    --tpu-hero-scroll-text:     rgba(255, 255, 255, 0.5);
+    --tpu-hero-scroll-border:   rgba(255, 255, 255, 0.2);
+    --tpu-hero-btn-primary-text: #f5f5f5;
+    --tpu-hero-btn-secondary-text: #f5f5f5;
+    --tpu-hero-btn-secondary-border: rgba(255, 255, 255, 0.3);
+    --tpu-hero-btn-secondary-hover-border: rgba(255, 255, 255, 0.7);
+    --tpu-hero-btn-secondary-hover-bg: rgba(255, 255, 255, 0.1);
+
+    // Sidebar (faceted filters)
+    --tpu-sidebar-bg:             rgba(20, 20, 20, 0.7);
+    --tpu-sidebar-bg-solid:       #141414;
+    --tpu-sidebar-border:         rgba(255, 255, 255, 0.08);
+    --tpu-sidebar-border-hover:   rgba(255, 255, 255, 0.15);
+    --tpu-sidebar-text:           #fafafa;
+    --tpu-sidebar-text-muted:     rgba(255, 255, 255, 0.6);
+    --tpu-sidebar-text-dim:       rgba(255, 255, 255, 0.4);
+    --tpu-sidebar-hover-bg:       rgba(255, 255, 255, 0.05);
+    --tpu-sidebar-active-bg:      rgba(230, 34, 35, 0.08);
+    --tpu-sidebar-active-bg-hover: rgba(230, 34, 35, 0.12);
+    --tpu-sidebar-input-bg:       rgba(255, 255, 255, 0.05);
+    --tpu-sidebar-input-focus-bg: rgba(255, 255, 255, 0.08);
+    --tpu-sidebar-shadow:         0 4px 30px rgba(0, 0, 0, 0.3);
+    --tpu-sidebar-shadow-inset:   inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --tpu-sidebar-scrollbar:      rgba(255, 255, 255, 0.2);
+    --tpu-sidebar-scrollbar-hover: rgba(255, 255, 255, 0.3);
+    --tpu-sidebar-indicator:      rgba(255, 255, 255, 0.08);
+
+    // PLP Toolbar
+    --tpu-toolbar-bg:             linear-gradient(135deg, rgba(30, 30, 35, 0.95) 0%, rgba(20, 20, 25, 0.98) 100%);
+    --tpu-toolbar-border:         rgba(255, 255, 255, 0.08);
+    --tpu-toolbar-shadow:         0 4px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --tpu-toolbar-separator:      rgba(255, 255, 255, 0.1);
+    --tpu-toolbar-btn-bg:         rgba(255, 255, 255, 0.06);
+    --tpu-toolbar-btn-border:     rgba(255, 255, 255, 0.1);
+    --tpu-toolbar-select-bg:      linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+    --tpu-toolbar-select-border:  rgba(255, 255, 255, 0.12);
+
+    // YouTube section
+    --yt-panel-bg:              #141618;
+    --yt-panel-border:          rgba(255, 255, 255, 0.06);
+    --yt-panel-gradient:        linear-gradient(180deg, rgba(230, 34, 35, 0.04) 0%, transparent 120px);
+    --yt-card-bg:               rgba(255, 255, 255, 0.025);
+    --yt-card-border:           rgba(255, 255, 255, 0.06);
+    --yt-card-hover-border:     rgba(230, 34, 35, 0.4);
+    --yt-card-hover-bg:         rgba(255, 255, 255, 0.04);
+    --yt-play-bg:               rgba(20, 22, 24, 0.7);
+    --yt-play-border:           rgba(255, 255, 255, 0.15);
+    --yt-play-hover-bg:         rgba(20, 22, 24, 0.9);
+    --yt-popover-bg:            #1a1c1e;
+    --yt-popover-border:        rgba(255, 255, 255, 0.08);
+    --yt-video-overlay:         rgba(0, 0, 0, 0.2);
+    --yt-video-bg:              #000;
+    --yt-text-primary:          #ffffff;
+    --yt-text-secondary:        rgba(255, 255, 255, 0.7);
+    --yt-text-tertiary:         rgba(255, 255, 255, 0.5);
+    --yt-text-muted:            rgba(255, 255, 255, 0.4);
+    --yt-text-faint:            rgba(255, 255, 255, 0.3);
+    --yt-border-subtle:         rgba(255, 255, 255, 0.06);
+    --yt-chip-bg:               rgba(255, 255, 255, 0.04);
+    --yt-chip-border:           rgba(255, 255, 255, 0.08);
+    --yt-chip-hover-bg:         rgba(255, 255, 255, 0.08);
+    --yt-chip-hover-border:     rgba(255, 255, 255, 0.15);
+    --yt-chip-hover-text:       #ffffff;
+    --yt-btn-ghost-border:      rgba(255, 255, 255, 0.15);
+    --yt-btn-ghost-text:        rgba(255, 255, 255, 0.8);
+    --yt-btn-ghost-hover-bg:    rgba(255, 255, 255, 0.06);
+    --yt-btn-ghost-hover-border: rgba(255, 255, 255, 0.25);
+    --yt-btn-ghost-hover-text:  #ffffff;
+    --yt-badge-bg:              rgba(255, 255, 255, 0.06);
+    --yt-badge-border:          rgba(255, 255, 255, 0.1);
+}
