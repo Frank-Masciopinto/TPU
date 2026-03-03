@@ -1,6 +1,6 @@
-import { jwtVerify, SignJWT } from 'jose';
+import { jwtVerify, SignJWT } from "jose";
 
-type SortMode = 'new' | 'top' | 'unanswered' | 'hot';
+type SortMode = "new" | "top" | "unanswered" | "hot";
 
 interface Env {
   STOREFRONT_ORIGIN: string;
@@ -30,11 +30,16 @@ interface Env {
 
 type Authed = { userId: string; jwt: string; claims: Record<string, unknown> };
 
-type AdminStatus = { isAdmin: boolean; displayName?: string; role: 'admin' | 'moderator' | 'member' };
+type AdminStatus = {
+  isAdmin: boolean;
+  displayName?: string;
+  role: "admin" | "moderator" | "member";
+};
 
 function json(data: unknown, init: ResponseInit = {}): Response {
   const headers = new Headers(init.headers);
-  if (!headers.has('content-type')) headers.set('content-type', 'application/json; charset=utf-8');
+  if (!headers.has("content-type"))
+    headers.set("content-type", "application/json; charset=utf-8");
   return new Response(JSON.stringify(data), { ...init, headers });
 }
 
@@ -42,63 +47,74 @@ function isAllowedOrigin(origin: string, env: Env): boolean {
   // Production origin
   if (origin === env.STOREFRONT_ORIGIN) return true;
   // Local development origins
-  if (origin.startsWith('http://localhost:')) return true;
-  if (origin.startsWith('http://127.0.0.1:')) return true;
+  if (origin.startsWith("http://localhost:")) return true;
+  if (origin.startsWith("http://127.0.0.1:")) return true;
   return false;
 }
 
 function withCors(req: Request, env: Env, res: Response): Response {
-  const origin = req.headers.get('Origin') || '';
-  const allowOrigin = isAllowedOrigin(origin, env) ? origin : '';
+  const origin = req.headers.get("Origin") || "";
+  const allowOrigin = isAllowedOrigin(origin, env) ? origin : "";
   const headers = new Headers(res.headers);
   if (allowOrigin) {
-    headers.set('Access-Control-Allow-Origin', allowOrigin);
-    headers.set('Access-Control-Allow-Credentials', 'true');
+    headers.set("Access-Control-Allow-Origin", allowOrigin);
+    headers.set("Access-Control-Allow-Credentials", "true");
   }
-  headers.set('Vary', appendVary(headers.get('Vary'), 'Origin'));
-  headers.set('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
-  headers.set('Access-Control-Allow-Headers', 'Authorization,Content-Type,x-sf-csrf-token,x-xsrf-token,x-csrf-token');
-  headers.set('Access-Control-Max-Age', '600');
+  headers.set("Vary", appendVary(headers.get("Vary"), "Origin"));
+  headers.set("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
+  headers.set(
+    "Access-Control-Allow-Headers",
+    "Authorization,Content-Type,x-sf-csrf-token,x-xsrf-token,x-csrf-token",
+  );
+  headers.set("Access-Control-Max-Age", "600");
   // Note: Must explicitly pass status as Response getters don't spreads
-  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers,
+  });
 }
 
 function appendVary(existing: string | null, value: string): string {
   if (!existing) return value;
-  const parts = existing.split(',').map((p) => p.trim().toLowerCase());
+  const parts = existing.split(",").map((p) => p.trim().toLowerCase());
   if (parts.includes(value.toLowerCase())) return existing;
   return `${existing}, ${value}`;
 }
 
 function getClientIp(req: Request): string {
   // Cloudflare sets CF-Connecting-IP at the edge.
-  const cf = req.headers.get('CF-Connecting-IP');
+  const cf = req.headers.get("CF-Connecting-IP");
   if (cf) return cf;
-  const xff = req.headers.get('X-Forwarded-For');
-  if (!xff) return '0.0.0.0';
-  return xff.split(',')[0]?.trim() || '0.0.0.0';
+  const xff = req.headers.get("X-Forwarded-For");
+  if (!xff) return "0.0.0.0";
+  return xff.split(",")[0]?.trim() || "0.0.0.0";
 }
 
 function getBearer(req: Request): string | null {
-  const h = req.headers.get('Authorization') || '';
+  const h = req.headers.get("Authorization") || "";
   const m = /^Bearer\s+(.+)$/i.exec(h);
   return m?.[1] ?? null;
 }
 
 async function requireSupabaseJwt(req: Request, env: Env): Promise<Authed> {
   const token = getBearer(req);
-  if (!token) throw new HttpError(401, 'missing_bearer_token');
+  if (!token) throw new HttpError(401, "missing_bearer_token");
 
   // Supabase JWTs are HS256 signed with the project's JWT secret.
   const secret = new TextEncoder().encode(env.SUPABASE_JWT_SECRET);
   const { payload } = await jwtVerify(token, secret, {
-    algorithms: ['HS256'],
+    algorithms: ["HS256"],
   });
 
-  const sub = typeof payload.sub === 'string' ? payload.sub : '';
-  if (!sub) throw new HttpError(401, 'invalid_token_sub');
+  const sub = typeof payload.sub === "string" ? payload.sub : "";
+  if (!sub) throw new HttpError(401, "invalid_token_sub");
 
-  return { userId: sub, jwt: token, claims: payload as unknown as Record<string, unknown> };
+  return {
+    userId: sub,
+    jwt: token,
+    claims: payload as unknown as Record<string, unknown>,
+  };
 }
 
 class HttpError extends Error {
@@ -113,7 +129,12 @@ class HttpError extends Error {
   }
 }
 
-async function rateLimitOrThrow(env: Env, key: string, limit: number, windowSeconds: number): Promise<void> {
+async function rateLimitOrThrow(
+  env: Env,
+  key: string,
+  limit: number,
+  windowSeconds: number,
+): Promise<void> {
   const now = Date.now();
   const bucket = Math.floor(now / (windowSeconds * 1000));
   const kvKey = `rl:${key}:${bucket}`;
@@ -121,13 +142,17 @@ async function rateLimitOrThrow(env: Env, key: string, limit: number, windowSeco
   const existing = await env.RATE_LIMIT_KV.get(kvKey);
   const next = (existing ? Number.parseInt(existing, 10) : 0) + 1;
   if (Number.isNaN(next)) {
-    await env.RATE_LIMIT_KV.put(kvKey, '1', { expirationTtl: windowSeconds + 5 });
+    await env.RATE_LIMIT_KV.put(kvKey, "1", {
+      expirationTtl: windowSeconds + 5,
+    });
     return;
   }
   if (next > limit) {
-    throw new HttpError(429, 'rate_limited', { windowSeconds, limit });
+    throw new HttpError(429, "rate_limited", { windowSeconds, limit });
   }
-  await env.RATE_LIMIT_KV.put(kvKey, String(next), { expirationTtl: windowSeconds + 5 });
+  await env.RATE_LIMIT_KV.put(kvKey, String(next), {
+    expirationTtl: windowSeconds + 5,
+  });
 }
 
 function countLinks(text: string): number {
@@ -136,13 +161,13 @@ function countLinks(text: string): number {
 }
 
 function asString(v: unknown): string {
-  return typeof v === 'string' ? v : '';
+  return typeof v === "string" ? v : "";
 }
 
 function parseTagsParam(tagsParam: string | null): string[] {
   if (!tagsParam) return [];
   return tagsParam
-    .split(',')
+    .split(",")
     .map((t) => t.trim())
     .filter(Boolean)
     .slice(0, 10);
@@ -155,29 +180,34 @@ function parsePageParam(pageParam: string | null): number {
 }
 
 function parseSortParam(sortParam: string | null): SortMode {
-  const s = (sortParam || 'new').toLowerCase();
-  if (s === 'new' || s === 'top' || s === 'unanswered' || s === 'hot') return s;
-  return 'new';
+  const s = (sortParam || "new").toLowerCase();
+  if (s === "new" || s === "top" || s === "unanswered" || s === "hot") return s;
+  return "new";
 }
 
 function supabaseRestUrl(env: Env, path: string): string {
-  const base = env.SUPABASE_URL.replace(/\/+$/, '');
-  const clean = path.replace(/^\/+/, '');
+  const base = env.SUPABASE_URL.replace(/\/+$/, "");
+  const clean = path.replace(/^\/+/, "");
   return `${base}/rest/v1/${clean}`;
 }
 
 async function supabaseFetch(
   env: Env,
   path: string,
-  init: RequestInit & { jwt?: string; preferCount?: boolean; range?: { from: number; to: number } } = {},
+  init: RequestInit & {
+    jwt?: string;
+    preferCount?: boolean;
+    range?: { from: number; to: number };
+  } = {},
 ): Promise<Response> {
   const headers = new Headers(init.headers);
-  headers.set('apikey', env.SUPABASE_ANON_KEY);
-  if (init.jwt) headers.set('Authorization', `Bearer ${init.jwt}`);
-  if (init.preferCount) headers.set('Prefer', 'count=exact');
-  if (init.range) headers.set('Range', `${init.range.from}-${init.range.to}`);
-  if (init.body && !headers.has('content-type')) headers.set('content-type', 'application/json; charset=utf-8');
-  headers.set('accept', 'application/json');
+  headers.set("apikey", env.SUPABASE_ANON_KEY);
+  if (init.jwt) headers.set("Authorization", `Bearer ${init.jwt}`);
+  if (init.preferCount) headers.set("Prefer", "count=exact");
+  if (init.range) headers.set("Range", `${init.range.from}-${init.range.to}`);
+  if (init.body && !headers.has("content-type"))
+    headers.set("content-type", "application/json; charset=utf-8");
+  headers.set("accept", "application/json");
 
   return fetch(supabaseRestUrl(env, path), { ...init, headers });
 }
@@ -200,272 +230,434 @@ function hotRank(score: number, createdAtIso: string): number {
   return order + (sign * seconds) / 45000;
 }
 
-async function maybeCached(req: Request, ctx: ExecutionContext, ttlSeconds: number, handler: () => Promise<Response>): Promise<Response> {
+async function maybeCached(
+  req: Request,
+  ctx: ExecutionContext,
+  ttlSeconds: number,
+  handler: () => Promise<Response>,
+): Promise<Response> {
   // In local development, skip caching to avoid wrangler cache API issues
   try {
     // Cloudflare provides `caches.default`, but TS lib types don't always include it.
-    const cache: Cache | undefined = 'default' in (caches as unknown as Record<string, unknown>) 
-      ? (caches as any).default 
-      : undefined;
-    
+    const cache: Cache | undefined =
+      "default" in (caches as unknown as Record<string, unknown>)
+        ? (caches as any).default
+        : undefined;
+
     if (cache) {
       const cacheKey = new Request(req.url, req);
       const hit = await cache.match(cacheKey);
       if (hit) return hit;
-      
+
       const res = await handler();
       const headers = new Headers(res.headers);
-      headers.set('Cache-Control', `public, max-age=${ttlSeconds}`);
-      const cached = new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+      headers.set("Cache-Control", `public, max-age=${ttlSeconds}`);
+      const cached = new Response(res.body, {
+        status: res.status,
+        statusText: res.statusText,
+        headers,
+      });
       ctx.waitUntil(cache.put(cacheKey, cached.clone()));
       return cached;
     }
   } catch (e) {
     // Cache API not available (e.g., local dev) - fall through to handler
-    console.warn('Cache API unavailable, skipping cache:', e instanceof Error ? e.message : e);
+    console.warn(
+      "Cache API unavailable, skipping cache:",
+      e instanceof Error ? e.message : e,
+    );
   }
-  
+
   // No caching - just run the handler
   const res = await handler();
   const headers = new Headers(res.headers);
-  headers.set('Cache-Control', `public, max-age=${ttlSeconds}`);
-  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+  headers.set("Cache-Control", `public, max-age=${ttlSeconds}`);
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers,
+  });
 }
 
-async function handleThreadsFeed(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+async function handleThreadsFeed(
+  req: Request,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<Response> {
   const url = new URL(req.url);
-  const sort = parseSortParam(url.searchParams.get('sort'));
-  const q = url.searchParams.get('q') || '';
-  const tags = parseTagsParam(url.searchParams.get('tags'));
-  const page = parsePageParam(url.searchParams.get('page'));
+  const sort = parseSortParam(url.searchParams.get("sort"));
+  const q = url.searchParams.get("q") || "";
+  const tags = parseTagsParam(url.searchParams.get("tags"));
+  const page = parsePageParam(url.searchParams.get("page"));
   const pageSize = 20;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
   const baseSelect =
-    'id,title,body,created_at,updated_at,score,comment_count,accepted_comment_id,tags,user_id';
+    "id,title,body,created_at,updated_at,score,comment_count,accepted_comment_id,tags,user_id";
 
   // Cached because this is a hot path; short TTL.
   return maybeCached(req, ctx, 30, async () => {
     try {
-    if (sort === 'hot') {
-      // Fetch a window of recent threads and compute rank in the worker.
-      // This avoids requiring a DB view, while keeping response times OK.
-      const recentDays = 30;
-      const gte = new Date(Date.now() - recentDays * 86400 * 1000).toISOString();
+      if (sort === "hot") {
+        // Fetch a window of recent threads and compute rank in the worker.
+        // This avoids requiring a DB view, while keeping response times OK.
+        const recentDays = 30;
+        const gte = new Date(
+          Date.now() - recentDays * 86400 * 1000,
+        ).toISOString();
+
+        const params = new URLSearchParams();
+        params.set("select", baseSelect);
+        params.set("created_at", `gte.${gte}`);
+        params.set("order", "created_at.desc");
+        // Pull more than a single page so we can sort by computed hot rank.
+        const hotFetchLimit = Math.max(200, (page + 2) * pageSize);
+
+        if (q.trim()) {
+          const qq = q.trim().replace(/%/g, "\\%").replace(/_/g, "\\_");
+          params.set("or", `(title.ilike.*${qq}*,body.ilike.*${qq}*)`);
+        }
+        if (tags.length) {
+          params.set("tags", `cs.{${tags.join(",")}}`);
+        }
+
+        const r = await supabaseFetch(env, `threads?${params.toString()}`, {
+          method: "GET",
+          preferCount: false,
+          range: { from: 0, to: hotFetchLimit - 1 },
+        });
+        if (!r.ok) {
+          return json(
+            { error: "supabase_error", details: await safeJson(r) },
+            { status: 502 },
+          );
+        }
+        const rows = (await r.json()) as Array<Record<string, unknown>>;
+        const ranked = rows
+          .map((t) => ({
+            ...t,
+            _hot: hotRank(Number(t.score ?? 0), String(t.created_at ?? "")),
+          }))
+          .sort((a, b) => (b._hot as number) - (a._hot as number));
+
+        const slice = ranked
+          .slice(from, from + pageSize)
+          .map(({ _hot, ...t }) => t);
+        return json(
+          { data: slice, meta: { sort, page, pageSize, total: ranked.length } },
+          { status: 200 },
+        );
+      }
 
       const params = new URLSearchParams();
-      params.set('select', baseSelect);
-      params.set('created_at', `gte.${gte}`);
-      params.set('order', 'created_at.desc');
-      // Pull more than a single page so we can sort by computed hot rank.
-      const hotFetchLimit = Math.max(200, (page + 2) * pageSize);
+      params.set("select", baseSelect);
 
       if (q.trim()) {
-        const qq = q.trim().replace(/%/g, '\\%').replace(/_/g, '\\_');
-        params.set('or', `(title.ilike.*${qq}*,body.ilike.*${qq}*)`);
+        const qq = q.trim().replace(/%/g, "\\%").replace(/_/g, "\\_");
+        params.set("or", `(title.ilike.*${qq}*,body.ilike.*${qq}*)`);
       }
       if (tags.length) {
-        params.set('tags', `cs.{${tags.join(',')}}`);
+        params.set("tags", `cs.{${tags.join(",")}}`);
+      }
+
+      if (sort === "new") params.set("order", "created_at.desc");
+      if (sort === "top") params.set("order", "score.desc");
+      if (sort === "unanswered") {
+        params.set("accepted_comment_id", "is.null");
+        params.set("order", "created_at.desc");
       }
 
       const r = await supabaseFetch(env, `threads?${params.toString()}`, {
-        method: 'GET',
-        preferCount: false,
-        range: { from: 0, to: hotFetchLimit - 1 },
+        method: "GET",
+        preferCount: true,
+        range: { from, to },
       });
       if (!r.ok) {
-        return json({ error: 'supabase_error', details: await safeJson(r) }, { status: 502 });
+        return json(
+          { error: "supabase_error", details: await safeJson(r) },
+          { status: 502 },
+        );
       }
-      const rows = (await r.json()) as Array<Record<string, unknown>>;
-      const ranked = rows
-        .map((t) => ({
-          ...t,
-          _hot: hotRank(Number(t.score ?? 0), String(t.created_at ?? '')),
-        }))
-        .sort((a, b) => (b._hot as number) - (a._hot as number));
-
-      const slice = ranked.slice(from, from + pageSize).map(({ _hot, ...t }) => t);
-      return json({ data: slice, meta: { sort, page, pageSize, total: ranked.length } }, { status: 200 });
-    }
-
-    const params = new URLSearchParams();
-    params.set('select', baseSelect);
-
-    if (q.trim()) {
-      const qq = q.trim().replace(/%/g, '\\%').replace(/_/g, '\\_');
-      params.set('or', `(title.ilike.*${qq}*,body.ilike.*${qq}*)`);
-    }
-    if (tags.length) {
-      params.set('tags', `cs.{${tags.join(',')}}`);
-    }
-
-    if (sort === 'new') params.set('order', 'created_at.desc');
-    if (sort === 'top') params.set('order', 'score.desc');
-    if (sort === 'unanswered') {
-      params.set('accepted_comment_id', 'is.null');
-      params.set('order', 'created_at.desc');
-    }
-
-    const r = await supabaseFetch(env, `threads?${params.toString()}`, {
-      method: 'GET',
-      preferCount: true,
-      range: { from, to },
-    });
-    if (!r.ok) {
-      return json({ error: 'supabase_error', details: await safeJson(r) }, { status: 502 });
-    }
-    const total = getContentRangeCount(r.headers.get('content-range'));
-    const data = await r.json();
-    return json({ data, meta: { sort, page, pageSize, total } }, { status: 200 });
+      const total = getContentRangeCount(r.headers.get("content-range"));
+      const data = await r.json();
+      return json(
+        { data, meta: { sort, page, pageSize, total } },
+        { status: 200 },
+      );
     } catch (handlerErr) {
-      console.error('handleThreadsFeed handler error:', handlerErr instanceof Error ? handlerErr.message : handlerErr, handlerErr instanceof Error ? handlerErr.stack : '');
-      return json({ error: 'handler_error', details: handlerErr instanceof Error ? handlerErr.message : String(handlerErr) }, { status: 500 });
+      console.error(
+        "handleThreadsFeed handler error:",
+        handlerErr instanceof Error ? handlerErr.message : handlerErr,
+        handlerErr instanceof Error ? handlerErr.stack : "",
+      );
+      return json(
+        {
+          error: "handler_error",
+          details:
+            handlerErr instanceof Error
+              ? handlerErr.message
+              : String(handlerErr),
+        },
+        { status: 500 },
+      );
     }
   });
 }
 
-async function handleGetThread(req: Request, env: Env, ctx: ExecutionContext, threadId: string): Promise<Response> {
+async function handleGetThread(
+  req: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  threadId: string,
+): Promise<Response> {
   return maybeCached(req, ctx, 30, async () => {
     const params = new URLSearchParams();
-    params.set('select', 'id,title,body,created_at,updated_at,score,comment_count,accepted_comment_id,tags,user_id');
-    params.set('id', `eq.${threadId}`);
-    const r = await supabaseFetch(env, `threads?${params.toString()}`, { method: 'GET' });
-    if (!r.ok) return json({ error: 'supabase_error', details: await safeJson(r) }, { status: 502 });
+    params.set(
+      "select",
+      "id,title,body,created_at,updated_at,score,comment_count,accepted_comment_id,tags,user_id",
+    );
+    params.set("id", `eq.${threadId}`);
+    const r = await supabaseFetch(env, `threads?${params.toString()}`, {
+      method: "GET",
+    });
+    if (!r.ok)
+      return json(
+        { error: "supabase_error", details: await safeJson(r) },
+        { status: 502 },
+      );
     const rows = (await r.json()) as unknown[];
     const thread = rows[0] ?? null;
-    if (!thread) return json({ error: 'not_found' }, { status: 404 });
+    if (!thread) return json({ error: "not_found" }, { status: 404 });
     return json({ data: thread }, { status: 200 });
   });
 }
 
-async function handleCreateThread(req: Request, env: Env, authed: Authed): Promise<Response> {
-  const body = (await req.json().catch(() => null)) as null | Record<string, unknown>;
-  if (!body) throw new HttpError(400, 'invalid_json');
+async function handleCreateThread(
+  req: Request,
+  env: Env,
+  authed: Authed,
+): Promise<Response> {
+  const body = (await req.json().catch(() => null)) as null | Record<
+    string,
+    unknown
+  >;
+  if (!body) throw new HttpError(400, "invalid_json");
 
   const title = asString(body.title).trim();
   const content = asString(body.body).trim();
-  const tags = Array.isArray(body.tags) ? body.tags.map(String).map((t) => t.trim()).filter(Boolean).slice(0, 10) : [];
+  const tags = Array.isArray(body.tags)
+    ? body.tags
+        .map(String)
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .slice(0, 10)
+    : [];
 
-  if (title.length < 8) throw new HttpError(400, 'title_too_short');
-  if (content.length < 20) throw new HttpError(400, 'body_too_short');
-  if (countLinks(`${title}\n${content}`) > 2) throw new HttpError(400, 'too_many_links');
+  if (title.length < 8) throw new HttpError(400, "title_too_short");
+  if (content.length < 20) throw new HttpError(400, "body_too_short");
+  if (countLinks(`${title}\n${content}`) > 2)
+    throw new HttpError(400, "too_many_links");
 
   const insert = { title, body: content, tags, user_id: authed.userId };
 
-  const r = await supabaseFetch(env, 'threads', {
-    method: 'POST',
+  const r = await supabaseFetch(env, "threads", {
+    method: "POST",
     jwt: authed.jwt,
-    headers: { Prefer: 'return=representation' },
+    headers: { Prefer: "return=representation" },
     body: JSON.stringify(insert),
   });
-  if (!r.ok) return json({ error: 'supabase_error', details: await safeJson(r) }, { status: 502 });
+  if (!r.ok)
+    return json(
+      { error: "supabase_error", details: await safeJson(r) },
+      { status: 502 },
+    );
   const created = (await r.json()) as unknown[];
   return json({ data: created[0] ?? null }, { status: 201 });
 }
 
-async function handleVoteThread(req: Request, env: Env, authed: Authed, threadId: string): Promise<Response> {
-  const body = (await req.json().catch(() => null)) as null | Record<string, unknown>;
-  if (!body) throw new HttpError(400, 'invalid_json');
+async function handleVoteThread(
+  req: Request,
+  env: Env,
+  authed: Authed,
+  threadId: string,
+): Promise<Response> {
+  const body = (await req.json().catch(() => null)) as null | Record<
+    string,
+    unknown
+  >;
+  if (!body) throw new HttpError(400, "invalid_json");
   const value = Number(body.value);
-  if (![1, -1].includes(value)) throw new HttpError(400, 'invalid_vote_value');
+  if (![1, -1].includes(value)) throw new HttpError(400, "invalid_vote_value");
 
   // Assumes a `thread_votes` table with unique(thread_id, user_id) and a DB trigger/view
   // maintains thread score/comment_count. If your schema uses RPC instead, swap here.
   const upsert = { thread_id: threadId, user_id: authed.userId, value };
 
-  const r = await supabaseFetch(env, 'thread_votes', {
-    method: 'POST',
+  const r = await supabaseFetch(env, "thread_votes", {
+    method: "POST",
     jwt: authed.jwt,
-    headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
     body: JSON.stringify(upsert),
   });
-  if (!r.ok) return json({ error: 'supabase_error', details: await safeJson(r) }, { status: 502 });
+  if (!r.ok)
+    return json(
+      { error: "supabase_error", details: await safeJson(r) },
+      { status: 502 },
+    );
   const row = (await r.json()) as unknown[];
   return json({ data: row[0] ?? null }, { status: 200 });
 }
 
-async function handleGetThreadComments(req: Request, env: Env, ctx: ExecutionContext, threadId: string): Promise<Response> {
+async function handleGetThreadComments(
+  req: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  threadId: string,
+): Promise<Response> {
   return maybeCached(req, ctx, 20, async () => {
     const params = new URLSearchParams();
-    params.set('select', 'id,thread_id,body,created_at,updated_at,score,user_id');
-    params.set('thread_id', `eq.${threadId}`);
-    params.set('order', 'created_at.asc');
-    const r = await supabaseFetch(env, `comments?${params.toString()}`, { method: 'GET' });
-    if (!r.ok) return json({ error: 'supabase_error', details: await safeJson(r) }, { status: 502 });
+    params.set(
+      "select",
+      "id,thread_id,body,created_at,updated_at,score,user_id",
+    );
+    params.set("thread_id", `eq.${threadId}`);
+    params.set("order", "created_at.asc");
+    const r = await supabaseFetch(env, `comments?${params.toString()}`, {
+      method: "GET",
+    });
+    if (!r.ok)
+      return json(
+        { error: "supabase_error", details: await safeJson(r) },
+        { status: 502 },
+      );
     return json({ data: await r.json() }, { status: 200 });
   });
 }
 
-async function handleCreateComment(req: Request, env: Env, authed: Authed, threadId: string): Promise<Response> {
-  const body = (await req.json().catch(() => null)) as null | Record<string, unknown>;
-  if (!body) throw new HttpError(400, 'invalid_json');
+async function handleCreateComment(
+  req: Request,
+  env: Env,
+  authed: Authed,
+  threadId: string,
+): Promise<Response> {
+  const body = (await req.json().catch(() => null)) as null | Record<
+    string,
+    unknown
+  >;
+  if (!body) throw new HttpError(400, "invalid_json");
   const content = asString(body.body).trim();
-  if (content.length < 5) throw new HttpError(400, 'comment_too_short');
-  if (countLinks(content) > 2) throw new HttpError(400, 'too_many_links');
+  if (content.length < 5) throw new HttpError(400, "comment_too_short");
+  if (countLinks(content) > 2) throw new HttpError(400, "too_many_links");
 
   const insert = { thread_id: threadId, body: content, user_id: authed.userId };
-  const r = await supabaseFetch(env, 'comments', {
-    method: 'POST',
+  const r = await supabaseFetch(env, "comments", {
+    method: "POST",
     jwt: authed.jwt,
-    headers: { Prefer: 'return=representation' },
+    headers: { Prefer: "return=representation" },
     body: JSON.stringify(insert),
   });
-  if (!r.ok) return json({ error: 'supabase_error', details: await safeJson(r) }, { status: 502 });
+  if (!r.ok)
+    return json(
+      { error: "supabase_error", details: await safeJson(r) },
+      { status: 502 },
+    );
   const created = (await r.json()) as unknown[];
   return json({ data: created[0] ?? null }, { status: 201 });
 }
 
-async function handleVoteComment(req: Request, env: Env, authed: Authed, commentId: string): Promise<Response> {
-  const body = (await req.json().catch(() => null)) as null | Record<string, unknown>;
-  if (!body) throw new HttpError(400, 'invalid_json');
+async function handleVoteComment(
+  req: Request,
+  env: Env,
+  authed: Authed,
+  commentId: string,
+): Promise<Response> {
+  const body = (await req.json().catch(() => null)) as null | Record<
+    string,
+    unknown
+  >;
+  if (!body) throw new HttpError(400, "invalid_json");
   const value = Number(body.value);
-  if (![1, -1].includes(value)) throw new HttpError(400, 'invalid_vote_value');
+  if (![1, -1].includes(value)) throw new HttpError(400, "invalid_vote_value");
 
   const upsert = { comment_id: commentId, user_id: authed.userId, value };
-  const r = await supabaseFetch(env, 'comment_votes', {
-    method: 'POST',
+  const r = await supabaseFetch(env, "comment_votes", {
+    method: "POST",
     jwt: authed.jwt,
-    headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
     body: JSON.stringify(upsert),
   });
-  if (!r.ok) return json({ error: 'supabase_error', details: await safeJson(r) }, { status: 502 });
+  if (!r.ok)
+    return json(
+      { error: "supabase_error", details: await safeJson(r) },
+      { status: 502 },
+    );
   const row = (await r.json()) as unknown[];
   return json({ data: row[0] ?? null }, { status: 200 });
 }
 
-async function handleAcceptComment(req: Request, env: Env, authed: Authed, commentId: string): Promise<Response> {
+async function handleAcceptComment(
+  req: Request,
+  env: Env,
+  authed: Authed,
+  commentId: string,
+): Promise<Response> {
   // Fetch comment to find thread_id, then update thread's accepted_comment_id.
   const cParams = new URLSearchParams();
-  cParams.set('select', 'id,thread_id');
-  cParams.set('id', `eq.${commentId}`);
-  const c = await supabaseFetch(env, `comments?${cParams.toString()}`, { method: 'GET', jwt: authed.jwt });
-  if (!c.ok) return json({ error: 'supabase_error', details: await safeJson(c) }, { status: 502 });
+  cParams.set("select", "id,thread_id");
+  cParams.set("id", `eq.${commentId}`);
+  const c = await supabaseFetch(env, `comments?${cParams.toString()}`, {
+    method: "GET",
+    jwt: authed.jwt,
+  });
+  if (!c.ok)
+    return json(
+      { error: "supabase_error", details: await safeJson(c) },
+      { status: 502 },
+    );
   const comments = (await c.json()) as Array<Record<string, unknown>>;
-  const threadId = String(comments[0]?.thread_id ?? '');
-  if (!threadId) return json({ error: 'not_found' }, { status: 404 });
+  const threadId = String(comments[0]?.thread_id ?? "");
+  if (!threadId) return json({ error: "not_found" }, { status: 404 });
 
   const tParams = new URLSearchParams();
-  tParams.set('id', `eq.${threadId}`);
+  tParams.set("id", `eq.${threadId}`);
   const r = await supabaseFetch(env, `threads?${tParams.toString()}`, {
-    method: 'PATCH',
+    method: "PATCH",
     jwt: authed.jwt,
-    headers: { Prefer: 'return=representation' },
+    headers: { Prefer: "return=representation" },
     body: JSON.stringify({ accepted_comment_id: commentId }),
   });
-  if (!r.ok) return json({ error: 'supabase_error', details: await safeJson(r) }, { status: 502 });
+  if (!r.ok)
+    return json(
+      { error: "supabase_error", details: await safeJson(r) },
+      { status: 502 },
+    );
   const updated = (await r.json()) as unknown[];
   return json({ data: updated[0] ?? null }, { status: 200 });
 }
 
-async function handleRelatedKits(req: Request, env: Env, ctx: ExecutionContext, threadId: string): Promise<Response> {
+async function handleRelatedKits(
+  req: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  threadId: string,
+): Promise<Response> {
   return maybeCached(req, ctx, 60, async () => {
     // Try multiple possible schema fields to find SKUs.
     const params = new URLSearchParams();
-    params.set('select', 'id,kit_skus,related_kit_skus,related_kits,product_skus');
-    params.set('id', `eq.${threadId}`);
-    const r = await supabaseFetch(env, `threads?${params.toString()}`, { method: 'GET' });
-    if (!r.ok) return json({ error: 'supabase_error', details: await safeJson(r) }, { status: 502 });
+    params.set(
+      "select",
+      "id,kit_skus,related_kit_skus,related_kits,product_skus",
+    );
+    params.set("id", `eq.${threadId}`);
+    const r = await supabaseFetch(env, `threads?${params.toString()}`, {
+      method: "GET",
+    });
+    if (!r.ok)
+      return json(
+        { error: "supabase_error", details: await safeJson(r) },
+        { status: 502 },
+      );
     const rows = (await r.json()) as Array<Record<string, unknown>>;
     const t = rows[0] ?? {};
 
@@ -476,8 +668,8 @@ async function handleRelatedKits(req: Request, env: Env, ctx: ExecutionContext, 
           const ss = String(s).trim();
           if (ss) skus.push(ss);
         }
-      } else if (typeof v === 'string') {
-        for (const part of v.split(',')) {
+      } else if (typeof v === "string") {
+        for (const part of v.split(",")) {
           const ss = part.trim();
           if (ss) skus.push(ss);
         }
@@ -492,29 +684,35 @@ async function handleRelatedKits(req: Request, env: Env, ctx: ExecutionContext, 
     if (!unique.length) return json({ data: [] }, { status: 200 });
 
     if (!env.BIGCOMMERCE_STORE_HASH || !env.BIGCOMMERCE_ACCESS_TOKEN) {
-      return json({ error: 'bigcommerce_not_configured' }, { status: 501 });
+      return json({ error: "bigcommerce_not_configured" }, { status: 501 });
     }
 
     const storeHash = env.BIGCOMMERCE_STORE_HASH;
-    const bcUrl = new URL(`https://api.bigcommerce.com/stores/${storeHash}/v3/catalog/products`);
-    bcUrl.searchParams.set('include', 'images');
-    bcUrl.searchParams.set('limit', String(unique.length));
-    bcUrl.searchParams.set('sku:in', unique.join(','));
+    const bcUrl = new URL(
+      `https://api.bigcommerce.com/stores/${storeHash}/v3/catalog/products`,
+    );
+    bcUrl.searchParams.set("include", "images");
+    bcUrl.searchParams.set("limit", String(unique.length));
+    bcUrl.searchParams.set("sku:in", unique.join(","));
 
     const bc = await fetch(bcUrl.toString(), {
       headers: {
-        'X-Auth-Token': env.BIGCOMMERCE_ACCESS_TOKEN,
-        Accept: 'application/json',
+        "X-Auth-Token": env.BIGCOMMERCE_ACCESS_TOKEN,
+        Accept: "application/json",
       },
     });
-    if (!bc.ok) return json({ error: 'bigcommerce_error', details: await safeJson(bc) }, { status: 502 });
+    if (!bc.ok)
+      return json(
+        { error: "bigcommerce_error", details: await safeJson(bc) },
+        { status: 502 },
+      );
     const data = await bc.json();
     return json({ data }, { status: 200 });
   });
 }
 
 async function safeJson(r: Response): Promise<unknown> {
-  const text = await r.text().catch(() => '');
+  const text = await r.text().catch(() => "");
   if (!text) return { status: r.status };
   try {
     return JSON.parse(text);
@@ -533,40 +731,49 @@ async function safeJson(r: Response): Promise<unknown> {
  */
 async function checkAdminStatus(env: Env, email: string): Promise<AdminStatus> {
   if (!email) {
-    return { isAdmin: false, role: 'member' };
+    return { isAdmin: false, role: "member" };
   }
 
   const params = new URLSearchParams();
-  params.set('select', 'email,display_name');
-  params.set('email', `ilike.${email}`);
+  params.set("select", "email,display_name");
+  params.set("email", `ilike.${email}`);
 
-  const r = await supabaseFetch(env, `forum_admins?${params.toString()}`, { method: 'GET' });
+  const r = await supabaseFetch(env, `forum_admins?${params.toString()}`, {
+    method: "GET",
+  });
   if (!r.ok) {
-    console.error('Admin check failed:', await safeJson(r));
-    return { isAdmin: false, role: 'member' };
+    console.error("Admin check failed:", await safeJson(r));
+    return { isAdmin: false, role: "member" };
   }
 
-  const rows = (await r.json()) as Array<{ email: string; display_name: string }>;
+  const rows = (await r.json()) as Array<{
+    email: string;
+    display_name: string;
+  }>;
   if (rows.length > 0) {
     return {
       isAdmin: true,
-      displayName: rows[0]?.display_name || 'Admin',
-      role: 'admin',
+      displayName: rows[0]?.display_name || "Admin",
+      role: "admin",
     };
   }
 
-  return { isAdmin: false, role: 'member' };
+  return { isAdmin: false, role: "member" };
 }
 
 /**
  * Get the role of a user by their user_id
  * Looks up the user's email from auth.users and checks admin status
  */
-async function getUserRole(env: Env, userId: string, jwt: string): Promise<'admin' | 'moderator' | 'member'> {
+async function getUserRole(
+  env: Env,
+  userId: string,
+  jwt: string,
+): Promise<"admin" | "moderator" | "member"> {
   // For now, we'll need to query the forum_admins table with service role
   // Since we can't easily get email from user_id without service role access,
   // we'll check if the user's posts are from an admin email in the API response enrichment
-  return 'member';
+  return "member";
 }
 
 /**
@@ -576,7 +783,11 @@ async function requireAdmin(env: Env, authed: Authed): Promise<AdminStatus> {
   const email = asString(authed.claims.email);
   const status = await checkAdminStatus(env, email);
   if (!status.isAdmin) {
-    throw new HttpError(403, 'admin_required', 'This action requires admin privileges');
+    throw new HttpError(
+      403,
+      "admin_required",
+      "This action requires admin privileges",
+    );
   }
   return status;
 }
@@ -585,45 +796,63 @@ async function requireAdmin(env: Env, authed: Authed): Promise<AdminStatus> {
  * Handle GET /admin/me
  * Returns admin status for the authenticated user
  */
-async function handleAdminMe(req: Request, env: Env, authed: Authed): Promise<Response> {
+async function handleAdminMe(
+  req: Request,
+  env: Env,
+  authed: Authed,
+): Promise<Response> {
   const email = asString(authed.claims.email);
   const status = await checkAdminStatus(env, email);
-  
-  return json({
-    isAdmin: status.isAdmin,
-    role: status.role,
-    displayName: status.displayName || null,
-    email: email || null,
-  }, { status: 200 });
+
+  return json(
+    {
+      isAdmin: status.isAdmin,
+      role: status.role,
+      displayName: status.displayName || null,
+      email: email || null,
+    },
+    { status: 200 },
+  );
 }
 
 /**
  * Handle DELETE /threads/:id
  * Deletes a thread (admin only)
  */
-async function handleDeleteThread(req: Request, env: Env, authed: Authed, threadId: string): Promise<Response> {
+async function handleDeleteThread(
+  req: Request,
+  env: Env,
+  authed: Authed,
+  threadId: string,
+): Promise<Response> {
   // Verify admin status
   await requireAdmin(env, authed);
 
   // Delete the thread via Supabase
   const params = new URLSearchParams();
-  params.set('id', `eq.${threadId}`);
+  params.set("id", `eq.${threadId}`);
 
   const r = await supabaseFetch(env, `threads?${params.toString()}`, {
-    method: 'DELETE',
+    method: "DELETE",
     jwt: authed.jwt,
-    headers: { Prefer: 'return=representation' },
+    headers: { Prefer: "return=representation" },
   });
 
   if (!r.ok) {
     const errorData = await safeJson(r);
-    console.error('Delete thread failed:', errorData);
-    return json({ error: 'delete_failed', details: errorData }, { status: 502 });
+    console.error("Delete thread failed:", errorData);
+    return json(
+      { error: "delete_failed", details: errorData },
+      { status: 502 },
+    );
   }
 
   const deleted = (await r.json()) as unknown[];
   if (!deleted.length) {
-    return json({ error: 'not_found', message: 'Thread not found or already deleted' }, { status: 404 });
+    return json(
+      { error: "not_found", message: "Thread not found or already deleted" },
+      { status: 404 },
+    );
   }
 
   return json({ success: true, deleted: deleted[0] }, { status: 200 });
@@ -633,29 +862,40 @@ async function handleDeleteThread(req: Request, env: Env, authed: Authed, thread
  * Handle DELETE /comments/:id
  * Deletes a comment (admin only)
  */
-async function handleDeleteComment(req: Request, env: Env, authed: Authed, commentId: string): Promise<Response> {
+async function handleDeleteComment(
+  req: Request,
+  env: Env,
+  authed: Authed,
+  commentId: string,
+): Promise<Response> {
   // Verify admin status
   await requireAdmin(env, authed);
 
   // Delete the comment via Supabase
   const params = new URLSearchParams();
-  params.set('id', `eq.${commentId}`);
+  params.set("id", `eq.${commentId}`);
 
   const r = await supabaseFetch(env, `comments?${params.toString()}`, {
-    method: 'DELETE',
+    method: "DELETE",
     jwt: authed.jwt,
-    headers: { Prefer: 'return=representation' },
+    headers: { Prefer: "return=representation" },
   });
 
   if (!r.ok) {
     const errorData = await safeJson(r);
-    console.error('Delete comment failed:', errorData);
-    return json({ error: 'delete_failed', details: errorData }, { status: 502 });
+    console.error("Delete comment failed:", errorData);
+    return json(
+      { error: "delete_failed", details: errorData },
+      { status: 502 },
+    );
   }
 
   const deleted = (await r.json()) as unknown[];
   if (!deleted.length) {
-    return json({ error: 'not_found', message: 'Comment not found or already deleted' }, { status: 404 });
+    return json(
+      { error: "not_found", message: "Comment not found or already deleted" },
+      { status: 404 },
+    );
   }
 
   return json({ success: true, deleted: deleted[0] }, { status: 200 });
@@ -666,24 +906,36 @@ async function handleDeleteComment(req: Request, env: Env, authed: Authed, comme
  * Returns list of all admin emails and display names for author role display
  * This is a public endpoint (read-only) so the frontend can show admin badges
  */
-async function handleAdminList(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+async function handleAdminList(
+  req: Request,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<Response> {
   return maybeCached(req, ctx, 300, async () => {
     const params = new URLSearchParams();
-    params.set('select', 'email,display_name');
+    params.set("select", "email,display_name");
 
-    const r = await supabaseFetch(env, `forum_admins?${params.toString()}`, { method: 'GET' });
+    const r = await supabaseFetch(env, `forum_admins?${params.toString()}`, {
+      method: "GET",
+    });
     if (!r.ok) {
-      console.error('Admin list fetch failed:', await safeJson(r));
+      console.error("Admin list fetch failed:", await safeJson(r));
       return json({ admins: [] }, { status: 200 });
     }
 
-    const rows = (await r.json()) as Array<{ email: string; display_name: string }>;
-    
+    const rows = (await r.json()) as Array<{
+      email: string;
+      display_name: string;
+    }>;
+
     // Return a map of email -> display_name for easy lookup
-    const admins = rows.reduce((acc, row) => {
-      acc[row.email.toLowerCase()] = row.display_name;
-      return acc;
-    }, {} as Record<string, string>);
+    const admins = rows.reduce(
+      (acc, row) => {
+        acc[row.email.toLowerCase()] = row.display_name;
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
 
     return json({ admins }, { status: 200 });
   });
@@ -703,20 +955,25 @@ interface BCCustomer {
 /**
  * Find a BigCommerce customer by email address
  */
-async function findBCCustomerByEmail(env: Env, email: string): Promise<BCCustomer | null> {
+async function findBCCustomerByEmail(
+  env: Env,
+  email: string,
+): Promise<BCCustomer | null> {
   const storeHash = env.BIGCOMMERCE_STORE_HASH;
-  const url = new URL(`https://api.bigcommerce.com/stores/${storeHash}/v3/customers`);
-  url.searchParams.set('email:in', email);
+  const url = new URL(
+    `https://api.bigcommerce.com/stores/${storeHash}/v3/customers`,
+  );
+  url.searchParams.set("email:in", email);
 
   const res = await fetch(url.toString(), {
     headers: {
-      'X-Auth-Token': env.BIGCOMMERCE_ACCESS_TOKEN,
-      'Accept': 'application/json',
+      "X-Auth-Token": env.BIGCOMMERCE_ACCESS_TOKEN,
+      Accept: "application/json",
     },
   });
 
   if (!res.ok) {
-    console.error('BigCommerce find customer error:', await res.text());
+    console.error("BigCommerce find customer error:", await res.text());
     return null;
   }
 
@@ -727,20 +984,25 @@ async function findBCCustomerByEmail(env: Env, email: string): Promise<BCCustome
 /**
  * Get a BigCommerce customer by ID
  */
-async function getBCCustomerById(env: Env, customerId: number): Promise<BCCustomer | null> {
+async function getBCCustomerById(
+  env: Env,
+  customerId: number,
+): Promise<BCCustomer | null> {
   const storeHash = env.BIGCOMMERCE_STORE_HASH;
-  const url = new URL(`https://api.bigcommerce.com/stores/${storeHash}/v3/customers`);
-  url.searchParams.set('id:in', String(customerId));
+  const url = new URL(
+    `https://api.bigcommerce.com/stores/${storeHash}/v3/customers`,
+  );
+  url.searchParams.set("id:in", String(customerId));
 
   const res = await fetch(url.toString(), {
     headers: {
-      'X-Auth-Token': env.BIGCOMMERCE_ACCESS_TOKEN,
-      'Accept': 'application/json',
+      "X-Auth-Token": env.BIGCOMMERCE_ACCESS_TOKEN,
+      Accept: "application/json",
     },
   });
 
   if (!res.ok) {
-    console.error('BigCommerce get customer by ID error:', await res.text());
+    console.error("BigCommerce get customer by ID error:", await res.text());
     return null;
   }
 
@@ -764,17 +1026,17 @@ async function createBCCustomer(
   const randomPassword = crypto.randomUUID() + crypto.randomUUID();
 
   const res = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'X-Auth-Token': env.BIGCOMMERCE_ACCESS_TOKEN,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      "X-Auth-Token": env.BIGCOMMERCE_ACCESS_TOKEN,
+      "Content-Type": "application/json",
+      Accept: "application/json",
     },
     body: JSON.stringify([
       {
         email,
-        first_name: firstName || 'Customer',
-        last_name: lastName || '',
+        first_name: firstName || "Customer",
+        last_name: lastName || "",
         authentication: {
           new_password: randomPassword,
         },
@@ -784,7 +1046,7 @@ async function createBCCustomer(
 
   if (!res.ok) {
     const errorText = await res.text();
-    console.error('BigCommerce create customer error:', errorText);
+    console.error("BigCommerce create customer error:", errorText);
     return null;
   }
 
@@ -800,7 +1062,7 @@ async function createBCCustomer(
 async function generateBCLoginJWT(
   env: Env,
   customerId: number,
-  redirectTo: string = '/',
+  redirectTo: string = "/",
 ): Promise<string> {
   const secret = new TextEncoder().encode(env.BIGCOMMERCE_CLIENT_SECRET);
   const now = Math.floor(Date.now() / 1000);
@@ -810,12 +1072,12 @@ async function generateBCLoginJWT(
     iss: env.BIGCOMMERCE_CLIENT_ID,
     iat: now,
     jti,
-    operation: 'customer_login',
+    operation: "customer_login",
     store_hash: env.BIGCOMMERCE_STORE_HASH,
     customer_id: customerId,
     redirect_to: redirectTo,
   })
-    .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setExpirationTime(now + 30) // JWT valid for 30 seconds
     .sign(secret);
 
@@ -834,31 +1096,47 @@ function buildBCLoginUrl(env: Env, jwt: string): string {
  * Finds or creates a BigCommerce customer for the authenticated Supabase user,
  * then returns a login URL that will log them into BigCommerce.
  */
-async function handleBCLogin(req: Request, env: Env, authed: Authed): Promise<Response> {
+async function handleBCLogin(
+  req: Request,
+  env: Env,
+  authed: Authed,
+): Promise<Response> {
   // Extract email from Supabase JWT claims
   const email = asString(authed.claims.email);
   if (!email) {
-    throw new HttpError(400, 'missing_email', 'Supabase token missing email claim');
+    throw new HttpError(
+      400,
+      "missing_email",
+      "Supabase token missing email claim",
+    );
   }
 
   // Extract name from user metadata if available
-  const userMetadata = (authed.claims.user_metadata || {}) as Record<string, unknown>;
-  const fullName = asString(userMetadata.full_name || userMetadata.name || '');
-  const nameParts = fullName.split(' ');
-  const firstName = nameParts[0] || asString(userMetadata.first_name) || 'Customer';
-  const lastName = nameParts.slice(1).join(' ') || asString(userMetadata.last_name) || '';
+  const userMetadata = (authed.claims.user_metadata || {}) as Record<
+    string,
+    unknown
+  >;
+  const fullName = asString(userMetadata.full_name || userMetadata.name || "");
+  const nameParts = fullName.split(" ");
+  const firstName =
+    nameParts[0] || asString(userMetadata.first_name) || "Customer";
+  const lastName =
+    nameParts.slice(1).join(" ") || asString(userMetadata.last_name) || "";
 
   // Parse request body for redirect URL
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-  const redirectTo = asString(body.redirect_to) || '/account.php';
+  const redirectTo = asString(body.redirect_to) || "/account.php";
 
   // Check if BigCommerce is configured
   if (!env.BIGCOMMERCE_STORE_HASH || !env.BIGCOMMERCE_ACCESS_TOKEN) {
-    throw new HttpError(501, 'bigcommerce_not_configured');
+    throw new HttpError(501, "bigcommerce_not_configured");
   }
   if (!env.BIGCOMMERCE_CLIENT_ID || !env.BIGCOMMERCE_CLIENT_SECRET) {
-    throw new HttpError(501, 'bigcommerce_login_not_configured', 
-      'BIGCOMMERCE_CLIENT_ID and BIGCOMMERCE_CLIENT_SECRET are required for customer login');
+    throw new HttpError(
+      501,
+      "bigcommerce_login_not_configured",
+      "BIGCOMMERCE_CLIENT_ID and BIGCOMMERCE_CLIENT_SECRET are required for customer login",
+    );
   }
 
   // Find existing customer
@@ -868,7 +1146,11 @@ async function handleBCLogin(req: Request, env: Env, authed: Authed): Promise<Re
   if (!customer) {
     customer = await createBCCustomer(env, email, firstName, lastName);
     if (!customer) {
-      throw new HttpError(500, 'customer_creation_failed', 'Could not create BigCommerce customer');
+      throw new HttpError(
+        500,
+        "customer_creation_failed",
+        "Could not create BigCommerce customer",
+      );
     }
   }
 
@@ -876,11 +1158,14 @@ async function handleBCLogin(req: Request, env: Env, authed: Authed): Promise<Re
   const loginJwt = await generateBCLoginJWT(env, customer.id, redirectTo);
   const loginUrl = buildBCLoginUrl(env, loginJwt);
 
-  return json({
-    success: true,
-    customer_id: customer.id,
-    login_url: loginUrl,
-  }, { status: 200 });
+  return json(
+    {
+      success: true,
+      customer_id: customer.id,
+      login_url: loginUrl,
+    },
+    { status: 200 },
+  );
 }
 
 /**
@@ -888,64 +1173,81 @@ async function handleBCLogin(req: Request, env: Env, authed: Authed): Promise<Re
  * Exchanges BigCommerce customer identity for a forum JWT token.
  * This allows BigCommerce-logged-in users to authenticate with the forum
  * without requiring a separate Supabase login.
- * 
+ *
  * Body: { customer_id: number, email: string }
  * Returns: { token: string, expires_at: number }
  */
 async function handleBCExchange(req: Request, env: Env): Promise<Response> {
   // Parse request body
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-  const customerId = typeof body.customer_id === 'number' ? body.customer_id : null;
-  const email = typeof body.email === 'string' ? body.email.toLowerCase().trim() : '';
+  const customerId =
+    typeof body.customer_id === "number" ? body.customer_id : null;
+  const email =
+    typeof body.email === "string" ? body.email.toLowerCase().trim() : "";
 
   if (!customerId || !email) {
-    throw new HttpError(400, 'missing_params', 'customer_id and email are required');
+    throw new HttpError(
+      400,
+      "missing_params",
+      "customer_id and email are required",
+    );
   }
 
   // Verify BigCommerce is configured
   if (!env.BIGCOMMERCE_STORE_HASH || !env.BIGCOMMERCE_ACCESS_TOKEN) {
-    throw new HttpError(501, 'bigcommerce_not_configured');
+    throw new HttpError(501, "bigcommerce_not_configured");
   }
 
   // Verify the customer exists in BigCommerce and email matches
   const customer = await getBCCustomerById(env, customerId);
   if (!customer) {
-    throw new HttpError(401, 'customer_not_found', 'BigCommerce customer not found');
+    throw new HttpError(
+      401,
+      "customer_not_found",
+      "BigCommerce customer not found",
+    );
   }
 
   // Verify email matches (case-insensitive)
   if (customer.email.toLowerCase() !== email) {
-    throw new HttpError(401, 'email_mismatch', 'Email does not match customer record');
+    throw new HttpError(
+      401,
+      "email_mismatch",
+      "Email does not match customer record",
+    );
   }
 
   // Issue a forum JWT token signed with SUPABASE_JWT_SECRET
   // This allows the forum API to verify the token using the same secret
   const secret = new TextEncoder().encode(env.SUPABASE_JWT_SECRET);
   const now = Math.floor(Date.now() / 1000);
-  const expiresAt = now + (7 * 24 * 60 * 60); // 7 days
+  const expiresAt = now + 7 * 24 * 60 * 60; // 7 days
 
   const token = await new SignJWT({
     sub: `bc_${customerId}`,
     email: customer.email,
     name: `${customer.first_name} ${customer.last_name}`.trim(),
-    source: 'bigcommerce',
+    source: "bigcommerce",
     bc_customer_id: customerId,
   })
-    .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuedAt(now)
     .setExpirationTime(expiresAt)
     .sign(secret);
 
-  return json({
-    success: true,
-    token,
-    expires_at: expiresAt,
-    customer: {
-      id: customer.id,
-      email: customer.email,
-      name: `${customer.first_name} ${customer.last_name}`.trim(),
+  return json(
+    {
+      success: true,
+      token,
+      expires_at: expiresAt,
+      customer: {
+        id: customer.id,
+        email: customer.email,
+        name: `${customer.first_name} ${customer.last_name}`.trim(),
+      },
     },
-  }, { status: 200 });
+    { status: 200 },
+  );
 }
 
 // =============================================================================
@@ -970,8 +1272,8 @@ interface AddressVerifyResponse {
     state: string;
     zip: string;
   };
-  deliveryPoint?: 'residential' | 'commercial' | 'pobox' | 'unknown';
-  provider: 'google' | 'none';
+  deliveryPoint?: "residential" | "commercial" | "pobox" | "unknown";
+  provider: "google" | "none";
   nearestHub?: {
     name: string;
     address: string;
@@ -992,21 +1294,21 @@ async function verifyAddressGoogle(
 ): Promise<AddressVerifyResponse> {
   const apiKey = env.GOOGLE_ADDRESS_VALIDATION_KEY;
   if (!apiKey) {
-    throw new HttpError(501, 'google_address_validation_not_configured');
+    throw new HttpError(501, "google_address_validation_not_configured");
   }
 
   const url = `https://addressvalidation.googleapis.com/v1:validateAddress?key=${apiKey}`;
-  
+
   const res = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       address: {
-        regionCode: 'US',
-        addressLines: address.street2 
-          ? [address.street, address.street2] 
+        regionCode: "US",
+        addressLines: address.street2
+          ? [address.street, address.street2]
           : [address.street],
         locality: address.city,
         administrativeArea: address.state,
@@ -1017,13 +1319,13 @@ async function verifyAddressGoogle(
 
   if (!res.ok) {
     const errorData = await safeJson(res);
-    console.error('Google Address Validation error:', errorData);
+    console.error("Google Address Validation error:", errorData);
     // Return unverified response instead of throwing
     return {
       verified: false,
       isResidential: null,
-      provider: 'google',
-      deliveryPoint: 'unknown',
+      provider: "google",
+      deliveryPoint: "unknown",
       nearestHub: null,
     };
   }
@@ -1062,36 +1364,40 @@ async function verifyAddressGoogle(
 
   // Determine address type from metadata
   let isResidential: boolean | null = null;
-  let deliveryPoint: 'residential' | 'commercial' | 'pobox' | 'unknown' = 'unknown';
+  let deliveryPoint: "residential" | "commercial" | "pobox" | "unknown" =
+    "unknown";
 
   if (metadata) {
     if (metadata.residential === true) {
       isResidential = true;
-      deliveryPoint = 'residential';
+      deliveryPoint = "residential";
     } else if (metadata.business === true) {
       isResidential = false;
-      deliveryPoint = 'commercial';
+      deliveryPoint = "commercial";
     } else if (metadata.poBox === true) {
       isResidential = false;
-      deliveryPoint = 'pobox';
+      deliveryPoint = "pobox";
     }
   }
 
   // Build corrected address if available
-  const correctedAddress = postalAddress ? {
-    street: postalAddress.addressLines?.[0] || address.street,
-    street2: postalAddress.addressLines?.[1],
-    city: postalAddress.locality || address.city,
-    state: postalAddress.administrativeArea || address.state,
-    zip: postalAddress.postalCode || address.zip,
-  } : undefined;
+  const correctedAddress = postalAddress
+    ? {
+        street: postalAddress.addressLines?.[0] || address.street,
+        street2: postalAddress.addressLines?.[1],
+        city: postalAddress.locality || address.city,
+        state: postalAddress.administrativeArea || address.state,
+        zip: postalAddress.postalCode || address.zip,
+      }
+    : undefined;
 
   return {
-    verified: verdict?.addressComplete === true && !verdict?.hasUnconfirmedComponents,
+    verified:
+      verdict?.addressComplete === true && !verdict?.hasUnconfirmedComponents,
     isResidential,
     correctedAddress,
     deliveryPoint,
-    provider: 'google',
+    provider: "google",
     nearestHub: null,
   };
 }
@@ -1118,28 +1424,156 @@ interface FreightHub {
  */
 const FREIGHT_TERMINALS: FreightHub[] = [
   // XPO Logistics major terminals
-  { name: 'XPO Logistics - Dallas', address: '4901 Singleton Blvd, Dallas, TX 75212', street: '4901 Singleton Blvd', city: 'Dallas', state: 'TX', zip: '75212', carrier: 'XPO' },
-  { name: 'XPO Logistics - Houston', address: '12500 Cutten Rd, Houston, TX 77066', street: '12500 Cutten Rd', city: 'Houston', state: 'TX', zip: '77066', carrier: 'XPO' },
-  { name: 'XPO Logistics - Phoenix', address: '4020 E Broadway Rd, Phoenix, AZ 85040', street: '4020 E Broadway Rd', city: 'Phoenix', state: 'AZ', zip: '85040', carrier: 'XPO' },
-  { name: 'XPO Logistics - Atlanta', address: '4200 Shirley Dr SW, Atlanta, GA 30336', street: '4200 Shirley Dr SW', city: 'Atlanta', state: 'GA', zip: '30336', carrier: 'XPO' },
-  { name: 'XPO Logistics - Chicago', address: '2500 S Western Ave, Chicago, IL 60608', street: '2500 S Western Ave', city: 'Chicago', state: 'IL', zip: '60608', carrier: 'XPO' },
-  { name: 'XPO Logistics - Los Angeles', address: '14800 S Main St, Gardena, CA 90248', street: '14800 S Main St', city: 'Gardena', state: 'CA', zip: '90248', carrier: 'XPO' },
-  { name: 'XPO Logistics - Denver', address: '4901 Ivy St, Commerce City, CO 80022', street: '4901 Ivy St', city: 'Commerce City', state: 'CO', zip: '80022', carrier: 'XPO' },
-  
+  {
+    name: "XPO Logistics - Dallas",
+    address: "4901 Singleton Blvd, Dallas, TX 75212",
+    street: "4901 Singleton Blvd",
+    city: "Dallas",
+    state: "TX",
+    zip: "75212",
+    carrier: "XPO",
+  },
+  {
+    name: "XPO Logistics - Houston",
+    address: "12500 Cutten Rd, Houston, TX 77066",
+    street: "12500 Cutten Rd",
+    city: "Houston",
+    state: "TX",
+    zip: "77066",
+    carrier: "XPO",
+  },
+  {
+    name: "XPO Logistics - Phoenix",
+    address: "4020 E Broadway Rd, Phoenix, AZ 85040",
+    street: "4020 E Broadway Rd",
+    city: "Phoenix",
+    state: "AZ",
+    zip: "85040",
+    carrier: "XPO",
+  },
+  {
+    name: "XPO Logistics - Atlanta",
+    address: "4200 Shirley Dr SW, Atlanta, GA 30336",
+    street: "4200 Shirley Dr SW",
+    city: "Atlanta",
+    state: "GA",
+    zip: "30336",
+    carrier: "XPO",
+  },
+  {
+    name: "XPO Logistics - Chicago",
+    address: "2500 S Western Ave, Chicago, IL 60608",
+    street: "2500 S Western Ave",
+    city: "Chicago",
+    state: "IL",
+    zip: "60608",
+    carrier: "XPO",
+  },
+  {
+    name: "XPO Logistics - Los Angeles",
+    address: "14800 S Main St, Gardena, CA 90248",
+    street: "14800 S Main St",
+    city: "Gardena",
+    state: "CA",
+    zip: "90248",
+    carrier: "XPO",
+  },
+  {
+    name: "XPO Logistics - Denver",
+    address: "4901 Ivy St, Commerce City, CO 80022",
+    street: "4901 Ivy St",
+    city: "Commerce City",
+    state: "CO",
+    zip: "80022",
+    carrier: "XPO",
+  },
+
   // Estes Express major terminals
-  { name: 'Estes Express - Richmond', address: '3901 W Broad St, Richmond, VA 23230', street: '3901 W Broad St', city: 'Richmond', state: 'VA', zip: '23230', carrier: 'Estes' },
-  { name: 'Estes Express - Charlotte', address: '8601 Statesville Rd, Charlotte, NC 28269', street: '8601 Statesville Rd', city: 'Charlotte', state: 'NC', zip: '28269', carrier: 'Estes' },
-  { name: 'Estes Express - Nashville', address: '1300 Antioch Pike, Nashville, TN 37211', street: '1300 Antioch Pike', city: 'Nashville', state: 'TN', zip: '37211', carrier: 'Estes' },
-  { name: 'Estes Express - Indianapolis', address: '5151 W 96th St, Indianapolis, IN 46268', street: '5151 W 96th St', city: 'Indianapolis', state: 'IN', zip: '46268', carrier: 'Estes' },
-  
+  {
+    name: "Estes Express - Richmond",
+    address: "3901 W Broad St, Richmond, VA 23230",
+    street: "3901 W Broad St",
+    city: "Richmond",
+    state: "VA",
+    zip: "23230",
+    carrier: "Estes",
+  },
+  {
+    name: "Estes Express - Charlotte",
+    address: "8601 Statesville Rd, Charlotte, NC 28269",
+    street: "8601 Statesville Rd",
+    city: "Charlotte",
+    state: "NC",
+    zip: "28269",
+    carrier: "Estes",
+  },
+  {
+    name: "Estes Express - Nashville",
+    address: "1300 Antioch Pike, Nashville, TN 37211",
+    street: "1300 Antioch Pike",
+    city: "Nashville",
+    state: "TN",
+    zip: "37211",
+    carrier: "Estes",
+  },
+  {
+    name: "Estes Express - Indianapolis",
+    address: "5151 W 96th St, Indianapolis, IN 46268",
+    street: "5151 W 96th St",
+    city: "Indianapolis",
+    state: "IN",
+    zip: "46268",
+    carrier: "Estes",
+  },
+
   // Old Dominion terminals
-  { name: 'Old Dominion - Thomasville', address: '1101 National Hwy, Thomasville, NC 27360', street: '1101 National Hwy', city: 'Thomasville', state: 'NC', zip: '27360', carrier: 'ODFL' },
-  { name: 'Old Dominion - Memphis', address: '3505 Lamar Ave, Memphis, TN 38118', street: '3505 Lamar Ave', city: 'Memphis', state: 'TN', zip: '38118', carrier: 'ODFL' },
-  { name: 'Old Dominion - Fort Worth', address: '4400 Mercantile Plaza, Fort Worth, TX 76137', street: '4400 Mercantile Plaza', city: 'Fort Worth', state: 'TX', zip: '76137', carrier: 'ODFL' },
-  
+  {
+    name: "Old Dominion - Thomasville",
+    address: "1101 National Hwy, Thomasville, NC 27360",
+    street: "1101 National Hwy",
+    city: "Thomasville",
+    state: "NC",
+    zip: "27360",
+    carrier: "ODFL",
+  },
+  {
+    name: "Old Dominion - Memphis",
+    address: "3505 Lamar Ave, Memphis, TN 38118",
+    street: "3505 Lamar Ave",
+    city: "Memphis",
+    state: "TN",
+    zip: "38118",
+    carrier: "ODFL",
+  },
+  {
+    name: "Old Dominion - Fort Worth",
+    address: "4400 Mercantile Plaza, Fort Worth, TX 76137",
+    street: "4400 Mercantile Plaza",
+    city: "Fort Worth",
+    state: "TX",
+    zip: "76137",
+    carrier: "ODFL",
+  },
+
   // SAIA terminals
-  { name: 'SAIA - Johns Creek', address: '11465 Johns Creek Pkwy, Johns Creek, GA 30097', street: '11465 Johns Creek Pkwy', city: 'Johns Creek', state: 'GA', zip: '30097', carrier: 'SAIA' },
-  { name: 'SAIA - Houma', address: '1200 Grand Caillou Rd, Houma, LA 70363', street: '1200 Grand Caillou Rd', city: 'Houma', state: 'LA', zip: '70363', carrier: 'SAIA' },
+  {
+    name: "SAIA - Johns Creek",
+    address: "11465 Johns Creek Pkwy, Johns Creek, GA 30097",
+    street: "11465 Johns Creek Pkwy",
+    city: "Johns Creek",
+    state: "GA",
+    zip: "30097",
+    carrier: "SAIA",
+  },
+  {
+    name: "SAIA - Houma",
+    address: "1200 Grand Caillou Rd, Houma, LA 70363",
+    street: "1200 Grand Caillou Rd",
+    city: "Houma",
+    state: "LA",
+    zip: "70363",
+    carrier: "SAIA",
+  },
 ];
 
 /**
@@ -1152,12 +1586,12 @@ function estimateDistanceByZip(zip1: string, zip2: string): number | null {
   // First 3 digits of ZIP give rough geographic area
   const prefix1 = zip1.slice(0, 3);
   const prefix2 = zip2.slice(0, 3);
-  
+
   if (prefix1 === prefix2) return 15; // Same area
-  
+
   // Very rough estimation based on ZIP prefix differences
   const diff = Math.abs(parseInt(prefix1, 10) - parseInt(prefix2, 10));
-  
+
   if (diff < 5) return 50;
   if (diff < 10) return 100;
   if (diff < 20) return 200;
@@ -1168,19 +1602,23 @@ function estimateDistanceByZip(zip1: string, zip2: string): number | null {
 /**
  * Find nearest freight terminals to a ZIP code
  */
-function findNearestFreightHubs(zip: string, state: string, limit: number = 3): FreightHub[] {
+function findNearestFreightHubs(
+  zip: string,
+  state: string,
+  limit: number = 3,
+): FreightHub[] {
   // First, filter by state if possible
-  const sameState = FREIGHT_TERMINALS.filter(t => t.state === state);
-  
+  const sameState = FREIGHT_TERMINALS.filter((t) => t.state === state);
+
   // Calculate distances and sort
-  const withDistances = FREIGHT_TERMINALS.map(terminal => ({
+  const withDistances = FREIGHT_TERMINALS.map((terminal) => ({
     ...terminal,
     distance: estimateDistanceByZip(zip, terminal.zip) || 999,
   }));
-  
+
   // Sort by distance
   withDistances.sort((a, b) => a.distance - b.distance);
-  
+
   // Return top N
   return withDistances.slice(0, limit);
 }
@@ -1190,22 +1628,28 @@ function findNearestFreightHubs(zip: string, state: string, limit: number = 3): 
  * Find nearest freight terminals for LTL shipments
  */
 async function handleFreightHubs(req: Request, env: Env): Promise<Response> {
-  const body = (await req.json().catch(() => null)) as null | Record<string, unknown>;
-  if (!body) throw new HttpError(400, 'invalid_json');
+  const body = (await req.json().catch(() => null)) as null | Record<
+    string,
+    unknown
+  >;
+  if (!body) throw new HttpError(400, "invalid_json");
 
   const zip = asString(body.zip).trim();
   const state = asString(body.state).trim();
   const limit = Math.min(Number(body.limit) || 3, 10);
 
-  if (!zip) throw new HttpError(400, 'missing_zip');
+  if (!zip) throw new HttpError(400, "missing_zip");
 
   const hubs = findNearestFreightHubs(zip, state, limit);
 
-  return json({
-    hubs,
-    count: hubs.length,
-    note: 'Distances are approximate. Contact carrier for exact terminal locations.',
-  }, { status: 200 });
+  return json(
+    {
+      hubs,
+      count: hubs.length,
+      note: "Distances are approximate. Contact carrier for exact terminal locations.",
+    },
+    { status: 200 },
+  );
 }
 
 /**
@@ -1213,19 +1657,22 @@ async function handleFreightHubs(req: Request, env: Env): Promise<Response> {
  * Verifies an address and returns residential/commercial indicator
  */
 async function handleAddressVerify(req: Request, env: Env): Promise<Response> {
-  const body = (await req.json().catch(() => null)) as null | Record<string, unknown>;
-  if (!body) throw new HttpError(400, 'invalid_json');
+  const body = (await req.json().catch(() => null)) as null | Record<
+    string,
+    unknown
+  >;
+  if (!body) throw new HttpError(400, "invalid_json");
 
   const street = asString(body.street).trim();
   const city = asString(body.city).trim();
   const state = asString(body.state).trim();
   const zip = asString(body.zip).trim();
-  const street2 = asString(body.street2 || '').trim();
+  const street2 = asString(body.street2 || "").trim();
 
-  if (!street) throw new HttpError(400, 'missing_street');
-  if (!city) throw new HttpError(400, 'missing_city');
-  if (!state) throw new HttpError(400, 'missing_state');
-  if (!zip) throw new HttpError(400, 'missing_zip');
+  if (!street) throw new HttpError(400, "missing_street");
+  if (!city) throw new HttpError(400, "missing_city");
+  if (!state) throw new HttpError(400, "missing_state");
+  if (!zip) throw new HttpError(400, "missing_zip");
 
   const addressRequest: AddressVerifyRequest = {
     street,
@@ -1245,8 +1692,8 @@ async function handleAddressVerify(req: Request, env: Env): Promise<Response> {
     result = {
       verified: false,
       isResidential: null,
-      provider: 'none',
-      deliveryPoint: 'unknown',
+      provider: "none",
+      deliveryPoint: "unknown",
       nearestHub: null,
     };
   }
@@ -1284,7 +1731,12 @@ interface QuoteItem {
   price: { value: number; formatted: string };
   total: { value: number; formatted: string };
   image?: { data: string; alt: string };
-  options?: Array<{ name: string; value: string; nameId?: number; valueId?: number }>;
+  options?: Array<{
+    name: string;
+    value: string;
+    nameId?: number;
+    valueId?: number;
+  }>;
   url?: string;
 }
 
@@ -1315,12 +1767,12 @@ function generateQuoteEmailHtml(
   storefrontOrigin: string,
 ): string {
   const { cart, name, notes } = request;
-  const customerName = name || 'Valued Customer';
-  const expirationDate = new Date(expiresAt).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  const customerName = name || "Valued Customer";
+  const expirationDate = new Date(expiresAt).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
   const itemsHtml = cart.items
@@ -1332,17 +1784,17 @@ function generateQuoteEmailHtml(
             ${
               item.image?.data
                 ? `<img src="${item.image.data}" alt="${item.image.alt || item.name}" style="width: 64px; height: 64px; object-fit: cover; border-radius: 4px;" />`
-                : ''
+                : ""
             }
             <div>
               <div style="font-weight: 600; color: #1a1a1a; margin-bottom: 4px;">${item.name}</div>
-              ${item.sku ? `<div style="font-size: 12px; color: #666;">SKU: ${item.sku}</div>` : ''}
+              ${item.sku ? `<div style="font-size: 12px; color: #666;">SKU: ${item.sku}</div>` : ""}
               ${
                 item.options && item.options.length > 0
                   ? `<div style="font-size: 12px; color: #666; margin-top: 4px;">
-                      ${item.options.map((opt) => `${opt.name}: ${opt.value}`).join(' · ')}
+                      ${item.options.map((opt) => `${opt.name}: ${opt.value}`).join(" · ")}
                     </div>`
-                  : ''
+                  : ""
               }
             </div>
           </div>
@@ -1359,7 +1811,7 @@ function generateQuoteEmailHtml(
       </tr>
     `,
     )
-    .join('');
+    .join("");
 
   return `
 <!DOCTYPE html>
@@ -1441,7 +1893,7 @@ function generateQuoteEmailHtml(
             </td>
           </tr>
           `
-              : ''
+              : ""
           }
 
           <!-- Items Table -->
@@ -1479,7 +1931,7 @@ function generateQuoteEmailHtml(
                   <td style="padding: 8px 0; text-align: right; color: #22c55e;">-${cart.discount.formatted}</td>
                 </tr>
                 `
-                    : ''
+                    : ""
                 }
                 ${
                   cart.tax && cart.tax.value > 0
@@ -1489,7 +1941,7 @@ function generateQuoteEmailHtml(
                   <td style="padding: 8px 0; text-align: right; color: #1a1a1a;">${cart.tax.formatted}</td>
                 </tr>
                 `
-                    : ''
+                    : ""
                 }
                 <tr>
                   <td colspan="2" style="padding-top: 12px; border-top: 2px solid #e5e5e5;"></td>
@@ -1608,17 +2060,20 @@ function generateQuoteEmailText(
   storefrontOrigin: string,
 ): string {
   const { cart, name, notes } = request;
-  const customerName = name || 'Valued Customer';
-  const expirationDate = new Date(expiresAt).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  const customerName = name || "Valued Customer";
+  const expirationDate = new Date(expiresAt).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
   const itemsList = cart.items
-    .map((item) => `- ${item.name} (Qty: ${item.quantity}) - ${item.total.formatted}`)
-    .join('\n');
+    .map(
+      (item) =>
+        `- ${item.name} (Qty: ${item.quantity}) - ${item.total.formatted}`,
+    )
+    .join("\n");
 
   return `
 TRAILER PARTS UNLIMITED - QUOTE
@@ -1630,13 +2085,13 @@ Hi ${customerName},
 
 Thank you for your interest in Trailer Parts Unlimited! Here's the quote you requested:
 
-${notes ? `YOUR NOTES:\n${notes}\n` : ''}
+${notes ? `YOUR NOTES:\n${notes}\n` : ""}
 ITEMS:
 ${itemsList}
 
 TOTALS:
 Subtotal: ${cart.subtotal.formatted}
-${cart.discount && cart.discount.value > 0 ? `Discount: -${cart.discount.formatted}\n` : ''}${cart.tax && cart.tax.value > 0 ? `Est. Tax: ${cart.tax.formatted}\n` : ''}Total: ${cart.grand_total.formatted}
+${cart.discount && cart.discount.value > 0 ? `Discount: -${cart.discount.formatted}\n` : ""}${cart.tax && cart.tax.value > 0 ? `Est. Tax: ${cart.tax.formatted}\n` : ""}Total: ${cart.grand_total.formatted}
 
 Ready to complete your order? Visit: https://cartertraileraxles.com/quote/cart/${quoteNumber}
 
@@ -1662,30 +2117,34 @@ async function sendEmailViaResend(
   text: string,
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   if (!env.RESEND_API_KEY) {
-    throw new HttpError(501, 'email_not_configured', 'RESEND_API_KEY is not set');
+    throw new HttpError(
+      501,
+      "email_not_configured",
+      "RESEND_API_KEY is not set",
+    );
   }
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
     headers: {
       Authorization: `Bearer ${env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: 'Trailer Parts Unlimited <cart@cartertraileraxles.com>',
+      from: "Trailer Parts Unlimited <cart@cartertraileraxles.com>",
       to: [to],
       subject,
       html,
       text,
-      reply_to: 'sales@trailerpartsunlimited.com',
-      tags: [{ name: 'type', value: 'quote' }],
+      reply_to: "sales@trailerpartsunlimited.com",
+      tags: [{ name: "type", value: "quote" }],
     }),
   });
 
   if (!response.ok) {
     const errorData = await safeJson(response);
-    console.error('Resend API error:', errorData);
-    return { success: false, error: 'Failed to send email' };
+    console.error("Resend API error:", errorData);
+    return { success: false, error: "Failed to send email" };
   }
 
   const data = (await response.json()) as { id: string };
@@ -1698,27 +2157,38 @@ async function sendEmailViaResend(
  * and redirects the visitor to that cart. This avoids the session-cart problem where
  * `/cart.php` always shows the visitor's own cart rather than the quoted items.
  */
-async function handleQuoteCart(req: Request, env: Env, quoteNumber: string): Promise<Response> {
+async function handleQuoteCart(
+  req: Request,
+  env: Env,
+  quoteNumber: string,
+): Promise<Response> {
   if (!env.BIGCOMMERCE_STORE_HASH || !env.BIGCOMMERCE_ACCESS_TOKEN) {
-    return new Response('Store not configured', { status: 501 });
+    return new Response("Store not configured", { status: 501 });
   }
 
   // Look up quote from Supabase
   const params = new URLSearchParams();
-  params.set('select', 'id,quote_number,items,expires_at');
-  params.set('quote_number', `eq.${quoteNumber}`);
-  const qr = await supabaseFetch(env, `quotes?${params.toString()}`, { method: 'GET' });
+  params.set("select", "id,quote_number,items,expires_at");
+  params.set("quote_number", `eq.${quoteNumber}`);
+  const qr = await supabaseFetch(env, `quotes?${params.toString()}`, {
+    method: "GET",
+  });
   if (!qr.ok) {
-    return new Response('Unable to load quote', { status: 502 });
+    return new Response("Unable to load quote", { status: 502 });
   }
-  const rows = (await qr.json()) as Array<{ id: string; quote_number: string; items: QuoteItem[]; expires_at: string }>;
+  const rows = (await qr.json()) as Array<{
+    id: string;
+    quote_number: string;
+    items: QuoteItem[];
+    expires_at: string;
+  }>;
   const quote = rows[0];
   if (!quote) {
-    return new Response('Quote not found', { status: 404 });
+    return new Response("Quote not found", { status: 404 });
   }
 
   if (new Date(quote.expires_at) < new Date()) {
-    return new Response('This quote has expired', { status: 410 });
+    return new Response("This quote has expired", { status: 410 });
   }
 
   // Build line items for BigCommerce Server-to-Server Cart API
@@ -1730,7 +2200,10 @@ async function handleQuoteCart(req: Request, env: Env, quoteNumber: string): Pro
     if (item.variant_id) {
       li.variant_id = item.variant_id;
     }
-    if (item.options?.length && item.options.some((o) => o.nameId && o.valueId)) {
+    if (
+      item.options?.length &&
+      item.options.some((o) => o.nameId && o.valueId)
+    ) {
       li.option_selections = item.options
         .filter((o) => o.nameId && o.valueId)
         .map((o) => ({ option_id: o.nameId, option_value: o.valueId }));
@@ -1743,11 +2216,11 @@ async function handleQuoteCart(req: Request, env: Env, quoteNumber: string): Pro
   const createCartRes = await fetch(
     `https://api.bigcommerce.com/stores/${storeHash}/v3/carts`,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'X-Auth-Token': env.BIGCOMMERCE_ACCESS_TOKEN,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
+        "X-Auth-Token": env.BIGCOMMERCE_ACCESS_TOKEN,
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify({ line_items: lineItems }),
     },
@@ -1755,37 +2228,39 @@ async function handleQuoteCart(req: Request, env: Env, quoteNumber: string): Pro
 
   if (!createCartRes.ok) {
     const err = await safeJson(createCartRes);
-    console.error('BigCommerce create cart error:', err);
-    return new Response('Unable to create cart', { status: 502 });
+    console.error("BigCommerce create cart error:", err);
+    return new Response("Unable to create cart", { status: 502 });
   }
 
   const cartData = (await createCartRes.json()) as { data: { id: string } };
   const cartId = cartData.data?.id;
   if (!cartId) {
-    return new Response('Cart creation returned no ID', { status: 502 });
+    return new Response("Cart creation returned no ID", { status: 502 });
   }
 
   // Get redirect URLs for the new cart
   const redirectRes = await fetch(
     `https://api.bigcommerce.com/stores/${storeHash}/v3/carts/${cartId}/redirect_urls`,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'X-Auth-Token': env.BIGCOMMERCE_ACCESS_TOKEN,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
+        "X-Auth-Token": env.BIGCOMMERCE_ACCESS_TOKEN,
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
     },
   );
 
   if (!redirectRes.ok) {
     const err = await safeJson(redirectRes);
-    console.error('BigCommerce redirect URL error:', err);
+    console.error("BigCommerce redirect URL error:", err);
     // Fall back to plain cart page if redirect URL creation fails
     return Response.redirect(`${env.STOREFRONT_ORIGIN}/cart.php`, 302);
   }
 
-  const redirectData = (await redirectRes.json()) as { data: { cart_url: string; checkout_url: string } };
+  const redirectData = (await redirectRes.json()) as {
+    data: { cart_url: string; checkout_url: string };
+  };
   const cartUrl = redirectData.data?.cart_url;
   if (!cartUrl) {
     return Response.redirect(`${env.STOREFRONT_ORIGIN}/cart.php`, 302);
@@ -1800,28 +2275,37 @@ async function handleQuoteCart(req: Request, env: Env, quoteNumber: string): Pro
  */
 async function handleSendQuote(req: Request, env: Env): Promise<Response> {
   const body = (await req.json().catch(() => null)) as null | QuoteRequest;
-  if (!body) throw new HttpError(400, 'invalid_json');
+  if (!body) throw new HttpError(400, "invalid_json");
 
   // Validate required fields
   const email = asString(body.email).trim().toLowerCase();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new HttpError(400, 'invalid_email');
+    throw new HttpError(400, "invalid_email");
   }
 
-  if (!body.cart || !Array.isArray(body.cart.items) || body.cart.items.length === 0) {
-    throw new HttpError(400, 'empty_cart');
+  if (
+    !body.cart ||
+    !Array.isArray(body.cart.items) ||
+    body.cart.items.length === 0
+  ) {
+    throw new HttpError(400, "empty_cart");
   }
 
-  if (!body.cart.grand_total || typeof body.cart.grand_total.value !== 'number') {
-    throw new HttpError(400, 'invalid_cart_total');
+  if (
+    !body.cart.grand_total ||
+    typeof body.cart.grand_total.value !== "number"
+  ) {
+    throw new HttpError(400, "invalid_cart_total");
   }
 
-  const name = asString(body.name || '').trim();
-  const phone = asString(body.phone || '').trim();
-  const notes = asString(body.notes || '').trim();
+  const name = asString(body.name || "").trim();
+  const phone = asString(body.phone || "").trim();
+  const notes = asString(body.notes || "").trim();
 
   // Calculate expiration (30 days from now)
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  const expiresAt = new Date(
+    Date.now() + 30 * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
   // Prepare quote data for Supabase
   const quoteData = {
@@ -1837,48 +2321,74 @@ async function handleSendQuote(req: Request, env: Env): Promise<Response> {
     grand_total: body.cart.grand_total.value,
     expires_at: expiresAt,
     notes: notes || null,
-    source: 'cart',
-    ip_address: req.headers.get('CF-Connecting-IP') || req.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() || null,
-    user_agent: req.headers.get('User-Agent')?.slice(0, 500) || null,
+    source: "cart",
+    ip_address:
+      req.headers.get("CF-Connecting-IP") ||
+      req.headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ||
+      null,
+    user_agent: req.headers.get("User-Agent")?.slice(0, 500) || null,
   };
 
   // Insert quote into Supabase (quote_number is auto-generated by trigger)
-  const insertRes = await supabaseFetch(env, 'quotes', {
-    method: 'POST',
-    headers: { Prefer: 'return=representation' },
+  const insertRes = await supabaseFetch(env, "quotes", {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
     body: JSON.stringify(quoteData),
   });
 
   if (!insertRes.ok) {
     const errorData = await safeJson(insertRes);
-    console.error('Supabase insert error:', errorData);
-    throw new HttpError(502, 'database_error', 'Failed to save quote');
+    console.error("Supabase insert error:", errorData);
+    throw new HttpError(502, "database_error", "Failed to save quote");
   }
 
-  const insertedQuotes = (await insertRes.json()) as Array<{ id: string; quote_number: string }>;
+  const insertedQuotes = (await insertRes.json()) as Array<{
+    id: string;
+    quote_number: string;
+  }>;
   const quote = insertedQuotes[0];
-  
+
   if (!quote) {
-    throw new HttpError(502, 'database_error', 'No quote returned from database');
+    throw new HttpError(
+      502,
+      "database_error",
+      "No quote returned from database",
+    );
   }
 
   // Generate email content
-  const emailHtml = generateQuoteEmailHtml(quote.quote_number, body, expiresAt, env.STOREFRONT_ORIGIN);
-  const emailText = generateQuoteEmailText(quote.quote_number, body, expiresAt, env.STOREFRONT_ORIGIN);
+  const emailHtml = generateQuoteEmailHtml(
+    quote.quote_number,
+    body,
+    expiresAt,
+    env.STOREFRONT_ORIGIN,
+  );
+  const emailText = generateQuoteEmailText(
+    quote.quote_number,
+    body,
+    expiresAt,
+    env.STOREFRONT_ORIGIN,
+  );
   const subject = `Your Quote ${quote.quote_number} from Trailer Parts Unlimited`;
 
   // Send email via Resend
-  const emailResult = await sendEmailViaResend(env, email, subject, emailHtml, emailText);
+  const emailResult = await sendEmailViaResend(
+    env,
+    email,
+    subject,
+    emailHtml,
+    emailText,
+  );
 
   if (!emailResult.success) {
     // Update quote to mark email failed (but don't fail the request)
-    console.error('Email send failed:', emailResult.error);
+    console.error("Email send failed:", emailResult.error);
   } else {
     // Update quote with sent timestamp
     const updateParams = new URLSearchParams();
-    updateParams.set('id', `eq.${quote.id}`);
+    updateParams.set("id", `eq.${quote.id}`);
     await supabaseFetch(env, `quotes?${updateParams.toString()}`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: JSON.stringify({ sent_at: new Date().toISOString() }),
     });
   }
@@ -1897,38 +2407,52 @@ async function handleSendQuote(req: Request, env: Env): Promise<Response> {
 }
 
 function notFound(): Response {
-  return json({ error: 'not_found' }, { status: 404 });
+  return json({ error: "not_found" }, { status: 404 });
 }
 
 export default {
-  async fetch(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(
+    req: Request,
+    env: Env,
+    ctx: ExecutionContext,
+  ): Promise<Response> {
     try {
       // CORS preflight
-      if (req.method === 'OPTIONS') {
+      if (req.method === "OPTIONS") {
         return withCors(req, env, new Response(null, { status: 204 }));
       }
 
       // Strict CORS lockdown for browser-origin requests.
       // If Origin is present and not allowed, hard fail (prevents accidental embedding).
-      const origin = req.headers.get('Origin');
+      const origin = req.headers.get("Origin");
       if (origin && !isAllowedOrigin(origin, env)) {
-        return withCors(req, env, json({ error: 'cors_denied' }, { status: 403 }));
+        return withCors(
+          req,
+          env,
+          json({ error: "cors_denied" }, { status: 403 }),
+        );
       }
 
       const url = new URL(req.url);
-      const path = url.pathname.replace(/\/+$/, '') || '/';
+      const path = url.pathname.replace(/\/+$/, "") || "/";
 
       const ip = getClientIp(req);
       let authed: Authed | null = null;
 
       // Public POST endpoints that don't require authentication
-      const publicPostEndpoints = ['/address/verify', '/freight/hubs', '/quote/send', '/auth/bc-exchange'];
-      const isPublicPost = req.method === 'POST' && publicPostEndpoints.includes(path);
+      const publicPostEndpoints = [
+        "/address/verify",
+        "/freight/hubs",
+        "/quote/send",
+        "/auth/bc-exchange",
+      ];
+      const isPublicPost =
+        req.method === "POST" && publicPostEndpoints.includes(path);
 
       // DELETE requires authentication (admin-only, checked in handlers)
-      const isDelete = req.method === 'DELETE';
+      const isDelete = req.method === "DELETE";
 
-      const isWrite = (req.method === 'POST' && !isPublicPost) || isDelete;
+      const isWrite = (req.method === "POST" && !isPublicPost) || isDelete;
       if (isWrite) {
         authed = await requireSupabaseJwt(req, env);
         // Tight write limits.
@@ -1948,26 +2472,35 @@ export default {
             authed = null;
           }
         }
-        const userKey = authed?.userId ?? 'anon';
+        const userKey = authed?.userId ?? "anon";
         await rateLimitOrThrow(env, `${ip}:${userKey}:read`, 120, 60);
       }
 
       // Routes
-      if (req.method === 'GET' && path === '/threads') {
+      if (req.method === "GET" && path === "/threads") {
         return withCors(req, env, await handleThreadsFeed(req, env, ctx));
       }
 
       const threadIdMatch = /^\/threads\/([^/]+)$/.exec(path);
-      if (req.method === 'GET' && threadIdMatch) {
-        return withCors(req, env, await handleGetThread(req, env, ctx, decodeURIComponent(threadIdMatch[1]!)));
+      if (req.method === "GET" && threadIdMatch) {
+        return withCors(
+          req,
+          env,
+          await handleGetThread(
+            req,
+            env,
+            ctx,
+            decodeURIComponent(threadIdMatch[1]!),
+          ),
+        );
       }
 
-      if (req.method === 'POST' && path === '/threads') {
+      if (req.method === "POST" && path === "/threads") {
         return withCors(req, env, await handleCreateThread(req, env, authed!));
       }
 
       // Admin endpoint: check admin status (requires auth)
-      if (req.method === 'GET' && path === '/admin/me') {
+      if (req.method === "GET" && path === "/admin/me") {
         // This needs auth, so verify JWT
         if (!authed) {
           authed = await requireSupabaseJwt(req, env);
@@ -1976,96 +2509,179 @@ export default {
       }
 
       // Admin list: public endpoint for frontend to determine admin badges
-      if (req.method === 'GET' && path === '/admin/list') {
+      if (req.method === "GET" && path === "/admin/list") {
         return withCors(req, env, await handleAdminList(req, env, ctx));
       }
 
       // Admin: Delete thread
-      if (req.method === 'DELETE' && threadIdMatch) {
-        return withCors(req, env, await handleDeleteThread(req, env, authed!, decodeURIComponent(threadIdMatch[1]!)));
-      }
-
-      const threadVoteMatch = /^\/threads\/([^/]+)\/vote$/.exec(path);
-      if (req.method === 'POST' && threadVoteMatch) {
-        return withCors(req, env, await handleVoteThread(req, env, authed!, decodeURIComponent(threadVoteMatch[1]!)));
-      }
-
-      const threadCommentsMatch = /^\/threads\/([^/]+)\/comments$/.exec(path);
-      if (req.method === 'GET' && threadCommentsMatch) {
+      if (req.method === "DELETE" && threadIdMatch) {
         return withCors(
           req,
           env,
-          await handleGetThreadComments(req, env, ctx, decodeURIComponent(threadCommentsMatch[1]!)),
+          await handleDeleteThread(
+            req,
+            env,
+            authed!,
+            decodeURIComponent(threadIdMatch[1]!),
+          ),
         );
       }
-      if (req.method === 'POST' && threadCommentsMatch) {
-        return withCors(req, env, await handleCreateComment(req, env, authed!, decodeURIComponent(threadCommentsMatch[1]!)));
+
+      const threadVoteMatch = /^\/threads\/([^/]+)\/vote$/.exec(path);
+      if (req.method === "POST" && threadVoteMatch) {
+        return withCors(
+          req,
+          env,
+          await handleVoteThread(
+            req,
+            env,
+            authed!,
+            decodeURIComponent(threadVoteMatch[1]!),
+          ),
+        );
+      }
+
+      const threadCommentsMatch = /^\/threads\/([^/]+)\/comments$/.exec(path);
+      if (req.method === "GET" && threadCommentsMatch) {
+        return withCors(
+          req,
+          env,
+          await handleGetThreadComments(
+            req,
+            env,
+            ctx,
+            decodeURIComponent(threadCommentsMatch[1]!),
+          ),
+        );
+      }
+      if (req.method === "POST" && threadCommentsMatch) {
+        return withCors(
+          req,
+          env,
+          await handleCreateComment(
+            req,
+            env,
+            authed!,
+            decodeURIComponent(threadCommentsMatch[1]!),
+          ),
+        );
       }
 
       const commentVoteMatch = /^\/comments\/([^/]+)\/vote$/.exec(path);
-      if (req.method === 'POST' && commentVoteMatch) {
-        return withCors(req, env, await handleVoteComment(req, env, authed!, decodeURIComponent(commentVoteMatch[1]!)));
+      if (req.method === "POST" && commentVoteMatch) {
+        return withCors(
+          req,
+          env,
+          await handleVoteComment(
+            req,
+            env,
+            authed!,
+            decodeURIComponent(commentVoteMatch[1]!),
+          ),
+        );
       }
 
       // Admin: Delete comment
       const commentIdMatch = /^\/comments\/([^/]+)$/.exec(path);
-      if (req.method === 'DELETE' && commentIdMatch) {
-        return withCors(req, env, await handleDeleteComment(req, env, authed!, decodeURIComponent(commentIdMatch[1]!)));
+      if (req.method === "DELETE" && commentIdMatch) {
+        return withCors(
+          req,
+          env,
+          await handleDeleteComment(
+            req,
+            env,
+            authed!,
+            decodeURIComponent(commentIdMatch[1]!),
+          ),
+        );
       }
 
       const commentAcceptMatch = /^\/comments\/([^/]+)\/accept$/.exec(path);
-      if (req.method === 'POST' && commentAcceptMatch) {
-        return withCors(req, env, await handleAcceptComment(req, env, authed!, decodeURIComponent(commentAcceptMatch[1]!)));
+      if (req.method === "POST" && commentAcceptMatch) {
+        return withCors(
+          req,
+          env,
+          await handleAcceptComment(
+            req,
+            env,
+            authed!,
+            decodeURIComponent(commentAcceptMatch[1]!),
+          ),
+        );
       }
 
       const relatedKitsMatch = /^\/threads\/([^/]+)\/related-kits$/.exec(path);
-      if (req.method === 'GET' && relatedKitsMatch) {
-        return withCors(req, env, await handleRelatedKits(req, env, ctx, decodeURIComponent(relatedKitsMatch[1]!)));
+      if (req.method === "GET" && relatedKitsMatch) {
+        return withCors(
+          req,
+          env,
+          await handleRelatedKits(
+            req,
+            env,
+            ctx,
+            decodeURIComponent(relatedKitsMatch[1]!),
+          ),
+        );
       }
 
       // Auth: BigCommerce Customer Login (requires Supabase JWT)
-      if (req.method === 'POST' && path === '/auth/bc-login') {
+      if (req.method === "POST" && path === "/auth/bc-login") {
         return withCors(req, env, await handleBCLogin(req, env, authed!));
       }
 
       // Auth: Exchange BigCommerce customer identity for forum JWT
       // Note: This endpoint doesn't require a bearer token - it verifies BC customer data directly
-      if (req.method === 'POST' && path === '/auth/bc-exchange') {
+      if (req.method === "POST" && path === "/auth/bc-exchange") {
         return withCors(req, env, await handleBCExchange(req, env));
       }
 
       // Address Verification (Residential/Commercial)
       // Note: This endpoint doesn't require authentication - it's rate limited by IP
-      if (req.method === 'POST' && path === '/address/verify') {
+      if (req.method === "POST" && path === "/address/verify") {
         return withCors(req, env, await handleAddressVerify(req, env));
       }
 
       // Freight Hub Lookup (for LTL shipments)
-      if (req.method === 'POST' && path === '/freight/hubs') {
+      if (req.method === "POST" && path === "/freight/hubs") {
         return withCors(req, env, await handleFreightHubs(req, env));
       }
 
       // Email Quote System
-      if (req.method === 'POST' && path === '/quote/send') {
+      if (req.method === "POST" && path === "/quote/send") {
         return withCors(req, env, await handleSendQuote(req, env));
       }
 
       // Quote → Cart redirect (linked from quote emails, no CORS needed)
       const quoteCartMatch = /^\/quote\/cart\/([^/]+)$/.exec(path);
-      if (req.method === 'GET' && quoteCartMatch) {
-        return handleQuoteCart(req, env, decodeURIComponent(quoteCartMatch[1]!));
+      if (req.method === "GET" && quoteCartMatch) {
+        return handleQuoteCart(
+          req,
+          env,
+          decodeURIComponent(quoteCartMatch[1]!),
+        );
       }
 
       return withCors(req, env, notFound());
     } catch (err) {
       const e = err as unknown;
       if (e instanceof HttpError) {
-        return withCors(req, env, json({ error: e.code, details: e.details }, { status: e.status }));
+        return withCors(
+          req,
+          env,
+          json({ error: e.code, details: e.details }, { status: e.status }),
+        );
       }
       // Log unexpected errors for debugging
-      console.error('Unexpected error:', e instanceof Error ? e.message : e, e instanceof Error ? e.stack : '');
-      return withCors(req, env, json({ error: 'internal_error' }, { status: 500 }));
+      console.error(
+        "Unexpected error:",
+        e instanceof Error ? e.message : e,
+        e instanceof Error ? e.stack : "",
+      );
+      return withCors(
+        req,
+        env,
+        json({ error: "internal_error" }, { status: 500 }),
+      );
     }
   },
 };
-

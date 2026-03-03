@@ -4,7 +4,7 @@ node_modules/
 # Build outputs
 assets/dist/
 *.js.map
-
+dist/
 # Stencil CLI (local config, may contain secrets)
 .stencil
 config.stencil.json

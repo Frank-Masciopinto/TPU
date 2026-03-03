@@ -22,7 +22,7 @@ SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 # BigCommerce store config
 BIGCOMMERCE_STORE_HASH = "2wzik2aols"
 # BigCommerce API Client ID (required for Customer Login JWT)
-BIGCOMMERCE_CLIENT_ID = "f4lxnl52w3shsff4b7plmf09i7wn60l"
+BIGCOMMERCE_CLIENT_ID = "f03kj6tmr2lw3qk9prdrek3o294padn"
 
 # Address Verification (Google Address Validation API):
 # Required for residential/commercial detection in checkout
