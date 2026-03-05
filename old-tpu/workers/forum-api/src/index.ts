@@ -160,6 +160,33 @@ function countLinks(text: string): number {
   return matches ? matches.length : 0;
 }
 
+function generateSlug(title: string): string {
+  const base = title
+    .toLowerCase()
+    .trim()
+    .replace(/['']/g, "")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .substring(0, 80);
+  const suffix = Math.random().toString(36).substring(2, 6);
+  return base ? `${base}-${suffix}` : suffix;
+}
+
+function stripHtmlToText(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function asString(v: unknown): string {
   return typeof v === "string" ? v : "";
 }
@@ -294,7 +321,7 @@ async function handleThreadsFeed(
   const to = from + pageSize - 1;
 
   const baseSelect =
-    "id,title,body,created_at,updated_at,score,comment_count,accepted_comment_id,tags,user_id";
+    "id,title,slug,body,summary,created_at,updated_at,score,comment_count,accepted_comment_id,tags,user_id";
 
   // Cached because this is a hot path; short TTL.
   return maybeCached(req, ctx, 30, async () => {
@@ -405,6 +432,9 @@ async function handleThreadsFeed(
   });
 }
 
+const THREAD_SELECT =
+  "id,title,slug,body,summary,created_at,updated_at,score,comment_count,accepted_comment_id,tags,user_id";
+
 async function handleGetThread(
   req: Request,
   env: Env,
@@ -413,11 +443,33 @@ async function handleGetThread(
 ): Promise<Response> {
   return maybeCached(req, ctx, 30, async () => {
     const params = new URLSearchParams();
-    params.set(
-      "select",
-      "id,title,body,created_at,updated_at,score,comment_count,accepted_comment_id,tags,user_id",
-    );
+    params.set("select", THREAD_SELECT);
     params.set("id", `eq.${threadId}`);
+    const r = await supabaseFetch(env, `threads?${params.toString()}`, {
+      method: "GET",
+    });
+    if (!r.ok)
+      return json(
+        { error: "supabase_error", details: await safeJson(r) },
+        { status: 502 },
+      );
+    const rows = (await r.json()) as unknown[];
+    const thread = rows[0] ?? null;
+    if (!thread) return json({ error: "not_found" }, { status: 404 });
+    return json({ data: thread }, { status: 200 });
+  });
+}
+
+async function handleGetThreadBySlug(
+  req: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  slug: string,
+): Promise<Response> {
+  return maybeCached(req, ctx, 30, async () => {
+    const params = new URLSearchParams();
+    params.set("select", THREAD_SELECT);
+    params.set("slug", `eq.${slug}`);
     const r = await supabaseFetch(env, `threads?${params.toString()}`, {
       method: "GET",
     });
@@ -459,7 +511,8 @@ async function handleCreateThread(
   if (countLinks(`${title}\n${content}`) > 2)
     throw new HttpError(400, "too_many_links");
 
-  const insert = { title, body: content, tags, user_id: authed.userId };
+  const slug = generateSlug(title);
+  const insert = { title, slug, body: content, tags, user_id: authed.userId };
 
   const r = await supabaseFetch(env, "threads", {
     method: "POST",
@@ -1169,6 +1222,130 @@ async function handleBCLogin(
 }
 
 /**
+ * Handle POST /auth/refresh
+ * Refreshes a forum JWT. Allows tokens expired by up to 5 minutes.
+ * Every 6th refresh re-validates the BC customer. Enforces a 7-day hard ceiling.
+ * Checks for revocation via KV.
+ */
+async function handleAuthRefresh(
+  req: Request,
+  env: Env,
+): Promise<Response> {
+  const bearer = getBearer(req);
+  if (!bearer) throw new HttpError(401, "missing_bearer_token");
+
+  const secret = new TextEncoder().encode(env.SUPABASE_JWT_SECRET);
+  let payload: Record<string, unknown>;
+
+  try {
+    // Allow up to 5 minutes of clock tolerance for expired tokens
+    const result = await jwtVerify(bearer, secret, {
+      algorithms: ["HS256"],
+      clockTolerance: 300,
+    });
+    payload = result.payload as unknown as Record<string, unknown>;
+  } catch (err) {
+    throw new HttpError(401, "invalid_or_expired_token");
+  }
+
+  const sub = typeof payload.sub === "string" ? payload.sub : "";
+  if (!sub) throw new HttpError(401, "invalid_token_sub");
+
+  // Hard ceiling: max_refresh_until
+  const maxRefreshUntil = typeof payload.max_refresh_until === "number"
+    ? payload.max_refresh_until
+    : 0;
+  const now = Math.floor(Date.now() / 1000);
+  if (maxRefreshUntil > 0 && now > maxRefreshUntil) {
+    throw new HttpError(401, "token_max_lifetime_exceeded");
+  }
+
+  // Check revocation
+  const revokedKey = `revoked:${sub}`;
+  const revoked = await env.RATE_LIMIT_KV.get(revokedKey);
+  if (revoked) {
+    throw new HttpError(401, "token_revoked");
+  }
+
+  // Rate limit per user
+  await rateLimitOrThrow(env, `refresh:${sub}`, 20, 60);
+
+  // Increment refresh count
+  const prevCount = typeof payload.refresh_count === "number"
+    ? payload.refresh_count
+    : 0;
+  const refreshCount = prevCount + 1;
+
+  // Every 6th refresh, re-validate the BC customer
+  if (refreshCount % 6 === 0 && typeof payload.bc_customer_id === "number") {
+    console.log(
+      `[Auth:Sync] refresh re-validating BC customer ${payload.bc_customer_id} (refresh #${refreshCount})`,
+    );
+    const customer = await getBCCustomerById(env, payload.bc_customer_id);
+    if (!customer) {
+      throw new HttpError(401, "customer_invalid", "BC customer no longer exists");
+    }
+    if (typeof payload.email === "string" && customer.email.toLowerCase() !== payload.email.toLowerCase()) {
+      throw new HttpError(401, "customer_invalid", "Customer email has changed");
+    }
+  }
+
+  // Issue refreshed token
+  const expiresAt = now + 4 * 60 * 60; // 4 hours
+
+  const newToken = await new SignJWT({
+    sub,
+    email: payload.email,
+    name: payload.name,
+    source: payload.source,
+    bc_customer_id: payload.bc_customer_id,
+    refresh_count: refreshCount,
+    max_refresh_until: maxRefreshUntil || now + 7 * 24 * 60 * 60,
+  })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setIssuedAt(now)
+    .setExpirationTime(expiresAt)
+    .sign(secret);
+
+  console.log(
+    `[Auth:Sync] refresh-ok sub=${sub} count=${refreshCount} bc_revalidate=${refreshCount % 6 === 0}`,
+  );
+
+  return json({ token: newToken, expires_at: expiresAt }, { status: 200 });
+}
+
+/**
+ * Handle POST /auth/revoke
+ * Admin utility to revoke a user's refresh ability.
+ * Sets a KV key that blocks future refreshes for 8 days.
+ */
+async function handleAuthRevoke(
+  req: Request,
+  env: Env,
+  authed: Authed,
+): Promise<Response> {
+  await requireAdmin(env, authed);
+
+  const body = (await req.json().catch(() => null)) as null | Record<
+    string,
+    unknown
+  >;
+  if (!body) throw new HttpError(400, "invalid_json");
+
+  const userId = asString(body.user_id).trim();
+  if (!userId) throw new HttpError(400, "missing_user_id");
+
+  const revokedKey = `revoked:${userId}`;
+  await env.RATE_LIMIT_KV.put(revokedKey, "1", {
+    expirationTtl: 8 * 24 * 60 * 60, // 8 days
+  });
+
+  console.log(`[Auth:Sync] revoked user=${userId} by admin=${asString(authed.claims.email)}`);
+
+  return json({ success: true }, { status: 200 });
+}
+
+/**
  * Handle POST /auth/bc-exchange
  * Exchanges BigCommerce customer identity for a forum JWT token.
  * This allows BigCommerce-logged-in users to authenticate with the forum
@@ -1217,11 +1394,12 @@ async function handleBCExchange(req: Request, env: Env): Promise<Response> {
     );
   }
 
-  // Issue a forum JWT token signed with SUPABASE_JWT_SECRET
-  // This allows the forum API to verify the token using the same secret
+  // Per-customer rate limit to prevent enumeration
+  await rateLimitOrThrow(env, `bc-exchange:${customerId}`, 10, 60);
+
   const secret = new TextEncoder().encode(env.SUPABASE_JWT_SECRET);
   const now = Math.floor(Date.now() / 1000);
-  const expiresAt = now + 7 * 24 * 60 * 60; // 7 days
+  const expiresAt = now + 4 * 60 * 60; // 4 hours
 
   const token = await new SignJWT({
     sub: `bc_${customerId}`,
@@ -1229,6 +1407,8 @@ async function handleBCExchange(req: Request, env: Env): Promise<Response> {
     name: `${customer.first_name} ${customer.last_name}`.trim(),
     source: "bigcommerce",
     bc_customer_id: customerId,
+    refresh_count: 0,
+    max_refresh_until: now + 7 * 24 * 60 * 60, // hard ceiling: 7 days from issue
   })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuedAt(now)
@@ -2406,6 +2586,366 @@ async function handleSendQuote(req: Request, env: Env): Promise<Response> {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Admin: Seed forum threads from curated Q&A data
+// ---------------------------------------------------------------------------
+
+async function handleSeedThreads(
+  req: Request,
+  env: Env,
+  authed: Authed,
+): Promise<Response> {
+  const email =
+    typeof authed.claims.email === "string" ? authed.claims.email : "";
+  const adminCheck = await checkAdminStatus(env, email);
+  if (!adminCheck.isAdmin)
+    throw new HttpError(403, "admin_required");
+
+  const body = (await req.json().catch(() => null)) as null | {
+    threads?: Array<{
+      title: string;
+      slug: string;
+      body: string;
+      summary?: string;
+      answer?: string;
+      tags?: string[];
+    }>;
+  };
+  if (!body || !Array.isArray(body.threads))
+    throw new HttpError(400, "invalid_payload");
+
+  const results: Array<{ slug: string; ok: boolean; error?: string }> = [];
+
+  for (const t of body.threads) {
+    const slug = t.slug || generateSlug(t.title);
+
+    // Check if slug already exists
+    const checkParams = new URLSearchParams();
+    checkParams.set("select", "id");
+    checkParams.set("slug", `eq.${slug}`);
+    const checkRes = await supabaseFetch(
+      env,
+      `threads?${checkParams.toString()}`,
+      { method: "GET" },
+    );
+    if (checkRes.ok) {
+      const existing = (await checkRes.json()) as unknown[];
+      if (existing.length > 0) {
+        results.push({ slug, ok: false, error: "slug_exists" });
+        continue;
+      }
+    }
+
+    // Insert thread
+    const insert = {
+      title: t.title,
+      slug,
+      body: t.body,
+      summary: t.summary || null,
+      tags: t.tags || [],
+      user_id: authed.userId,
+    };
+    const insertRes = await supabaseFetch(env, "threads", {
+      method: "POST",
+      jwt: authed.jwt,
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(insert),
+    });
+    if (!insertRes.ok) {
+      results.push({ slug, ok: false, error: "insert_failed" });
+      continue;
+    }
+    const created = (await insertRes.json()) as Record<string, unknown>[];
+    const threadId = created[0]?.id;
+
+    // If there's a pre-written answer, insert it as an accepted comment
+    if (t.answer && threadId) {
+      const commentInsert = {
+        thread_id: threadId,
+        body: t.answer,
+        user_id: authed.userId,
+      };
+      const commentRes = await supabaseFetch(env, "comments", {
+        method: "POST",
+        jwt: authed.jwt,
+        headers: { Prefer: "return=representation" },
+        body: JSON.stringify(commentInsert),
+      });
+      if (commentRes.ok) {
+        const commentCreated = (await commentRes.json()) as Record<
+          string,
+          unknown
+        >[];
+        const commentId = commentCreated[0]?.id;
+        if (commentId) {
+          // Mark as accepted answer
+          const acceptParams = new URLSearchParams();
+          acceptParams.set("id", `eq.${threadId}`);
+          await supabaseFetch(env, `threads?${acceptParams.toString()}`, {
+            method: "PATCH",
+            jwt: authed.jwt,
+            body: JSON.stringify({
+              accepted_comment_id: commentId,
+              comment_count: 1,
+            }),
+          });
+        }
+      }
+    }
+
+    results.push({ slug, ok: true });
+  }
+
+  return json(
+    {
+      seeded: results.filter((r) => r.ok).length,
+      skipped: results.filter((r) => !r.ok).length,
+      results,
+    },
+    { status: 200 },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// SEO: Pre-rendered HTML for crawlers
+// ---------------------------------------------------------------------------
+
+async function handleSeoThread(
+  req: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  slug: string,
+): Promise<Response> {
+  return maybeCached(req, ctx, 3600, async () => {
+    // Fetch thread by slug
+    const tParams = new URLSearchParams();
+    tParams.set("select", THREAD_SELECT);
+    tParams.set("slug", `eq.${slug}`);
+    const tRes = await supabaseFetch(env, `threads?${tParams.toString()}`, {
+      method: "GET",
+    });
+    if (!tRes.ok) return new Response("Error", { status: 502 });
+    const tRows = (await tRes.json()) as Record<string, unknown>[];
+    const thread = tRows[0];
+    if (!thread) return new Response("Not Found", { status: 404 });
+
+    const threadId = String(thread.id ?? "");
+    const title = String(thread.title ?? "Thread");
+    const body = String(thread.body ?? "");
+    const summary = String(thread.summary ?? "");
+    const createdAt = String(thread.created_at ?? "");
+    const updatedAt = String(thread.updated_at ?? createdAt);
+    const score = Number(thread.score ?? 0);
+
+    // Fetch comments for this thread
+    const cParams = new URLSearchParams();
+    cParams.set(
+      "select",
+      "id,body,created_at,updated_at,score,user_id,is_accepted",
+    );
+    cParams.set("thread_id", `eq.${threadId}`);
+    cParams.set("order", "score.desc");
+    const cRes = await supabaseFetch(env, `comments?${cParams.toString()}`, {
+      method: "GET",
+    });
+    const comments = cRes.ok
+      ? ((await cRes.json()) as Record<string, unknown>[])
+      : [];
+
+    const acceptedComment = comments.find((c) => c.is_accepted);
+    const acceptedId = thread.accepted_comment_id
+      ? String(thread.accepted_comment_id)
+      : null;
+    const accepted =
+      acceptedComment ||
+      (acceptedId ? comments.find((c) => String(c.id) === acceptedId) : null);
+
+    const bodyText = stripHtmlToText(body);
+    const metaDesc =
+      summary ||
+      bodyText.substring(0, 155) + (bodyText.length > 155 ? "..." : "");
+    const canonicalUrl = `${env.STOREFRONT_ORIGIN}/forum/thread?slug=${encodeURIComponent(slug)}`;
+
+    // Build QAPage JSON-LD
+    const qaSchema: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "QAPage",
+      mainEntity: {
+        "@type": "Question",
+        name: title,
+        text: bodyText.substring(0, 500),
+        dateCreated: createdAt,
+        dateModified: updatedAt,
+        upvoteCount: score,
+        url: canonicalUrl,
+        answerCount: comments.length,
+        ...(accepted
+          ? {
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: stripHtmlToText(String(accepted.body ?? "")).substring(
+                  0,
+                  500,
+                ),
+                dateCreated: String(accepted.created_at ?? ""),
+                upvoteCount: Number(accepted.score ?? 0),
+              },
+            }
+          : {}),
+        ...(comments.length
+          ? {
+              suggestedAnswer: comments
+                .filter((c) => c !== accepted)
+                .slice(0, 5)
+                .map((c) => ({
+                  "@type": "Answer",
+                  text: stripHtmlToText(String(c.body ?? "")).substring(0, 500),
+                  dateCreated: String(c.created_at ?? ""),
+                  upvoteCount: Number(c.score ?? 0),
+                })),
+            }
+          : {}),
+      },
+    };
+
+    // Build BreadcrumbList
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: env.STOREFRONT_ORIGIN,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Forum",
+          item: `${env.STOREFRONT_ORIGIN}/forum`,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: title,
+          item: canonicalUrl,
+        },
+      ],
+    };
+
+    const commentsHtml = comments
+      .map((c) => {
+        const cBody = String(c.body ?? "");
+        const isAccepted = c === accepted;
+        return `<div class="answer"${isAccepted ? ' data-accepted="true"' : ""}>${isAccepted ? "<strong>Accepted Answer</strong>" : ""}<div>${cBody}</div></div>`;
+      })
+      .join("\n");
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>${escapeHtml(title)} | Trailer Q&amp;A Forum | Trailer Parts Unlimited</title>
+<meta name="description" content="${escapeAttr(metaDesc)}">
+<link rel="canonical" href="${escapeAttr(canonicalUrl)}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="${escapeAttr(title)} | TPU Forum">
+<meta property="og:description" content="${escapeAttr(metaDesc)}">
+<meta property="og:url" content="${escapeAttr(canonicalUrl)}">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">${JSON.stringify(qaSchema)}</script>
+<script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
+</head>
+<body>
+<nav aria-label="Breadcrumb"><a href="${env.STOREFRONT_ORIGIN}">Home</a> &gt; <a href="${env.STOREFRONT_ORIGIN}/forum">Forum</a> &gt; <span>${escapeHtml(title)}</span></nav>
+<article>
+<h1>${escapeHtml(title)}</h1>
+${summary ? `<div class="summary"><p>${escapeHtml(summary)}</p></div>` : ""}
+<div class="question">${body}</div>
+<h2>Answers (${comments.length})</h2>
+${commentsHtml || "<p>No answers yet.</p>"}
+</article>
+</body>
+</html>`;
+
+    return new Response(html, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  });
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function escapeAttr(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+// ---------------------------------------------------------------------------
+// SEO: Sitemap
+// ---------------------------------------------------------------------------
+
+async function handleSitemap(
+  req: Request,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<Response> {
+  return maybeCached(req, ctx, 3600, async () => {
+    const params = new URLSearchParams();
+    params.set("select", "slug,updated_at,comment_count");
+    params.set("comment_count", "gt.0");
+    params.set("order", "updated_at.desc");
+    params.set("slug", "not.is.null");
+    const r = await supabaseFetch(env, `threads?${params.toString()}`, {
+      method: "GET",
+      range: { from: 0, to: 999 },
+    });
+    if (!r.ok) return new Response("Error generating sitemap", { status: 502 });
+    const rows = (await r.json()) as Record<string, unknown>[];
+
+    const urls = rows
+      .map((row) => {
+        const slug = String(row.slug ?? "");
+        if (!slug) return "";
+        const lastmod = String(row.updated_at ?? "").substring(0, 10);
+        return `  <url>
+    <loc>${env.STOREFRONT_ORIGIN}/forum/thread?slug=${encodeURIComponent(slug)}</loc>${lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ""}
+    <changefreq>weekly</changefreq>
+  </url>`;
+      })
+      .filter(Boolean)
+      .join("\n");
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${env.STOREFRONT_ORIGIN}/forum</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+${urls}
+</urlset>`;
+
+    return new Response(xml, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  });
+}
+
 function notFound(): Response {
   return json({ error: "not_found" }, { status: 404 });
 }
@@ -2440,11 +2980,13 @@ export default {
       let authed: Authed | null = null;
 
       // Public POST endpoints that don't require authentication
+      // /auth/refresh does its own JWT validation with a 5-min grace window
       const publicPostEndpoints = [
         "/address/verify",
         "/freight/hubs",
         "/quote/send",
         "/auth/bc-exchange",
+        "/auth/refresh",
       ];
       const isPublicPost =
         req.method === "POST" && publicPostEndpoints.includes(path);
@@ -2477,8 +3019,40 @@ export default {
       }
 
       // Routes
+
+      // SEO: pre-rendered HTML for crawlers
+      const seoThreadMatch = /^\/seo\/thread\/([^/]+)$/.exec(path);
+      if (req.method === "GET" && seoThreadMatch) {
+        return await handleSeoThread(
+          req,
+          env,
+          ctx,
+          decodeURIComponent(seoThreadMatch[1]!),
+        );
+      }
+
+      // SEO: sitemap
+      if (req.method === "GET" && path === "/forum-sitemap.xml") {
+        return await handleSitemap(req, env, ctx);
+      }
+
       if (req.method === "GET" && path === "/threads") {
         return withCors(req, env, await handleThreadsFeed(req, env, ctx));
+      }
+
+      // Slug-based thread lookup
+      const threadBySlugMatch = /^\/threads\/by-slug\/([^/]+)$/.exec(path);
+      if (req.method === "GET" && threadBySlugMatch) {
+        return withCors(
+          req,
+          env,
+          await handleGetThreadBySlug(
+            req,
+            env,
+            ctx,
+            decodeURIComponent(threadBySlugMatch[1]!),
+          ),
+        );
       }
 
       const threadIdMatch = /^\/threads\/([^/]+)$/.exec(path);
@@ -2511,6 +3085,12 @@ export default {
       // Admin list: public endpoint for frontend to determine admin badges
       if (req.method === "GET" && path === "/admin/list") {
         return withCors(req, env, await handleAdminList(req, env, ctx));
+      }
+
+      // Admin: Seed threads (POST /admin/seed-threads)
+      if (req.method === "POST" && path === "/admin/seed-threads") {
+        if (!authed) authed = await requireSupabaseJwt(req, env);
+        return withCors(req, env, await handleSeedThreads(req, env, authed));
       }
 
       // Admin: Delete thread
@@ -2622,6 +3202,17 @@ export default {
             decodeURIComponent(relatedKitsMatch[1]!),
           ),
         );
+      }
+
+      // Auth: Refresh forum JWT (self-validates with 5-min grace window)
+      if (req.method === "POST" && path === "/auth/refresh") {
+        return withCors(req, env, await handleAuthRefresh(req, env));
+      }
+
+      // Auth: Revoke a user's token (admin only)
+      if (req.method === "POST" && path === "/auth/revoke") {
+        if (!authed) authed = await requireSupabaseJwt(req, env);
+        return withCors(req, env, await handleAuthRevoke(req, env, authed));
       }
 
       // Auth: BigCommerce Customer Login (requires Supabase JWT)

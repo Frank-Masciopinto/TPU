@@ -51,6 +51,29 @@
             });
         </script>
 
+        {{#unless customer}}
+        <script>
+            (function() {
+                try {
+                    var p = window.location.pathname || '';
+                    if (p.indexOf('/forum') === 0) return;
+                    if (window.sessionStorage.getItem('tpu_bc_sync_pending')) return;
+                    var ls = window.localStorage;
+                    ls.removeItem('tpu_forum_token');
+                    ls.removeItem('tpuForumToken');
+                    ls.removeItem('forumToken');
+                    var keys = [];
+                    for (var i = 0; i < ls.length; i++) { keys.push(ls.key(i)); }
+                    for (var j = 0; j < keys.length; j++) {
+                        if (keys[j].indexOf('sb-') === 0 && keys[j].indexOf('-auth-token') !== -1) {
+                            ls.removeItem(keys[j]);
+                        }
+                    }
+                } catch (e) {}
+            })();
+        </script>
+        {{/unless}}
+
         <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.min.css" media="print" onload="this.media='all'">
 
         {{{footer.scripts}}}

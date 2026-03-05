@@ -132,6 +132,71 @@ function ensureMountEl(config) {
     return el;
 }
 
+function consumeAuthComplete() {
+    try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('auth_complete')) {
+            console.log('[Auth:Sync] auth_complete flag consumed');
+            url.searchParams.delete('auth_complete');
+            window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+            try { window.sessionStorage.removeItem('tpu_bc_sync_pending'); } catch (e) {}
+            return true;
+        }
+    } catch (e) {}
+    return false;
+}
+
+function decodeJwtPayload(token) {
+    try {
+        var parts = token.split('.');
+        if (parts.length !== 3) return null;
+        var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(payload));
+    } catch (e) {
+        return null;
+    }
+}
+
+function scheduleProactiveRefresh(config, token) {
+    var claims = decodeJwtPayload(token);
+    if (!claims || !claims.exp) return;
+    var msUntilRefresh = (claims.exp - 300) * 1000 - Date.now();
+    if (msUntilRefresh > 0) {
+        console.log('[Auth:Sync] scheduling proactive refresh in', Math.round(msUntilRefresh / 1000), 's');
+        setTimeout(async function() {
+            try {
+                var { refreshToken } = await import('../../components/forum/forumApi');
+                if (typeof refreshToken === 'function') {
+                    var newToken = await refreshToken(config);
+                    if (newToken) {
+                        console.log('[Auth:Sync] proactive refresh complete, rescheduling');
+                        scheduleProactiveRefresh(config, newToken);
+                    }
+                }
+            } catch (e) {
+                console.warn('[Auth:Sync] proactive refresh failed:', e.message);
+            }
+        }, msUntilRefresh);
+    }
+
+    // On visibility change: if token expires within 10 min, refresh immediately
+    document.addEventListener('visibilitychange', async function onVis() {
+        if (document.visibilityState !== 'visible') return;
+        var auth = getAuth(config);
+        if (!auth.token) return;
+        var c = decodeJwtPayload(auth.token);
+        if (!c || !c.exp) return;
+        var msLeft = c.exp * 1000 - Date.now();
+        if (msLeft < 10 * 60 * 1000) {
+            console.log('[Auth:Sync] visibility refresh, token expires in', Math.round(msLeft / 1000), 's');
+            try {
+                var { refreshToken: doRefresh } = await import('../../components/forum/forumApi');
+                if (typeof doRefresh === 'function') await doRefresh(config);
+            } catch (e) {}
+        }
+    });
+}
+
 export default {
     async load() {
         console.log('[Forum] load() called');
@@ -142,9 +207,14 @@ export default {
             return;
         }
 
-        // Ensure forum authentication before rendering
-        // This exchanges BC customer identity for a forum token if needed
+        consumeAuthComplete();
+
         await ensureForumAuth(config);
+
+        const auth = getAuth(config);
+        if (auth.token) {
+            scheduleProactiveRefresh(config, auth.token);
+        }
 
         const mountEl = ensureMountEl(config);
         console.log('[Forum] mountEl:', mountEl);

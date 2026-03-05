@@ -70,10 +70,10 @@ function GoogleIcon({ size = 18, className = "" }) {
   );
 }
 
-import { signInWithGoogle } from "../../lib/supabase";
+import { signInWithGoogle, signOut as supabaseSignOut } from "../../lib/supabase";
 import { forumApi, getAuth } from "./forumApi";
 import { sanitizeUserHtml } from "./forumSanitize";
-import { setForumFeedTitle, setForumThreadSeo } from "./forumSeo";
+import { clearForumSeo, setForumFeedTitle, setForumThreadSeo } from "./forumSeo";
 
 function isForumPath(pathname) {
   const p = (pathname || "").replace(/\/+$/, "");
@@ -85,7 +85,9 @@ function parseRoute(loc) {
   const search = new URLSearchParams(loc.search || "");
 
   if (pathname.startsWith("/forum/thread")) {
-    return { name: "thread", threadId: search.get("t") || "" };
+    const slug = search.get("slug") || "";
+    const threadId = search.get("t") || "";
+    return { name: "thread", threadId, slug };
   }
   if (pathname.startsWith("/forum")) {
     return {
@@ -109,8 +111,13 @@ function buildFeedUrl(state) {
   return qs ? `/forum?${qs}` : "/forum";
 }
 
-function buildThreadUrl(threadId) {
-  return `/forum/thread?t=${encodeURIComponent(threadId)}`;
+function buildThreadUrl(threadOrId, slug) {
+  if (slug) return `/forum/thread?slug=${encodeURIComponent(slug)}`;
+  const id = typeof threadOrId === "object" ? (threadOrId.slug || threadOrId.id) : threadOrId;
+  if (id && typeof id === "string" && !id.match(/^[0-9a-f-]{36}$/i)) {
+    return `/forum/thread?slug=${encodeURIComponent(id)}`;
+  }
+  return `/forum/thread?t=${encodeURIComponent(id)}`;
 }
 
 function useRouter() {
@@ -235,11 +242,11 @@ function SignInDrawer({ open, onOpenChange, loginUrl, googleLoginUrl }) {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      // Use Supabase's signInWithGoogle with current forum URL as redirect target
+      console.log("[Auth:Sync] google-oauth-start");
+      try { window.sessionStorage.setItem("tpu_bc_sync_pending", String(Date.now())); } catch (e) {}
       await signInWithGoogle(returnPath);
-      // Note: signInWithGoogle redirects to Google, so we stay in loading state
     } catch (error) {
-      console.error("[Forum] Google sign-in error:", error);
+      console.error("[Auth:Sync] google-oauth-error:", error);
       setIsLoading(false);
     }
   };
@@ -842,6 +849,56 @@ function CommentCard({
   );
 }
 
+const PRODUCT_LINKS = [
+  { keywords: ["3500", "3.5k", "3500 lb"], label: "3,500 lb Trailer Axles", url: "/axles/?brand=120&sort=featured" },
+  { keywords: ["5200", "5.2k", "5200 lb"], label: "5,200 lb Trailer Axles", url: "/axles/?brand=120&sort=featured" },
+  { keywords: ["6000", "6k axle", "6000 lb"], label: "6,000 lb Trailer Axles", url: "/axles/?brand=120&sort=featured" },
+  { keywords: ["7000", "7k axle", "7k trailer"], label: "7,000 lb Trailer Axles", url: "/axles/" },
+  { keywords: ["8000", "8k axle", "8k trailer"], label: "8,000 lb Trailer Axles", url: "/axles/" },
+  { keywords: ["10000", "10k axle", "10k trailer"], label: "10,000 lb Trailer Axles", url: "/axles/" },
+  { keywords: ["12000", "12k axle", "12k trailer"], label: "12,000 lb Trailer Axles", url: "/axles/" },
+  { keywords: ["hub and drum", "hub drum", "hub & drum"], label: "Trailer Hubs & Drums", url: "/trailer-axle-parts/hubs-drums/" },
+  { keywords: ["bearing", "bearings", "repack"], label: "Trailer Bearings & Seal Kits", url: "/trailer-axle-parts/bearings-races-seals-kits/" },
+  { keywords: ["brake assembly", "electric brake", "brake magnet"], label: "Trailer Brake Assemblies", url: "/trailer-axle-parts/trailer-brakes/" },
+  { keywords: ["leaf spring", "slipper spring", "double eye spring"], label: "Trailer Leaf Springs", url: "/trailer-suspension/leaf-springs/" },
+  { keywords: ["hanger kit", "suspension kit", "equalizer"], label: "Trailer Suspension Kits", url: "/trailer-suspension/" },
+  { keywords: ["tire", "tires", "wheel", "wheels", "17.5", "16 inch", "15 inch"], label: "Trailer Tires & Wheels", url: "/tires-wheels/" },
+  { keywords: ["tandem axle kit", "tandem kit"], label: "Tandem Axle Kits", url: "/trailer-axle-kits/" },
+  { keywords: ["hutch", "hdss"], label: "Hutch HDSS Suspension", url: "/trailer-suspension/" },
+  { keywords: ["grease cap", "oil cap", "oil bath"], label: "Oil & Grease Caps", url: "/trailer-axle-parts/oil-grease-caps/" },
+  { keywords: ["u-bolt", "u bolt"], label: "U-Bolt Kits", url: "/trailer-suspension/u-bolts-kits/" },
+  { keywords: ["lug nut", "stud", "swivel flange"], label: "Wheel Studs & Lug Nuts", url: "/tires-wheels/wheel-accessories-parts/" },
+  { keywords: ["disc brake", "hydraulic brake", "caliper"], label: "Hydraulic Disc Brakes", url: "/trailer-axle-parts/trailer-brakes/" },
+  { keywords: ["coupler", "gooseneck", "hitch"], label: "Trailer Couplers & Hitches", url: "/towing-accessories/" },
+];
+
+function RelatedProducts({ thread }) {
+  if (!thread) return null;
+  const text = ((thread.title || "") + " " + (thread.body || "") + " " + (thread.tags || []).join(" ")).toLowerCase();
+  const matches = PRODUCT_LINKS.filter((p) =>
+    p.keywords.some((kw) => text.includes(kw))
+  ).slice(0, 5);
+
+  if (!matches.length) return null;
+
+  return (
+    <Card className="tpu-forum__related-products">
+      <CardHeader>
+        <h2 className="tpu-forum__section-heading">Related Products</h2>
+      </CardHeader>
+      <CardContent>
+        <ul className="tpu-forum__product-links">
+          {matches.map((m) => (
+            <li key={m.url}>
+              <a href={m.url}>{m.label}</a>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function ForumApp({ config }) {
   const { route, navigate } = useRouter();
   const api = React.useMemo(() => forumApi(config), [config]);
@@ -862,6 +919,30 @@ export function ForumApp({ config }) {
   const [auth, setAuth] = React.useState(() => getAuth(config));
   const canInteract = !!auth.token;
 
+  const logoutUrl = (config && config.logoutUrl) || "/login.php?action=logout";
+
+  const handleForumSignOut = React.useCallback(async () => {
+    console.log("[Auth:Sync] sign-out-start");
+    try { await supabaseSignOut(); } catch (e) { /* best effort */ }
+    try {
+      window.localStorage.removeItem("tpu_forum_token");
+      window.localStorage.removeItem("tpuForumToken");
+      window.localStorage.removeItem("forumToken");
+      var keys = [];
+      for (var i = 0; i < window.localStorage.length; i++) keys.push(window.localStorage.key(i));
+      keys.forEach(function(k) {
+        if (k.indexOf("sb-") === 0 && k.indexOf("-auth-token") !== -1) window.localStorage.removeItem(k);
+      });
+    } catch (e) { /* ignore */ }
+    try { window.sessionStorage.removeItem("tpu_bc_sync_pending"); } catch (e) {}
+    setAuth({ token: null, user: null });
+    console.log("[Auth:Sync] sign-out-complete, redirecting to BC logout");
+    window.location.href = logoutUrl;
+  }, [logoutUrl]);
+
+  // BC sync overlay state (M1)
+  const [bcSyncState, setBcSyncState] = React.useState(null); // null | 'syncing' | 'failed'
+
   // Admin state
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [adminDisplayName, setAdminDisplayName] = React.useState(null);
@@ -877,6 +958,73 @@ export function ForumApp({ config }) {
       );
       setAuth(currentAuth);
     }
+  }, []); // Only run once on mount
+
+  // M1: Auto-sync Google OAuth to BC session
+  React.useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("auth_complete")) {
+      console.log("[Auth:Sync] auth_complete detected in ForumApp");
+      url.searchParams.delete("auth_complete");
+      window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+      try { window.sessionStorage.removeItem("tpu_bc_sync_pending"); } catch (e) {}
+      setBcSyncState(null);
+      return;
+    }
+
+    let pending;
+    try { pending = window.sessionStorage.getItem("tpu_bc_sync_pending"); } catch (e) {}
+    if (!pending) return;
+
+    const pendingTs = parseInt(pending, 10);
+    if (isNaN(pendingTs) || Date.now() - pendingTs > 60000) {
+      console.log("[Auth:Sync] stale tpu_bc_sync_pending, clearing");
+      try { window.sessionStorage.removeItem("tpu_bc_sync_pending"); } catch (e) {}
+      return;
+    }
+
+    const currentAuth = getAuth(config);
+    if (!currentAuth.token) return;
+    const bcCustomer = config && config.customer;
+    if (bcCustomer && bcCustomer.id) return;
+
+    console.log("[Auth:Sync] bc-sync-start: have Supabase token, no BC session");
+    setBcSyncState("syncing");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+
+    const authApiBase = (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"))
+      ? "http://localhost:8787"
+      : "https://cartertraileraxles.com";
+
+    fetch(`${authApiBase}/auth/bc-login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${currentAuth.token}`,
+      },
+      body: JSON.stringify({ redirect_to: "/forum?auth_complete=1" }),
+      signal: controller.signal,
+    })
+      .then((res) => {
+        clearTimeout(timeout);
+        if (!res.ok) throw new Error("bc-login failed: " + res.status);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.login_url) {
+          console.log("[Auth:Sync] bc-sync-redirect");
+          window.location.href = data.login_url;
+        } else {
+          throw new Error("no login_url returned");
+        }
+      })
+      .catch((err) => {
+        clearTimeout(timeout);
+        console.warn("[Auth:Sync] bc-sync-timeout-or-error:", err.message);
+        try { window.sessionStorage.removeItem("tpu_bc_sync_pending"); } catch (e) {}
+        setBcSyncState("failed");
+      });
   }, []); // Only run once on mount
 
   // Fetch admin status when authenticated
@@ -1030,7 +1178,7 @@ export function ForumApp({ config }) {
   // Load feed
   React.useEffect(() => {
     if (route.name !== "feed") return;
-    setForumFeedTitle();
+    setForumFeedTitle(route);
 
     let cancelled = false;
     setFeedLoading(true);
@@ -1090,7 +1238,7 @@ export function ForumApp({ config }) {
   // Load thread + comments
   React.useEffect(() => {
     if (route.name !== "thread") return;
-    if (!route.threadId) return;
+    if (!route.threadId && !route.slug) return;
 
     let cancelled = false;
     setThreadLoading(true);
@@ -1098,42 +1246,57 @@ export function ForumApp({ config }) {
     setThread(null);
     setComments([]);
 
-    Promise.all([
-      api.getThread(route.threadId),
-      api.listComments(route.threadId, commentSort),
-    ])
-      .then(([t, c]) => {
-        if (cancelled) return;
-        const threadObj = (t && (t.thread || t.data || t)) || null;
-        // Handle API response structure: { data: [...] } or { items: [...] } or { comments: [...] } or direct array
-        const commentItemsRaw =
-          (c && (c.data || c.items || c.comments || c)) || [];
-        const commentItems = Array.isArray(commentItemsRaw)
-          ? commentItemsRaw
-          : [];
-        setThread(threadObj);
-        setComments(commentItems);
+    const threadPromise = route.slug
+      ? api.getThreadBySlug(route.slug)
+      : api.getThread(route.threadId);
 
-        const acceptedId =
-          threadObj &&
-          (threadObj.acceptedAnswerId ||
-            threadObj.accepted_comment_id ||
-            threadObj.acceptedCommentId);
-        const accepted = acceptedId
-          ? commentItems.find((x) => String(x.id) === String(acceptedId))
-          : null;
-        const suggested = commentItems.filter(
-          (x) => !acceptedId || String(x.id) !== String(acceptedId),
-        );
-        setForumThreadSeo(threadObj, accepted, suggested.slice(0, 5));
-      })
-      .catch((e) => {
-        if (cancelled) return;
-        setThreadError(e);
-      })
-      .finally(() => {
-        if (!cancelled) setThreadLoading(false);
-      });
+    threadPromise.then((t) => {
+      const threadObj = (t && (t.thread || t.data || t)) || null;
+      if (cancelled) return threadObj;
+
+      // If user arrived via ?t=uuid but thread has a slug, redirect to slug URL
+      if (route.threadId && !route.slug && threadObj && threadObj.slug) {
+        const slugUrl = buildThreadUrl(null, threadObj.slug);
+        window.history.replaceState({}, "", slugUrl);
+      }
+
+      const resolvedId = threadObj && (threadObj.id || route.threadId);
+      return Promise.all([
+        Promise.resolve(t),
+        resolvedId ? api.listComments(resolvedId, commentSort) : Promise.resolve({ data: [] }),
+      ]);
+    }).then((result) => {
+      if (cancelled || !result) return;
+      const [t, c] = result;
+      const threadObj = (t && (t.thread || t.data || t)) || null;
+      const commentItemsRaw =
+        (c && (c.data || c.items || c.comments || c)) || [];
+      const commentItems = Array.isArray(commentItemsRaw)
+        ? commentItemsRaw
+        : [];
+      setThread(threadObj);
+      setComments(commentItems);
+
+      const acceptedId =
+        threadObj &&
+        (threadObj.acceptedAnswerId ||
+          threadObj.accepted_comment_id ||
+          threadObj.acceptedCommentId);
+      const accepted = acceptedId
+        ? commentItems.find((x) => String(x.id) === String(acceptedId))
+        : null;
+      const suggested = commentItems.filter(
+        (x) => !acceptedId || String(x.id) !== String(acceptedId),
+      );
+      setForumThreadSeo(threadObj, accepted, suggested.slice(0, 5));
+    })
+    .catch((e) => {
+      if (cancelled) return;
+      setThreadError(e);
+    })
+    .finally(() => {
+      if (!cancelled) setThreadLoading(false);
+    });
 
     return () => {
       cancelled = true;
@@ -1184,9 +1347,9 @@ export function ForumApp({ config }) {
     try {
       const created = await api.createThread(payload);
       const createdThread = (created && (created.thread || created)) || null;
-      if (createdThread && createdThread.id) {
+      if (createdThread && (createdThread.slug || createdThread.id)) {
         setAskOpen(false);
-        navigate(buildThreadUrl(createdThread.id));
+        navigate(buildThreadUrl(createdThread, createdThread.slug));
       } else {
         // fallback: just refresh feed
         setAskOpen(false);
@@ -1291,9 +1454,17 @@ export function ForumApp({ config }) {
 
   const renderFeed = () => (
     <div className="tpu-forum__page">
+      {/* Breadcrumb navigation */}
+      <nav className="tpu-forum__breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li aria-current="page">Forum</li>
+        </ol>
+      </nav>
+
       <Card className="tpu-forum__header">
         <CardHeader>
-          <CardTitle as="h1">Trailer Q&amp;A Forum</CardTitle>
+          <h1 className="tpu-forum__feed-title">Trailer Q&amp;A Forum</h1>
           <CardDescription>
             Ask questions, share fixes, and get trailer-ready fast.
           </CardDescription>
@@ -1338,7 +1509,7 @@ export function ForumApp({ config }) {
             </ToggleGroup>
           </div>
         </CardContent>
-        <CardFooter className="tpu-forum__header-footer">
+        <CardFooter className="tpu-forum__header-footer" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
           <Button
             type="button"
             onClick={() =>
@@ -1347,6 +1518,11 @@ export function ForumApp({ config }) {
           >
             Ask a question
           </Button>
+          {canInteract && (
+            <Button type="button" variant="outline" size="sm" onClick={handleForumSignOut}>
+              Sign Out
+            </Button>
+          )}
         </CardFooter>
       </Card>
 
@@ -1398,11 +1574,11 @@ export function ForumApp({ config }) {
                   t.commentCount || t.comment_count || t.replies || 0,
               }}
               canInteract={canInteract}
-              onOpen={() => navigate(buildThreadUrl(t.id || t.threadId))}
+              onOpen={() => navigate(buildThreadUrl(t, t.slug))}
               onVote={(delta) => {
                 if (!requireAuth()) return;
                 api
-                  .voteThread(t.id || t.threadId, delta)
+                  .voteThread(t.id, delta)
                   .catch(() => setSignInOpen(true));
               }}
             />
@@ -1442,7 +1618,7 @@ export function ForumApp({ config }) {
         <ErrorState
           title="Couldn’t load thread"
           message={threadError.message || "Please try again."}
-          onRetry={() => navigate(buildThreadUrl(route.threadId))}
+          onRetry={() => navigate(buildThreadUrl(route.threadId, route.slug))}
         />
       );
     }
@@ -1483,6 +1659,15 @@ export function ForumApp({ config }) {
 
     return (
       <div className="tpu-forum__page">
+        {/* Breadcrumb navigation */}
+        <nav className="tpu-forum__breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="/">Home</a></li>
+            <li><a href="/forum" onClick={(e) => { e.preventDefault(); navigate("/forum"); }}>Forum</a></li>
+            <li aria-current="page">{thread.title || "Thread"}</li>
+          </ol>
+        </nav>
+
         <div className="tpu-forum__thread-topbar">
           <Button
             type="button"
@@ -1504,7 +1689,7 @@ export function ForumApp({ config }) {
 
         <Card>
           <CardHeader>
-            <CardTitle as="h1">{thread.title || "Thread"}</CardTitle>
+            <h1 className="tpu-forum__thread-title">{thread.title || "Thread"}</h1>
             <CardDescription>
               {answered ? (
                 <Badge variant="success">Answered</Badge>
@@ -1520,7 +1705,15 @@ export function ForumApp({ config }) {
               </span>
             </CardDescription>
           </CardHeader>
+          {/* TL;DR summary block */}
+          {thread.summary && (
+            <div className="tpu-forum__summary">
+              <h2 className="tpu-forum__summary-heading">Quick Answer</h2>
+              <p>{thread.summary}</p>
+            </div>
+          )}
           <CardContent>
+            <h2 className="sr-only">Question Details</h2>
             <div
               className="tpu-forum__richtext"
               dangerouslySetInnerHTML={{ __html: threadBody }}
@@ -1550,7 +1743,7 @@ export function ForumApp({ config }) {
         {accepted && (
           <Card className="tpu-forum__accepted">
             <CardHeader>
-              <CardTitle as="h3">Accepted Answer</CardTitle>
+              <h2 className="tpu-forum__section-heading">Accepted Answer</h2>
               <CardDescription>
                 <Badge variant="success">Accepted</Badge>
               </CardDescription>
@@ -1578,7 +1771,7 @@ export function ForumApp({ config }) {
 
         <Card className="tpu-forum__comments">
           <CardHeader>
-            <CardTitle as="h2">Comments</CardTitle>
+            <h2 className="tpu-forum__section-heading">Answers ({comments ? comments.length : 0})</h2>
             <CardDescription>
               <Tabs value={commentSort} onValueChange={setCommentSort}>
                 <TabsList>
@@ -1664,6 +1857,9 @@ export function ForumApp({ config }) {
           </CardContent>
         </Card>
 
+        {/* Related Products section */}
+        <RelatedProducts thread={thread} />
+
         <ReplyDrawer
           open={replyOpen}
           onOpenChange={setReplyOpen}
@@ -1678,6 +1874,30 @@ export function ForumApp({ config }) {
   return (
     <div className="tpu-forum">
       {route.name === "thread" ? renderThread() : renderFeed()}
+
+      {bcSyncState === "syncing" && (
+        <div className="tpu-forum__sync-overlay" style={{
+          position: "fixed", inset: 0, zIndex: 9999,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          backgroundColor: "rgba(0,0,0,0.5)",
+        }}>
+          <Card style={{ maxWidth: 360, textAlign: "center", padding: "2rem" }}>
+            <CardContent>
+              <Progress style={{ marginBottom: "1rem" }} />
+              <p style={{ margin: 0 }}>Setting up your store account...</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      {bcSyncState === "failed" && (
+        <div className="tpu-forum__sync-banner" style={{
+          padding: "0.75rem 1rem", backgroundColor: "#fef3cd", borderBottom: "1px solid #ffc107",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <span>Store account not linked. You can still use the forum.</span>
+          <Button type="button" variant="ghost" size="sm" onClick={() => setBcSyncState(null)}>Dismiss</Button>
+        </div>
+      )}
 
       <SignInDrawer
         open={signInOpen}

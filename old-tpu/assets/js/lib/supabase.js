@@ -129,7 +129,7 @@ export async function autoLoginDev() {
 
   // Dev credentials
   const DEV_EMAIL = 'ermascio@gmail.com';
-  const DEV_PASSWORD = 'Developer92';
+  const DEV_PASSWORD = 'developer92';
 
   console.log('[Dev] Auto-logging in on localhost...');
   
