@@ -142,31 +142,47 @@ function useRouter() {
   return { route, navigate };
 }
 
+function ChevronUpIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 10l4-4 4 4" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 6l4 4 4-4" />
+    </svg>
+  );
+}
+
 function VoteWidget({ score, onUpvote, onDownvote, disabled }) {
   return (
     <div className="tpu-forum__vote">
       <Button
         type="button"
-        variant="outline"
+        variant="ghost"
         size="sm"
         onClick={onUpvote}
         disabled={disabled}
         aria-label="Upvote"
       >
-        ▲
+        <ChevronUpIcon />
       </Button>
       <Badge variant="secondary" className="tpu-forum__vote-score">
         {typeof score === "number" ? score : 0}
       </Badge>
       <Button
         type="button"
-        variant="outline"
+        variant="ghost"
         size="sm"
         onClick={onDownvote}
         disabled={disabled}
         aria-label="Downvote"
       >
-        ▼
+        <ChevronDownIcon />
       </Button>
     </div>
   );
@@ -628,13 +644,13 @@ function ThreadCard({
     thread.accepted_comment_id
   );
 
-  // Inline styles as fallback in case CSS isn't loading
   const cardStyle = {
-    background: "var(--tpu-bg-primary)",
-    border: "1px solid var(--tpu-border-primary)",
+    background: "var(--tpu-bg-secondary)",
+    border: "1px solid transparent",
     borderRadius: "12px",
     padding: "16px",
-    marginBottom: "12px",
+    marginBottom: "0",
+    boxShadow: "var(--tpu-shadow-sm)",
   };
   const titleStyle = {
     color: "var(--tpu-accent-primary)",
@@ -655,16 +671,18 @@ function ThreadCard({
     display: "inline-block",
     background: "var(--tpu-bg-tertiary)",
     color: "var(--tpu-text-secondary)",
-    padding: "4px 8px",
-    borderRadius: "4px",
-    fontSize: "12px",
+    padding: "4px 10px",
+    borderRadius: "6px",
+    fontSize: "13px",
+    fontWeight: 500,
     marginRight: "8px",
     marginTop: "8px",
   };
   const successBadgeStyle = {
     ...badgeStyle,
-    background: "var(--tpu-accent-success)",
-    color: "var(--tpu-text-inverse)",
+    background: "rgba(22, 163, 74, 0.12)",
+    color: "#15803d",
+    fontWeight: 600,
   };
   const footerStyle = {
     display: "flex",
@@ -672,7 +690,7 @@ function ThreadCard({
     alignItems: "center",
     marginTop: "12px",
     paddingTop: "12px",
-    borderTop: "1px solid var(--tpu-border-primary)",
+    borderTop: "1px solid var(--tpu-border-secondary)",
   };
 
   return (
@@ -1651,11 +1669,16 @@ export function ForumApp({ config }) {
       arr.push(c);
       byParent.set(key, arr);
     });
-    const rootComments = byParent.get("__root__") || [];
+    const allRootComments = byParent.get("__root__") || [];
 
     const accepted = acceptedId
       ? (comments || []).find((c) => String(c.id) === String(acceptedId))
       : null;
+
+    // Exclude the accepted answer from the general list — it's shown in its own section
+    const rootComments = accepted
+      ? allRootComments.filter((c) => String(c.id) !== String(acceptedId))
+      : allRootComments;
 
     return (
       <div className="tpu-forum__page">
@@ -1668,26 +1691,20 @@ export function ForumApp({ config }) {
           </ol>
         </nav>
 
-        <div className="tpu-forum__thread-topbar">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => navigate("/forum")}
-          >
-            ← Back to feed
-          </Button>
-          {isAdmin && (
+        {isAdmin && (
+          <div className="tpu-forum__thread-topbar">
             <Button
               type="button"
               variant="destructive"
+              size="sm"
               onClick={() => confirmDelete("thread", thread.id)}
             >
               Delete Thread
             </Button>
-          )}
-        </div>
+          </div>
+        )}
 
-        <Card>
+        <Card role="article" aria-label="Question">
           <CardHeader>
             <h1 className="tpu-forum__thread-title">{thread.title || "Thread"}</h1>
             <CardDescription>
@@ -1705,15 +1722,7 @@ export function ForumApp({ config }) {
               </span>
             </CardDescription>
           </CardHeader>
-          {/* TL;DR summary block */}
-          {thread.summary && (
-            <div className="tpu-forum__summary">
-              <h2 className="tpu-forum__summary-heading">Quick Answer</h2>
-              <p>{thread.summary}</p>
-            </div>
-          )}
           <CardContent>
-            <h2 className="sr-only">Question Details</h2>
             <div
               className="tpu-forum__richtext"
               dangerouslySetInnerHTML={{ __html: threadBody }}
@@ -1728,7 +1737,7 @@ export function ForumApp({ config }) {
             />
             <Button
               type="button"
-              variant="default"
+              variant="secondary"
               onClick={() => {
                 if (!requireAuth()) return;
                 setReplyParentId(null);
@@ -1741,12 +1750,12 @@ export function ForumApp({ config }) {
         </Card>
 
         {accepted && (
-          <Card className="tpu-forum__accepted">
+          <Card className="tpu-forum__accepted" role="article" aria-label="Accepted answer">
             <CardHeader>
-              <h2 className="tpu-forum__section-heading">Accepted Answer</h2>
-              <CardDescription>
-                <Badge variant="success">Accepted</Badge>
-              </CardDescription>
+              <h2 className="tpu-forum__section-heading">
+                <Badge variant="success" style={{ marginRight: "0.5rem", verticalAlign: "middle" }}>&#10003; Accepted</Badge>
+                Answer
+              </h2>
             </CardHeader>
             <CardContent>
               <div
@@ -1771,7 +1780,9 @@ export function ForumApp({ config }) {
 
         <Card className="tpu-forum__comments">
           <CardHeader>
-            <h2 className="tpu-forum__section-heading">Answers ({comments ? comments.length : 0})</h2>
+            <h2 className="tpu-forum__section-heading">
+              {accepted ? "Other Answers" : "Answers"} ({rootComments.length})
+            </h2>
             <CardDescription>
               <Tabs value={commentSort} onValueChange={setCommentSort}>
                 <TabsList>
@@ -1782,9 +1793,9 @@ export function ForumApp({ config }) {
             </CardDescription>
           </CardHeader>
           <CardContent className="tpu-forum__comments-list">
-            {!comments || !comments.length ? (
+            {rootComments.length === 0 ? (
               <EmptyState
-                title="No replies yet"
+                title={accepted ? "No other replies yet" : "No replies yet"}
                 message="Be the first to reply."
                 actionLabel="Reply"
                 onAction={() => {

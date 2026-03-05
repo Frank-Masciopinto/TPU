@@ -35,9 +35,9 @@ body.tpu-forum-page {
         color: $tpu-text-primary !important;
     }
   
-    // Hide page heading and breadcrumbs on forum pages
+    // Hide BigCommerce page heading and platform breadcrumbs on forum pages
     .page-heading,
-    nav[aria-label="Breadcrumb"],
+    nav[aria-label="Breadcrumb"]:not(.tpu-forum__breadcrumb),
     .breadcrumbs {
         display: none !important;
     }
@@ -59,6 +59,14 @@ body.tpu-forum-page {
     display: flex;
     flex-direction: column;
     gap: $tpu-space-4;
+
+    > .tpu-forum__accepted {
+        margin-top: -($tpu-space-2);
+    }
+
+    > .tpu-forum__comments {
+        margin-top: $tpu-space-2;
+    }
 }
 
 .tpu-forum__toolbar {
@@ -106,13 +114,29 @@ body.tpu-forum-page {
 
 .tpu-forum__vote {
     display: inline-flex;
-    gap: $tpu-space-2;
+    gap: $tpu-space-1;
     align-items: center;
+
+    .tpu-button {
+        min-width: 36px;
+        min-height: 36px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: $tpu-radius-md;
+        transition: background-color 150ms ease, color 150ms ease, transform 100ms ease;
+
+        &:active:not(:disabled) {
+            transform: scale(0.92);
+        }
+    }
 }
 
 .tpu-forum__vote-score {
-    min-width: 44px;
+    min-width: 32px;
     text-align: center;
+    font-size: 0.8125rem;
 }
 
 .tpu-forum__badges {
@@ -140,7 +164,104 @@ body.tpu-forum-page {
 
 .tpu-forum__thread-topbar {
     display: flex;
-    justify-content: flex-start;
+    justify-content: flex-end;
+    align-items: center;
+    gap: $tpu-space-3;
+}
+
+// =============================================================================
+// Thread Detail — Typography
+// =============================================================================
+
+.tpu-forum__thread-title {
+    font-family: $tpu-font-headline;
+    font-size: 1.75rem;
+    font-weight: $tpu-font-bold;
+    line-height: $tpu-leading-tight;
+    letter-spacing: -0.01em;
+    color: $tpu-text-primary;
+    margin: 0;
+
+    @media (min-width: $tpu-screen-md) {
+        font-size: 2rem;
+    }
+}
+
+.tpu-forum__feed-title {
+    font-family: $tpu-font-headline;
+    font-size: 1.5rem;
+    font-weight: $tpu-font-bold;
+    line-height: $tpu-leading-tight;
+    letter-spacing: -0.01em;
+    color: $tpu-text-primary;
+    margin: 0;
+
+    @media (min-width: $tpu-screen-md) {
+        font-size: 1.75rem;
+    }
+}
+
+.tpu-forum__section-heading {
+    font-family: $tpu-font-body;
+    font-size: 1.25rem;
+    font-weight: $tpu-font-semibold;
+    line-height: $tpu-leading-snug;
+    color: $tpu-text-primary;
+    margin: 0;
+}
+
+// =============================================================================
+// Breadcrumb Navigation
+// =============================================================================
+
+.tpu-forum__breadcrumb {
+    font-size: $tpu-text-sm;
+    color: $tpu-text-tertiary;
+
+    ol {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $tpu-space-1;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    li {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    li + li::before {
+        content: "/";
+        margin-right: $tpu-space-1;
+        color: $tpu-text-muted;
+    }
+
+    a {
+        color: $tpu-text-tertiary;
+        text-decoration: none;
+        transition: color 150ms ease;
+
+        &:hover {
+            color: $tpu-accent-primary;
+        }
+    }
+
+    li[aria-current="page"] {
+        color: $tpu-text-secondary;
+        font-weight: $tpu-font-medium;
+    }
+}
+
+// =============================================================================
+// Accepted Answer — elevated card
+// =============================================================================
+
+.tpu-forum__accepted {
+    border-left: 3px solid $tpu-accent-success !important;
+    background: linear-gradient(90deg, rgba($tpu-accent-success-raw, 0.04) 0%, transparent 40%) !important;
+    box-shadow: $tpu-shadow-md;
 }
 
 .tpu-forum__drawer-body {
@@ -215,25 +336,21 @@ body.tpu-forum-page {
     align-items: center;
 }
 
-// Thread topbar with admin delete button
-.tpu-forum__thread-topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: $tpu-space-3;
+
+.tpu-forum .tpu-alert__title {
+    text-transform: none;
 }
 
 .tpu-forum__richtext {
-    // Keep styles minimal; content is sanitized.
-    line-height: 1.6;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: $tpu-text-secondary;
 
     p { margin: 0 0 $tpu-space-3; }
     ul, ol { margin: 0 0 $tpu-space-3; padding-left: 1.25rem; }
     code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
     pre { overflow: auto; padding: $tpu-space-3; border: 1px solid $tpu-border-primary; border-radius: $tpu-radius-md; }
     a { color: $tpu-accent-primary; }
-  
-    color: $tpu-text-primary;
 
     code {
         background-color: $tpu-bg-secondary;
@@ -382,10 +499,12 @@ body.tpu-forum-page {
 // -----------------------------------------------------------------------------
 .tpu-card {
     background-color: $tpu-bg-secondary;
-    border: 1px solid $tpu-border-primary;
-    border-radius: $tpu-radius-lg;
+    border: 1px solid transparent;
+    border-radius: $tpu-radius-xl;
     color: $tpu-text-primary;
     overflow: hidden;
+    box-shadow: $tpu-shadow-sm;
+    transition: box-shadow 200ms ease, transform 200ms ease;
 }
 
 .tpu-card__header {
@@ -480,8 +599,12 @@ body.tpu-forum-page {
 
     &--ghost {
         background-color: transparent;
-        color: $tpu-text-primary;
-        &:hover { background-color: $tpu-bg-tertiary; }
+        color: $tpu-text-tertiary;
+        border: 1px solid transparent;
+        &:hover {
+            background-color: $tpu-bg-tertiary;
+            color: $tpu-text-primary;
+        }
     }
 
     &--link {
@@ -500,11 +623,11 @@ body.tpu-forum-page {
 .tpu-badge {
     display: inline-flex;
     align-items: center;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 500;
     line-height: 1;
     padding: 4px 10px;
-    border-radius: 9999px;
+    border-radius: 6px;
     border: 1px solid transparent;
     white-space: nowrap;
 
@@ -527,9 +650,10 @@ body.tpu-forum-page {
     }
 
     &--success {
-        background-color: rgba($tpu-accent-success-raw, 0.15);
-        color: $tpu-accent-success;
-        border-color: rgba($tpu-accent-success-raw, 0.3);
+        background-color: rgba($tpu-accent-success-raw, 0.12);
+        color: #15803d;
+        border-color: rgba($tpu-accent-success-raw, 0.25);
+        font-weight: 600;
     }
 
     &--destructive {
@@ -829,6 +953,61 @@ body.tpu-forum-page {
     font-size: 0.875rem;
     color: $tpu-text-secondary;
     line-height: 1.5;
+}
+
+
+// Focus rings for accessibility
+// -----------------------------------------------------------------------------
+.tpu-forum {
+    .tpu-button:focus-visible,
+    .tpu-tabs__trigger:focus-visible,
+    .tpu-toggle-group__item:focus-visible,
+    .tpu-select__trigger:focus-visible {
+        outline: 2px solid $tpu-accent-primary;
+        outline-offset: 2px;
+    }
+
+    a:focus-visible {
+        outline: 2px solid $tpu-accent-primary;
+        outline-offset: 2px;
+        border-radius: $tpu-radius-sm;
+    }
+}
+
+// Feed card hover
+// -----------------------------------------------------------------------------
+.tpu-forum__thread-card {
+    transition: box-shadow 200ms ease, transform 200ms ease;
+
+    &:hover {
+        box-shadow: $tpu-shadow-md;
+        transform: translateY(-1px);
+    }
+}
+
+// Related products
+// -----------------------------------------------------------------------------
+.tpu-forum__related-products {
+    .tpu-forum__product-links {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: $tpu-space-2;
+
+        a {
+            color: $tpu-accent-primary;
+            text-decoration: none;
+            font-size: $tpu-text-sm;
+            font-weight: $tpu-font-medium;
+            transition: color 150ms ease;
+
+            &:hover {
+                color: lighten($tpu-accent-primary-raw, 10%);
+            }
+        }
+    }
 }
 
 
