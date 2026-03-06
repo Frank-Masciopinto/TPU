@@ -184,11 +184,11 @@ export function forumApi(config) {
         },
 
         async voteThread(threadId, delta) {
-            return request(config, `/threads/${encodeURIComponent(threadId)}/vote`, { method: 'POST', body: { delta }, needsAuth: true });
+            return request(config, `/threads/${encodeURIComponent(threadId)}/vote`, { method: 'POST', body: { value: delta }, needsAuth: true });
         },
 
         async voteComment(commentId, delta) {
-            return request(config, `/comments/${encodeURIComponent(commentId)}/vote`, { method: 'POST', body: { delta }, needsAuth: true });
+            return request(config, `/comments/${encodeURIComponent(commentId)}/vote`, { method: 'POST', body: { value: delta }, needsAuth: true });
         },
 
         // =====================================================================

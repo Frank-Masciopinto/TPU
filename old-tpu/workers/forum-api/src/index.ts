@@ -440,6 +440,7 @@ async function handleGetThread(
   env: Env,
   ctx: ExecutionContext,
   threadId: string,
+  authed: Authed | null,
 ): Promise<Response> {
   return maybeCached(req, ctx, 30, async () => {
     const params = new URLSearchParams();
@@ -454,9 +455,23 @@ async function handleGetThread(
         { status: 502 },
       );
     const rows = (await r.json()) as unknown[];
-    const thread = rows[0] ?? null;
+    const thread = rows[0] as Record<string, unknown> | undefined;
     if (!thread) return json({ error: "not_found" }, { status: 404 });
-    return json({ data: thread }, { status: 200 });
+
+    let myVote = 0;
+    if (authed) {
+      const vr = await supabaseFetch(
+        env,
+        `thread_votes?thread_id=eq.${threadId}&user_id=eq.${encodeURIComponent(authed.userId)}&select=value`,
+        { method: "GET" },
+      );
+      if (vr.ok) {
+        const vrows = (await vr.json()) as { value: number }[];
+        if (vrows[0]) myVote = vrows[0].value;
+      }
+    }
+
+    return json({ data: { ...thread, myVote } }, { status: 200 });
   });
 }
 
@@ -465,6 +480,7 @@ async function handleGetThreadBySlug(
   env: Env,
   ctx: ExecutionContext,
   slug: string,
+  authed: Authed | null,
 ): Promise<Response> {
   return maybeCached(req, ctx, 30, async () => {
     const params = new URLSearchParams();
@@ -479,9 +495,23 @@ async function handleGetThreadBySlug(
         { status: 502 },
       );
     const rows = (await r.json()) as unknown[];
-    const thread = rows[0] ?? null;
+    const thread = rows[0] as Record<string, unknown> | undefined;
     if (!thread) return json({ error: "not_found" }, { status: 404 });
-    return json({ data: thread }, { status: 200 });
+
+    let myVote = 0;
+    if (authed && thread.id) {
+      const vr = await supabaseFetch(
+        env,
+        `thread_votes?thread_id=eq.${thread.id}&user_id=eq.${encodeURIComponent(authed.userId)}&select=value`,
+        { method: "GET" },
+      );
+      if (vr.ok) {
+        const vrows = (await vr.json()) as { value: number }[];
+        if (vrows[0]) myVote = vrows[0].value;
+      }
+    }
+
+    return json({ data: { ...thread, myVote } }, { status: 200 });
   });
 }
 
@@ -541,25 +571,52 @@ async function handleVoteThread(
   >;
   if (!body) throw new HttpError(400, "invalid_json");
   const value = Number(body.value);
-  if (![1, -1].includes(value)) throw new HttpError(400, "invalid_vote_value");
+  if (![1, -1, 0].includes(value))
+    throw new HttpError(400, "invalid_vote_value");
 
-  // Assumes a `thread_votes` table with unique(thread_id, user_id) and a DB trigger/view
-  // maintains thread score/comment_count. If your schema uses RPC instead, swap here.
-  const upsert = { thread_id: threadId, user_id: authed.userId, value };
+  let myVote = 0;
 
-  const r = await supabaseFetch(env, "thread_votes", {
-    method: "POST",
-    jwt: authed.jwt,
-    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-    body: JSON.stringify(upsert),
-  });
-  if (!r.ok)
-    return json(
-      { error: "supabase_error", details: await safeJson(r) },
-      { status: 502 },
-    );
-  const row = (await r.json()) as unknown[];
-  return json({ data: row[0] ?? null }, { status: 200 });
+  if (value === 0) {
+    // Remove vote
+    const qs = `thread_votes?thread_id=eq.${threadId}&user_id=eq.${encodeURIComponent(authed.userId)}`;
+    const r = await supabaseFetch(env, qs, {
+      method: "DELETE",
+      jwt: authed.jwt,
+    });
+    if (!r.ok && r.status !== 404)
+      return json(
+        { error: "supabase_error", details: await safeJson(r) },
+        { status: 502 },
+      );
+  } else {
+    const upsert = { thread_id: threadId, user_id: authed.userId, value };
+    const r = await supabaseFetch(env, "thread_votes", {
+      method: "POST",
+      jwt: authed.jwt,
+      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+      body: JSON.stringify(upsert),
+    });
+    if (!r.ok)
+      return json(
+        { error: "supabase_error", details: await safeJson(r) },
+        { status: 502 },
+      );
+    myVote = value;
+  }
+
+  // Fetch the updated thread score (maintained by trigger)
+  const scoreRes = await supabaseFetch(
+    env,
+    `threads?id=eq.${threadId}&select=score`,
+    { method: "GET" },
+  );
+  let score: number | null = null;
+  if (scoreRes.ok) {
+    const rows = (await scoreRes.json()) as { score: number }[];
+    if (rows[0]) score = rows[0].score;
+  }
+
+  return json({ score, myVote }, { status: 200 });
 }
 
 async function handleGetThreadComments(
@@ -567,6 +624,7 @@ async function handleGetThreadComments(
   env: Env,
   ctx: ExecutionContext,
   threadId: string,
+  authed: Authed | null,
 ): Promise<Response> {
   return maybeCached(req, ctx, 20, async () => {
     const params = new URLSearchParams();
@@ -584,7 +642,29 @@ async function handleGetThreadComments(
         { error: "supabase_error", details: await safeJson(r) },
         { status: 502 },
       );
-    return json({ data: await r.json() }, { status: 200 });
+    const comments = (await r.json()) as Record<string, unknown>[];
+
+    if (authed && comments.length > 0) {
+      const ids = comments.map((c) => c.id as string).filter(Boolean);
+      const vr = await supabaseFetch(
+        env,
+        `comment_votes?comment_id=in.(${ids.join(",")})\&user_id=eq.${encodeURIComponent(authed.userId)}&select=comment_id,value`,
+        { method: "GET" },
+      );
+      if (vr.ok) {
+        const votes = (await vr.json()) as { comment_id: string; value: number }[];
+        const voteMap = new Map(votes.map((v) => [v.comment_id, v.value]));
+        for (const c of comments) {
+          (c as Record<string, unknown>).myVote = voteMap.get(c.id as string) ?? 0;
+        }
+      }
+    } else {
+      for (const c of comments) {
+        (c as Record<string, unknown>).myVote = 0;
+      }
+    }
+
+    return json({ data: comments }, { status: 200 });
   });
 }
 
@@ -631,22 +711,51 @@ async function handleVoteComment(
   >;
   if (!body) throw new HttpError(400, "invalid_json");
   const value = Number(body.value);
-  if (![1, -1].includes(value)) throw new HttpError(400, "invalid_vote_value");
+  if (![1, -1, 0].includes(value))
+    throw new HttpError(400, "invalid_vote_value");
 
-  const upsert = { comment_id: commentId, user_id: authed.userId, value };
-  const r = await supabaseFetch(env, "comment_votes", {
-    method: "POST",
-    jwt: authed.jwt,
-    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-    body: JSON.stringify(upsert),
-  });
-  if (!r.ok)
-    return json(
-      { error: "supabase_error", details: await safeJson(r) },
-      { status: 502 },
-    );
-  const row = (await r.json()) as unknown[];
-  return json({ data: row[0] ?? null }, { status: 200 });
+  let myVote = 0;
+
+  if (value === 0) {
+    const qs = `comment_votes?comment_id=eq.${commentId}&user_id=eq.${encodeURIComponent(authed.userId)}`;
+    const r = await supabaseFetch(env, qs, {
+      method: "DELETE",
+      jwt: authed.jwt,
+    });
+    if (!r.ok && r.status !== 404)
+      return json(
+        { error: "supabase_error", details: await safeJson(r) },
+        { status: 502 },
+      );
+  } else {
+    const upsert = { comment_id: commentId, user_id: authed.userId, value };
+    const r = await supabaseFetch(env, "comment_votes", {
+      method: "POST",
+      jwt: authed.jwt,
+      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+      body: JSON.stringify(upsert),
+    });
+    if (!r.ok)
+      return json(
+        { error: "supabase_error", details: await safeJson(r) },
+        { status: 502 },
+      );
+    myVote = value;
+  }
+
+  // Fetch the updated comment score (maintained by trigger)
+  const scoreRes = await supabaseFetch(
+    env,
+    `comments?id=eq.${commentId}&select=score`,
+    { method: "GET" },
+  );
+  let score: number | null = null;
+  if (scoreRes.ok) {
+    const rows = (await scoreRes.json()) as { score: number }[];
+    if (rows[0]) score = rows[0].score;
+  }
+
+  return json({ score, myVote }, { status: 200 });
 }
 
 async function handleAcceptComment(
@@ -1295,6 +1404,7 @@ async function handleAuthRefresh(
 
   const newToken = await new SignJWT({
     sub,
+    role: "authenticated",
     email: payload.email,
     name: payload.name,
     source: payload.source,
@@ -1403,6 +1513,7 @@ async function handleBCExchange(req: Request, env: Env): Promise<Response> {
 
   const token = await new SignJWT({
     sub: `bc_${customerId}`,
+    role: "authenticated",
     email: customer.email,
     name: `${customer.first_name} ${customer.last_name}`.trim(),
     source: "bigcommerce",
@@ -3051,6 +3162,7 @@ export default {
             env,
             ctx,
             decodeURIComponent(threadBySlugMatch[1]!),
+            authed,
           ),
         );
       }
@@ -3065,6 +3177,7 @@ export default {
             env,
             ctx,
             decodeURIComponent(threadIdMatch[1]!),
+            authed,
           ),
         );
       }
@@ -3131,6 +3244,7 @@ export default {
             env,
             ctx,
             decodeURIComponent(threadCommentsMatch[1]!),
+            authed,
           ),
         );
       }

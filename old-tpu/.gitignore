@@ -35,8 +35,9 @@ temp/
 # Generated / parsed (e.g. tooling cache)
 parsed/
 
-# Optional: local env (uncomment if you add .env)
-# .env
-# .env.local
-# .env.*.local
+# Local env / secrets
+.env
+.env.local
+.env.*.local
+.dev.vars
 new-tpu/
