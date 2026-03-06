@@ -907,7 +907,7 @@ function RelatedProducts({ thread }) {
       <CardContent>
         <ul className="tpu-forum__product-links">
           {matches.map((m) => (
-            <li key={m.url}>
+            <li key={m.label}>
               <a href={m.url}>{m.label}</a>
             </li>
           ))}

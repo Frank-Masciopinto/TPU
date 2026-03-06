@@ -33,7 +33,7 @@ const CardTitle = React.forwardRef(({ className, as: Comp = 'h3', ...props }, re
 CardTitle.displayName = 'CardTitle';
 
 const CardDescription = React.forwardRef(({ className, ...props }, ref) => (
-  <p
+  <div
     ref={ref}
     className={cn('tpu-card__description', className)}
     {...props}

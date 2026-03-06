@@ -3,6 +3,9 @@ main = "src/index.ts"
 compatibility_date = "2026-01-08"
 account_id = "9c6e4f899b70c79dda1a7600754df3cc"
 
+[dev]
+port = 8787
+
 # Deploys to: cartertraileraxles.com (custom domain)
 
 # IMPORTANT:
