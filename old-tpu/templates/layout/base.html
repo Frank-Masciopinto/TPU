@@ -28,6 +28,7 @@
     {{inject 'secureBaseUrl' settings.secure_base_url}}
     {{inject 'cartId' cart_id}}
     {{inject 'template' template}}
+    {{inject 'customer' customer}}
 </head>
     <body id="body" class="main{{#if theme_settings.body_width '===' 960}} nine-sixty{{/if}} {{#if theme_settings.body_width '===' 1170}} eleven-seventy {{/if}} {{#if theme_settings.body_width '===' 1280}} twelve-eighty {{/if}} {{#if theme_settings.body_width '===' 1366}} thirteen-sixty-six {{/if}} {{#if theme_settings.body_width '===' 1440}} fourteen-forty {{/if}} base-layout {{#if theme_settings.header-layout '!==' 'in-container'}} header-full-width{{/if}} {{#if theme_settings.header-layout '===' 'in-container'}} header-in-container{{/if}}">
 
@@ -50,6 +51,21 @@
                 window.stencilBootstrap("{{page_type}}", {{jsContext}}).load();
             });
         </script>
+
+        {{#if customer}}
+        <script>
+            (function() {
+                try {
+                    var dest = window.sessionStorage.getItem('tpu_login_redirect');
+                    if (!dest) return;
+                    window.sessionStorage.removeItem('tpu_login_redirect');
+                    if (window.location.pathname + (window.location.search || '') !== dest) {
+                        window.location.replace(dest);
+                    }
+                } catch (e) {}
+            })();
+        </script>
+        {{/if}}
 
         {{#unless customer}}
         <script>

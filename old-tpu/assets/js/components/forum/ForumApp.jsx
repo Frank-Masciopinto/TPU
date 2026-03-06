@@ -136,6 +136,7 @@ function useRouter() {
       return;
     }
     window.history.pushState({}, "", url);
+    window.scrollTo(0, 0);
     setRoute(parseRoute(window.location));
   }, []);
 
@@ -868,26 +869,26 @@ function CommentCard({
 }
 
 const PRODUCT_LINKS = [
-  { keywords: ["3500", "3.5k", "3500 lb"], label: "3,500 lb Trailer Axles", url: "/axles/?brand=120&sort=featured" },
-  { keywords: ["5200", "5.2k", "5200 lb"], label: "5,200 lb Trailer Axles", url: "/axles/?brand=120&sort=featured" },
-  { keywords: ["6000", "6k axle", "6000 lb"], label: "6,000 lb Trailer Axles", url: "/axles/?brand=120&sort=featured" },
-  { keywords: ["7000", "7k axle", "7k trailer"], label: "7,000 lb Trailer Axles", url: "/axles/" },
-  { keywords: ["8000", "8k axle", "8k trailer"], label: "8,000 lb Trailer Axles", url: "/axles/" },
-  { keywords: ["10000", "10k axle", "10k trailer"], label: "10,000 lb Trailer Axles", url: "/axles/" },
-  { keywords: ["12000", "12k axle", "12k trailer"], label: "12,000 lb Trailer Axles", url: "/axles/" },
-  { keywords: ["hub and drum", "hub drum", "hub & drum"], label: "Trailer Hubs & Drums", url: "/trailer-axle-parts/hubs-drums/" },
-  { keywords: ["bearing", "bearings", "repack"], label: "Trailer Bearings & Seal Kits", url: "/trailer-axle-parts/bearings-races-seals-kits/" },
-  { keywords: ["brake assembly", "electric brake", "brake magnet"], label: "Trailer Brake Assemblies", url: "/trailer-axle-parts/trailer-brakes/" },
-  { keywords: ["leaf spring", "slipper spring", "double eye spring"], label: "Trailer Leaf Springs", url: "/trailer-suspension/leaf-springs/" },
-  { keywords: ["hanger kit", "suspension kit", "equalizer"], label: "Trailer Suspension Kits", url: "/trailer-suspension/" },
-  { keywords: ["tire", "tires", "wheel", "wheels", "17.5", "16 inch", "15 inch"], label: "Trailer Tires & Wheels", url: "/tires-wheels/" },
+  { keywords: ["3500", "3.5k", "3500 lb"], label: "3,500 lb Trailer Axles", url: "/categories/axles/3-500-lbs-axles.html" },
+  { keywords: ["5200", "5.2k", "5200 lb"], label: "5,200 lb Trailer Axles", url: "/categories/axles/5-200-lbs-axles.html" },
+  { keywords: ["6000", "6k axle", "6000 lb"], label: "6,000 lb Trailer Axles", url: "/categories/axles/6-000-lbs-axles.html" },
+  { keywords: ["7000", "7k axle", "7k trailer"], label: "7,000 lb Trailer Axles", url: "/categories/axles/7-000-lbs-axles.html" },
+  { keywords: ["8000", "8k axle", "8k trailer"], label: "8,000 lb Trailer Axles", url: "/categories/axles/8-000-lbs-axles.html" },
+  { keywords: ["10000", "10k axle", "10k trailer"], label: "10,000 lb Trailer Axles", url: "/categories/axles/10-000-lbs-axles.html" },
+  { keywords: ["12000", "12k axle", "12k trailer"], label: "12,000 lb Trailer Axles", url: "/categories/axles/12-000-lbs-axles.html" },
+  { keywords: ["hub and drum", "hub drum", "hub & drum"], label: "Trailer Hubs & Drums", url: "/categories/brakes-hubs-drums-parts/hubs-and-drums.html" },
+  { keywords: ["bearing", "bearings", "repack"], label: "Trailer Bearings & Seal Kits", url: "/categories/trailer-axle-parts/bearings-races-seals-kits.html" },
+  { keywords: ["brake assembly", "electric brake", "brake magnet"], label: "Trailer Brake Assemblies", url: "/categories/trailer-axle-parts/trailer-brakes.html" },
+  { keywords: ["leaf spring", "slipper spring", "double eye spring"], label: "Trailer Leaf Springs", url: "/categories/trailer-suspension/leaf-springs.html" },
+  { keywords: ["hanger kit", "suspension kit", "equalizer"], label: "Trailer Suspension Kits", url: "/categories/trailer-suspension/suspension-kits.html" },
+  { keywords: ["tire", "tires", "wheel", "wheels", "17.5", "16 inch", "15 inch"], label: "Trailer Tires & Wheels", url: "/categories/tires-wheels.html" },
   { keywords: ["tandem axle kit", "tandem kit"], label: "Tandem Axle Kits", url: "/trailer-axle-kits/" },
-  { keywords: ["hutch", "hdss"], label: "Hutch HDSS Suspension", url: "/trailer-suspension/" },
-  { keywords: ["grease cap", "oil cap", "oil bath"], label: "Oil & Grease Caps", url: "/trailer-axle-parts/oil-grease-caps/" },
-  { keywords: ["u-bolt", "u bolt"], label: "U-Bolt Kits", url: "/trailer-suspension/u-bolts-kits/" },
-  { keywords: ["lug nut", "stud", "swivel flange"], label: "Wheel Studs & Lug Nuts", url: "/tires-wheels/wheel-accessories-parts/" },
-  { keywords: ["disc brake", "hydraulic brake", "caliper"], label: "Hydraulic Disc Brakes", url: "/trailer-axle-parts/trailer-brakes/" },
-  { keywords: ["coupler", "gooseneck", "hitch"], label: "Trailer Couplers & Hitches", url: "/towing-accessories/" },
+  { keywords: ["hutch", "hdss"], label: "Hutch HDSS Suspension", url: "/categories/suspension/hutch-suspension.html" },
+  { keywords: ["grease cap", "oil cap", "oil bath"], label: "Oil & Grease Caps", url: "/categories/trailer-axle-parts/oil-grease-caps.html" },
+  { keywords: ["u-bolt", "u bolt"], label: "U-Bolt Kits", url: "/categories/trailer-suspension/u-bolts-kits.html" },
+  { keywords: ["lug nut", "stud", "swivel flange"], label: "Wheel Studs & Lug Nuts", url: "/categories/tires-wheels/wheel-accessories-parts/wheel-studs-lug-nuts-bolts.html" },
+  { keywords: ["disc brake", "hydraulic brake", "caliper"], label: "Hydraulic Disc Brakes", url: "/brake-calipers/" },
+  { keywords: ["coupler", "gooseneck", "hitch"], label: "Trailer Couplers & Hitches", url: "/categories/trailer-coupler.html" },
 ];
 
 function RelatedProducts({ thread }) {

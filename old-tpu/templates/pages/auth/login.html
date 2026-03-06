@@ -26,6 +26,18 @@
                     document.getElementById('login_pass').value = 'developer92';
                 }
             </script>
+            <script>
+                (function() {
+                    try {
+                        var params = new URLSearchParams(window.location.search);
+                        var from = params.get('from');
+                        if (!from) return;
+                        var url = new URL(from, window.location.origin);
+                        if (url.origin !== window.location.origin) return;
+                        window.sessionStorage.setItem('tpu_login_redirect', url.pathname + (url.search || ''));
+                    } catch (e) {}
+                })();
+            </script>
             <div class="form-actions">
                 <input type="submit" class="button button--primary" value="{{lang 'login.submit_value' }}">
                 <a class="forgot-password" href="{{urls.auth.forgot_password}}">{{lang 'login.forgot_password' }}</a>
