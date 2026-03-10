@@ -162,7 +162,8 @@ async function rateLimitOrThrow(
 // Image upload constants & helpers
 // ---------------------------------------------------------------------------
 
-const R2_PUBLIC_PREFIX = "https://forum-images.cartertraileraxles.com/";
+const R2_LEGACY_PREFIX = "https://forum-images.cartertraileraxles.com/";
+
 const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -172,17 +173,53 @@ const ALLOWED_IMAGE_TYPES = new Set([
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
 const MAX_IMAGES_PER_POST = 3;
 
-function validateImageUrls(raw: unknown): string[] {
+/**
+ * Rewrites any forum image URL (legacy subdomain or already-proxied) to use
+ * the current Worker origin. This means old rows stored with
+ * `forum-images.cartertraileraxles.com/forum/…` load correctly in both dev
+ * (localhost:8787) and production.
+ */
+function rewriteImageUrl(url: string, workerOrigin: string): string {
+  if (url.startsWith(R2_LEGACY_PREFIX + "forum/")) {
+    const key = url.slice(R2_LEGACY_PREFIX.length); // forum/...
+    return `${workerOrigin}/forum-images/${key}`;
+  }
+  return url;
+}
+
+function rewriteImageUrls(images: unknown, workerOrigin: string): string[] {
+  if (!Array.isArray(images)) return [];
+  return images.map((u) => rewriteImageUrl(String(u), workerOrigin));
+}
+
+/** Rewrites `images` field on each row in-place so old R2-subdomain URLs resolve via the Worker. */
+function rewriteRowImages(rows: Record<string, unknown>[], workerOrigin: string): void {
+  for (const row of rows) {
+    if (Array.isArray(row.images) && row.images.length > 0) {
+      row.images = rewriteImageUrls(row.images, workerOrigin);
+    }
+  }
+}
+
+function isValidForumImageUrl(url: string, workerOrigin: string): boolean {
+  return (
+    url.startsWith(R2_LEGACY_PREFIX + "forum/") ||
+    url.startsWith(`${workerOrigin}/forum-images/forum/`)
+  );
+}
+
+function validateImageUrls(raw: unknown, workerOrigin: string): string[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .map(String)
-    .filter((url) => url.startsWith(R2_PUBLIC_PREFIX + "forum/"))
+    .filter((u) => isValidForumImageUrl(u, workerOrigin))
     .slice(0, MAX_IMAGES_PER_POST);
 }
 
 function r2KeyFromUrl(url: string): string | null {
-  if (!url.startsWith(R2_PUBLIC_PREFIX)) return null;
-  const key = url.slice(R2_PUBLIC_PREFIX.length);
+  const match = url.match(/\/forum\/([^?\s#]+)$/);
+  if (!match) return null;
+  const key = "forum/" + match[1];
   return key.startsWith("forum/") ? key : null;
 }
 
@@ -238,7 +275,40 @@ async function handleImageUpload(
     `[Upload] ok user=${authed.userId} key=${key} size=${file.size} type=${file.type}`,
   );
 
-  return json({ url: `${R2_PUBLIC_PREFIX}${key}` }, { status: 201 });
+  const base = new URL(req.url).origin;
+  return json({ url: `${base}/forum-images/${key}` }, { status: 201 });
+}
+
+async function handleServeForumImage(
+  req: Request,
+  env: Env,
+  url: URL,
+): Promise<Response> {
+  const path = url.pathname.replace(/\/+$/, "") || "/";
+
+  let key: string;
+  if (path.startsWith("/forum-images/forum/")) {
+    key = path.slice("/forum-images".length).replace(/^\//, "");
+  } else if (
+    url.hostname === "forum-images.cartertraileraxles.com" &&
+    path.startsWith("/forum/")
+  ) {
+    key = path.slice(1);
+  } else {
+    return new Response("Not Found", { status: 404 });
+  }
+
+  if (!key.startsWith("forum/")) return new Response("Not Found", { status: 404 });
+
+  const obj = await env.FORUM_IMAGES.get(key);
+  if (!obj) return new Response("Not Found", { status: 404 });
+
+  const headers = new Headers();
+  const ct = obj.httpMetadata?.contentType ?? "application/octet-stream";
+  headers.set("Content-Type", ct);
+  headers.set("Cache-Control", "public, max-age=31536000, immutable");
+
+  return new Response(obj.body, { headers, status: 200 });
 }
 
 function countLinks(text: string): number {
@@ -370,7 +440,9 @@ async function enrichWithAuthors(
   env: Env,
   rows: Record<string, unknown>[],
   adminMap?: Record<string, string>,
+  workerOrigin?: string,
 ): Promise<void> {
+  if (workerOrigin) rewriteRowImages(rows, workerOrigin);
   try {
     const userIds = [...new Set(rows.map((r) => r.user_id as string).filter(Boolean))];
     if (!userIds.length) return;
@@ -530,6 +602,7 @@ async function handleThreadsFeed(
   ctx: ExecutionContext,
 ): Promise<Response> {
   const url = new URL(req.url);
+  const workerOrigin = url.origin;
   const sort = parseSortParam(url.searchParams.get("sort"));
   const q = url.searchParams.get("q") || "";
   const tags = parseTagsParam(url.searchParams.get("tags"));
@@ -586,7 +659,7 @@ async function handleThreadsFeed(
         const slice = ranked
           .slice(from, from + pageSize)
           .map(({ _hot, ...t }) => t);
-        await enrichWithAuthors(env, slice);
+        await enrichWithAuthors(env, slice, undefined, workerOrigin);
         return json(
           { data: slice, meta: { sort, page, pageSize, total: ranked.length } },
           { status: 200 },
@@ -624,7 +697,7 @@ async function handleThreadsFeed(
       }
       const total = getContentRangeCount(r.headers.get("content-range"));
       const data = await r.json();
-      if (Array.isArray(data)) await enrichWithAuthors(env, data);
+      if (Array.isArray(data)) await enrichWithAuthors(env, data, undefined, workerOrigin);
       return json(
         { data, meta: { sort, page, pageSize, total } },
         { status: 200 },
@@ -659,6 +732,7 @@ async function handleGetThread(
   threadId: string,
   authed: Authed | null,
 ): Promise<Response> {
+  const workerOrigin = new URL(req.url).origin;
   return maybeCached(req, ctx, 30, async () => {
     const params = new URLSearchParams();
     params.set("select", THREAD_SELECT);
@@ -688,7 +762,7 @@ async function handleGetThread(
       }
     }
 
-    await enrichWithAuthors(env, [thread]);
+    await enrichWithAuthors(env, [thread], undefined, workerOrigin);
     return json({ data: { ...thread, myVote } }, { status: 200 });
   });
 }
@@ -700,6 +774,7 @@ async function handleGetThreadBySlug(
   slug: string,
   authed: Authed | null,
 ): Promise<Response> {
+  const workerOrigin = new URL(req.url).origin;
   return maybeCached(req, ctx, 30, async () => {
     const params = new URLSearchParams();
     params.set("select", THREAD_SELECT);
@@ -729,7 +804,7 @@ async function handleGetThreadBySlug(
       }
     }
 
-    await enrichWithAuthors(env, [thread]);
+    await enrichWithAuthors(env, [thread], undefined, workerOrigin);
     return json({ data: { ...thread, myVote } }, { status: 200 });
   });
 }
@@ -740,6 +815,7 @@ async function handleCreateThread(
   ctx: ExecutionContext,
   authed: Authed,
 ): Promise<Response> {
+  const workerOrigin = new URL(req.url).origin;
   const body = (await req.json().catch(() => null)) as null | Record<
     string,
     unknown
@@ -761,7 +837,7 @@ async function handleCreateThread(
   if (countLinks(`${title}\n${content}`) > 2)
     throw new HttpError(400, "too_many_links");
 
-  const images = validateImageUrls(body.images);
+  const images = validateImageUrls(body.images, workerOrigin);
   const slug = generateSlug(title);
   const insert = { title, slug, body: content, tags, images, user_id: authed.userId };
 
@@ -852,6 +928,7 @@ async function handleGetThreadComments(
   threadId: string,
   authed: Authed | null,
 ): Promise<Response> {
+  const workerOrigin = new URL(req.url).origin;
   return maybeCached(req, ctx, 20, async () => {
     const params = new URLSearchParams();
     params.set(
@@ -890,7 +967,7 @@ async function handleGetThreadComments(
       }
     }
 
-    await enrichWithAuthors(env, comments);
+    await enrichWithAuthors(env, comments, undefined, workerOrigin);
     return json({ data: comments }, { status: 200 });
   });
 }
@@ -902,6 +979,7 @@ async function handleCreateComment(
   authed: Authed,
   threadId: string,
 ): Promise<Response> {
+  const workerOrigin = new URL(req.url).origin;
   const body = (await req.json().catch(() => null)) as null | Record<
     string,
     unknown
@@ -911,7 +989,7 @@ async function handleCreateComment(
   if (content.length < 5) throw new HttpError(400, "comment_too_short");
   if (countLinks(content) > 2) throw new HttpError(400, "too_many_links");
 
-  const images = validateImageUrls(body.images);
+  const images = validateImageUrls(body.images, workerOrigin);
   const insert = { thread_id: threadId, body: content, images, user_id: authed.userId };
   const r = await supabaseFetch(env, "comments", {
     method: "POST",
@@ -3437,6 +3515,17 @@ export default {
 
       const url = new URL(req.url);
       const path = url.pathname.replace(/\/+$/, "") || "/";
+
+      // Forum image proxy: public, no auth, minimal rate limit
+      if (req.method === "GET") {
+        if (
+          path.startsWith("/forum-images/forum/") ||
+          (url.hostname === "forum-images.cartertraileraxles.com" &&
+            path.startsWith("/forum/"))
+        ) {
+          return handleServeForumImage(req, env, url);
+        }
+      }
 
       const ip = getClientIp(req);
       let authed: Authed | null = null;

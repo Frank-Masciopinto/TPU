@@ -12,31 +12,15 @@ From `old-tpu/workers/forum-api/`:
 npx wrangler r2 bucket create tpu-forum-images
 ```
 
-## 2. Configure Public Access
+## 2. Image Serving (Worker Proxy)
 
-In the Cloudflare dashboard:
+Images are served by the Worker—no R2 custom domain needed. New uploads return URLs like `https://cartertraileraxles.com/forum-images/forum/...`. Existing URLs (`forum-images.cartertraileraxles.com`) are proxied via the Worker route.
 
-1. Go to **R2 > tpu-forum-images > Settings > Custom Domains**
-2. Add `forum-images.cartertraileraxles.com`
-3. In **DNS**, add a CNAME record for `forum-images` pointing to the R2 bucket
+**DNS:** Ensure `forum-images.cartertraileraxles.com` resolves (CNAME to the zone or Worker). If the zone is on Cloudflare, the Worker route in `wrangler.toml` will receive traffic.
 
-Alternative (quick start): R2 > bucket > Settings > R2.dev subdomain > Allow Access. If using r2.dev, update `R2_PUBLIC_PREFIX` in `src/index.ts` to match the assigned URL.
+**Optional:** R2 > bucket > Custom Domains for direct serving. Not required; the Worker proxy is sufficient.
 
-## 3. Smoke Test the Public URL
-
-```bash
-# Upload a test file
-npx wrangler r2 object put tpu-forum-images/test.txt --file wrangler.toml
-
-# Verify it's publicly accessible
-curl -I https://forum-images.cartertraileraxles.com/test.txt
-# Should return HTTP 200
-
-# Clean up
-npx wrangler r2 object delete tpu-forum-images/test.txt
-```
-
-## 4. Run the SQL Migration on Supabase
+## 3. Run the SQL Migration on Supabase
 
 In the Supabase SQL Editor (or via CLI), run:
 
@@ -47,17 +31,17 @@ ALTER TABLE comments ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
 
 Migration file: `supabase/migrations/20260310120000_add_forum_images.sql`
 
-## 5. Check Storefront CSP Headers
+## 4. Check Storefront CSP Headers
 
-Inspect the response headers on `trailerpartsunlimited.com` for `Content-Security-Policy`. If `img-src` is restricted, add the R2 domain:
+Inspect the response headers on `trailerpartsunlimited.com` for `Content-Security-Policy`. If `img-src` is restricted, add:
 
 ```
-img-src 'self' https://forum-images.cartertraileraxles.com ...;
+img-src 'self' https://cartertraileraxles.com https://forum-images.cartertraileraxles.com ...;
 ```
 
 If no CSP header exists, no action needed.
 
-## 6. Deploy Worker
+## 5. Deploy Worker
 
 From `old-tpu/workers/forum-api/`:
 
@@ -73,7 +57,7 @@ curl -X POST https://cartertraileraxles.com/upload/image \
   -F "file=@/path/to/test.jpg"
 ```
 
-## 7. Build and Deploy Theme to BigCommerce
+## 6. Build and Deploy Theme to BigCommerce
 
 From `old-tpu/`:
 

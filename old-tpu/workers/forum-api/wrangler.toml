@@ -7,6 +7,15 @@ account_id = "9c6e4f899b70c79dda1a7600754df3cc"
 port = 8787
 
 # Deploys to: cartertraileraxles.com (custom domain)
+# forum-images.cartertraileraxles.com serves forum images via Worker proxy
+
+[[routes]]
+pattern = "cartertraileraxles.com/*"
+zone_name = "cartertraileraxles.com"
+
+[[routes]]
+pattern = "forum-images.cartertraileraxles.com/*"
+zone_name = "cartertraileraxles.com"
 
 # IMPORTANT:
 # - Do NOT expose any of these values in storefront JS.
