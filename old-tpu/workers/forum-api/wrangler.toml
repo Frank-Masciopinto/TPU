@@ -45,3 +45,7 @@ BIGCOMMERCE_CLIENT_ID = "f03kj6tmr2lw3qk9prdrek3o294padn"
 binding = "RATE_LIMIT_KV"
 id = "76979f5df4de4a8482b9477837c2b6fe"
 preview_id = "df81d21c59384971994cf9a0146bdc42"
+
+[[r2_buckets]]
+binding = "FORUM_IMAGES"
+bucket_name = "tpu-forum-images"

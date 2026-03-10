@@ -26,6 +26,9 @@ interface Env {
   RESEND_API_KEY?: string;
 
   RATE_LIMIT_KV: KVNamespace;
+
+  // R2 bucket for forum image uploads
+  FORUM_IMAGES: R2Bucket;
 }
 
 type Authed = { userId: string; jwt: string; claims: Record<string, unknown> };
@@ -61,7 +64,7 @@ function withCors(req: Request, env: Env, res: Response): Response {
     headers.set("Access-Control-Allow-Credentials", "true");
   }
   headers.set("Vary", appendVary(headers.get("Vary"), "Origin"));
-  headers.set("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
+  headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   headers.set(
     "Access-Control-Allow-Headers",
     "Authorization,Content-Type,x-sf-csrf-token,x-xsrf-token,x-csrf-token",
@@ -155,6 +158,89 @@ async function rateLimitOrThrow(
   });
 }
 
+// ---------------------------------------------------------------------------
+// Image upload constants & helpers
+// ---------------------------------------------------------------------------
+
+const R2_PUBLIC_PREFIX = "https://forum-images.cartertraileraxles.com/";
+const ALLOWED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_IMAGES_PER_POST = 3;
+
+function validateImageUrls(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map(String)
+    .filter((url) => url.startsWith(R2_PUBLIC_PREFIX + "forum/"))
+    .slice(0, MAX_IMAGES_PER_POST);
+}
+
+function r2KeyFromUrl(url: string): string | null {
+  if (!url.startsWith(R2_PUBLIC_PREFIX)) return null;
+  const key = url.slice(R2_PUBLIC_PREFIX.length);
+  return key.startsWith("forum/") ? key : null;
+}
+
+async function cleanupR2Images(
+  env: Env,
+  ctx: ExecutionContext,
+  images: unknown,
+): Promise<void> {
+  if (!Array.isArray(images)) return;
+  for (const url of images) {
+    const key = r2KeyFromUrl(String(url));
+    if (key) {
+      ctx.waitUntil(env.FORUM_IMAGES.delete(key).catch(() => {}));
+    }
+  }
+}
+
+async function handleImageUpload(
+  req: Request,
+  env: Env,
+  authed: Authed,
+): Promise<Response> {
+  const contentType = req.headers.get("content-type") || "";
+  if (!contentType.includes("multipart/form-data"))
+    throw new HttpError(400, "expected_multipart");
+
+  const formData = await req.formData();
+  const file = formData.get("file") as File | null;
+  if (!file) throw new HttpError(400, "no_file");
+
+  if (!ALLOWED_IMAGE_TYPES.has(file.type))
+    throw new HttpError(400, "invalid_file_type");
+  if (file.size > MAX_IMAGE_SIZE)
+    throw new HttpError(400, "file_too_large");
+
+  const extMap: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+  };
+  const ext = extMap[file.type] || "bin";
+  const key = `forum/${authed.userId}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+
+  await env.FORUM_IMAGES.put(key, file.stream(), {
+    httpMetadata: {
+      contentType: file.type,
+      cacheControl: "public, max-age=31536000, immutable",
+    },
+  });
+
+  console.log(
+    `[Upload] ok user=${authed.userId} key=${key} size=${file.size} type=${file.type}`,
+  );
+
+  return json({ url: `${R2_PUBLIC_PREFIX}${key}` }, { status: 201 });
+}
+
 function countLinks(text: string): number {
   const matches = text.match(/https?:\/\/|www\./gi);
   return matches ? matches.length : 0;
@@ -189,6 +275,138 @@ function stripHtmlToText(html: string): string {
 
 function asString(v: unknown): string {
   return typeof v === "string" ? v : "";
+}
+
+const USERNAME_ADJECTIVES = [
+  "Steady", "Trail", "Road", "Iron", "Axle", "Hitch",
+  "Bolt", "Ridge", "Steel", "Gear", "Haul", "Rig",
+  "Torque", "Ranch", "Field", "Gravel", "Pine", "Oak",
+  "Rust", "Chrome", "Copper", "Timber", "Summit", "Mesa",
+];
+const USERNAME_NOUNS = [
+  "Rider", "Runner", "Hauler", "Builder", "Wrangler", "Fixer",
+  "Ranger", "Scout", "Tracker", "Camper", "Forger", "Welder",
+  "Driver", "Setter", "Maker", "Hiker", "Cruiser", "Liner",
+  "Packer", "Mender", "Roamer", "Trekker", "Hopper", "Roper",
+];
+const RESERVED_USERNAMES = new Set([
+  "admin", "moderator", "mod", "tpu", "system", "support",
+  "staff", "official", "trailer", "trailerparts", "trailerpartsunlimited",
+]);
+
+function hashUserId(userId: string): number {
+  let h = 0;
+  for (let i = 0; i < userId.length; i++) {
+    h = ((h << 5) - h + userId.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+function generateUsername(userId: string, attempt = 0): string {
+  const h = hashUserId(userId) + attempt * 7919;
+  const adj = USERNAME_ADJECTIVES[h % USERNAME_ADJECTIVES.length]!;
+  const noun = USERNAME_NOUNS[Math.floor(h / USERNAME_ADJECTIVES.length) % USERNAME_NOUNS.length]!;
+  const suffix = String((h % 90) + 10);
+  return `${adj}${noun}${suffix}`;
+}
+
+function validateUsername(username: string): string | null {
+  if (typeof username !== "string") return "Username is required.";
+  if (username.length < 3 || username.length > 24) return "Username must be 3–24 characters.";
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) return "Letters, numbers, and underscores only.";
+  if (RESERVED_USERNAMES.has(username.toLowerCase())) return "This username is not available.";
+  return null;
+}
+
+async function ensureProfile(env: Env, authed: Authed): Promise<string | null> {
+  try {
+    const checkRes = await supabaseFetch(
+      env,
+      `forum_profiles?user_id=eq.${encodeURIComponent(authed.userId)}&select=username`,
+      { method: "GET" },
+    );
+    if (checkRes.ok) {
+      const rows = (await checkRes.json()) as { username: string }[];
+      if (rows[0]) return rows[0].username;
+    }
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const name = generateUsername(authed.userId, attempt);
+      const r = await supabaseFetch(env, "forum_profiles", {
+        method: "POST",
+        jwt: authed.jwt,
+        headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
+        body: JSON.stringify({
+          user_id: authed.userId,
+          username: name,
+          updated_at: new Date().toISOString(),
+        }),
+      });
+      if (r.ok) {
+        const created = (await r.json()) as { username: string }[];
+        if (created[0]) {
+          console.log(`[Forum:Profile] auto-created username=${name} user=${authed.userId}`);
+          return created[0].username;
+        }
+        const recheck = await supabaseFetch(
+          env,
+          `forum_profiles?user_id=eq.${encodeURIComponent(authed.userId)}&select=username`,
+          { method: "GET" },
+        );
+        if (recheck.ok) {
+          const rows = (await recheck.json()) as { username: string }[];
+          if (rows[0]) return rows[0].username;
+        }
+      }
+    }
+    return null;
+  } catch (e) {
+    console.warn(`[Forum:Profile] ensureProfile failed user=${authed.userId}`, e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
+async function enrichWithAuthors(
+  env: Env,
+  rows: Record<string, unknown>[],
+  adminMap?: Record<string, string>,
+): Promise<void> {
+  try {
+    const userIds = [...new Set(rows.map((r) => r.user_id as string).filter(Boolean))];
+    if (!userIds.length) return;
+
+    const r = await supabaseFetch(
+      env,
+      `forum_profiles?user_id=in.(${userIds.join(",")})&select=user_id,username`,
+      { method: "GET" },
+    );
+    if (!r.ok) throw new Error(`profile-lookup-${r.status}`);
+    const profiles = (await r.json()) as { user_id: string; username: string }[];
+    const profileMap = new Map(profiles.map((p) => [p.user_id, p.username]));
+
+    for (const row of rows) {
+      const uid = row.user_id as string;
+      const email = (row.author_email || "") as string;
+      if (adminMap && email && adminMap[email.toLowerCase()]) {
+        row.author = adminMap[email.toLowerCase()];
+        row.author_is_admin = true;
+      } else {
+        row.author = profileMap.get(uid) || "Member";
+        row.author_is_admin = false;
+      }
+    }
+  } catch (e) {
+    console.warn(
+      `[Forum:Enrich] fallback-to-member count=${rows.length}`,
+      e instanceof Error ? e.message : e,
+    );
+    for (const row of rows) {
+      if (!row.author) {
+        row.author = "Member";
+        row.author_is_admin = false;
+      }
+    }
+  }
 }
 
 function parseTagsParam(tagsParam: string | null): string[] {
@@ -320,9 +538,6 @@ async function handleThreadsFeed(
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const baseSelect =
-    "id,title,slug,body,summary,created_at,updated_at,score,comment_count,accepted_comment_id,tags,user_id";
-
   // Cached because this is a hot path; short TTL.
   return maybeCached(req, ctx, 30, async () => {
     try {
@@ -335,7 +550,7 @@ async function handleThreadsFeed(
         ).toISOString();
 
         const params = new URLSearchParams();
-        params.set("select", baseSelect);
+        params.set("select", THREAD_SELECT);
         params.set("created_at", `gte.${gte}`);
         params.set("order", "created_at.desc");
         // Pull more than a single page so we can sort by computed hot rank.
@@ -371,6 +586,7 @@ async function handleThreadsFeed(
         const slice = ranked
           .slice(from, from + pageSize)
           .map(({ _hot, ...t }) => t);
+        await enrichWithAuthors(env, slice);
         return json(
           { data: slice, meta: { sort, page, pageSize, total: ranked.length } },
           { status: 200 },
@@ -378,7 +594,7 @@ async function handleThreadsFeed(
       }
 
       const params = new URLSearchParams();
-      params.set("select", baseSelect);
+      params.set("select", THREAD_SELECT);
 
       if (q.trim()) {
         const qq = q.trim().replace(/%/g, "\\%").replace(/_/g, "\\_");
@@ -408,6 +624,7 @@ async function handleThreadsFeed(
       }
       const total = getContentRangeCount(r.headers.get("content-range"));
       const data = await r.json();
+      if (Array.isArray(data)) await enrichWithAuthors(env, data);
       return json(
         { data, meta: { sort, page, pageSize, total } },
         { status: 200 },
@@ -433,7 +650,7 @@ async function handleThreadsFeed(
 }
 
 const THREAD_SELECT =
-  "id,title,slug,body,summary,created_at,updated_at,score,comment_count,accepted_comment_id,tags,user_id";
+  "id,title,slug,body,summary,created_at,updated_at,score,comment_count,accepted_comment_id,tags,images,user_id";
 
 async function handleGetThread(
   req: Request,
@@ -471,6 +688,7 @@ async function handleGetThread(
       }
     }
 
+    await enrichWithAuthors(env, [thread]);
     return json({ data: { ...thread, myVote } }, { status: 200 });
   });
 }
@@ -511,6 +729,7 @@ async function handleGetThreadBySlug(
       }
     }
 
+    await enrichWithAuthors(env, [thread]);
     return json({ data: { ...thread, myVote } }, { status: 200 });
   });
 }
@@ -518,6 +737,7 @@ async function handleGetThreadBySlug(
 async function handleCreateThread(
   req: Request,
   env: Env,
+  ctx: ExecutionContext,
   authed: Authed,
 ): Promise<Response> {
   const body = (await req.json().catch(() => null)) as null | Record<
@@ -541,8 +761,9 @@ async function handleCreateThread(
   if (countLinks(`${title}\n${content}`) > 2)
     throw new HttpError(400, "too_many_links");
 
+  const images = validateImageUrls(body.images);
   const slug = generateSlug(title);
-  const insert = { title, slug, body: content, tags, user_id: authed.userId };
+  const insert = { title, slug, body: content, tags, images, user_id: authed.userId };
 
   const r = await supabaseFetch(env, "threads", {
     method: "POST",
@@ -555,6 +776,11 @@ async function handleCreateThread(
       { error: "supabase_error", details: await safeJson(r) },
       { status: 502 },
     );
+  ctx.waitUntil(
+    ensureProfile(env, authed).catch((e) =>
+      console.warn(`[Forum:Profile] auto-provision failed user=${authed.userId}`, e instanceof Error ? e.message : e)
+    )
+  );
   const created = (await r.json()) as unknown[];
   return json({ data: created[0] ?? null }, { status: 201 });
 }
@@ -630,7 +856,7 @@ async function handleGetThreadComments(
     const params = new URLSearchParams();
     params.set(
       "select",
-      "id,thread_id,body,created_at,updated_at,score,user_id",
+      "id,thread_id,body,images,created_at,updated_at,score,user_id",
     );
     params.set("thread_id", `eq.${threadId}`);
     params.set("order", "created_at.asc");
@@ -664,6 +890,7 @@ async function handleGetThreadComments(
       }
     }
 
+    await enrichWithAuthors(env, comments);
     return json({ data: comments }, { status: 200 });
   });
 }
@@ -671,6 +898,7 @@ async function handleGetThreadComments(
 async function handleCreateComment(
   req: Request,
   env: Env,
+  ctx: ExecutionContext,
   authed: Authed,
   threadId: string,
 ): Promise<Response> {
@@ -683,7 +911,8 @@ async function handleCreateComment(
   if (content.length < 5) throw new HttpError(400, "comment_too_short");
   if (countLinks(content) > 2) throw new HttpError(400, "too_many_links");
 
-  const insert = { thread_id: threadId, body: content, user_id: authed.userId };
+  const images = validateImageUrls(body.images);
+  const insert = { thread_id: threadId, body: content, images, user_id: authed.userId };
   const r = await supabaseFetch(env, "comments", {
     method: "POST",
     jwt: authed.jwt,
@@ -695,6 +924,11 @@ async function handleCreateComment(
       { error: "supabase_error", details: await safeJson(r) },
       { status: 502 },
     );
+  ctx.waitUntil(
+    ensureProfile(env, authed).catch((e) =>
+      console.warn(`[Forum:Profile] auto-provision failed user=${authed.userId}`, e instanceof Error ? e.message : e)
+    )
+  );
   const created = (await r.json()) as unknown[];
   return json({ data: created[0] ?? null }, { status: 201 });
 }
@@ -977,6 +1211,90 @@ async function handleAdminMe(
   );
 }
 
+async function handleGetProfile(
+  req: Request,
+  env: Env,
+  authed: Authed,
+): Promise<Response> {
+  const r = await supabaseFetch(
+    env,
+    `forum_profiles?user_id=eq.${encodeURIComponent(authed.userId)}&select=username,created_at`,
+    { method: "GET" },
+  );
+  if (!r.ok) {
+    const details = await safeJson(r);
+    console.error("[Forum:Profile] GET profile Supabase error:", r.status, JSON.stringify(details));
+    return json({ error: "supabase_error", message: "Profile lookup failed" }, { status: 502 });
+  }
+  const rows = (await r.json()) as { username: string; created_at: string }[];
+  if (!rows[0])
+    return json({ error: "profile_not_found" }, { status: 404 });
+  return json({ username: rows[0].username, createdAt: rows[0].created_at }, { status: 200 });
+}
+
+async function handleUpdateProfile(
+  req: Request,
+  env: Env,
+  authed: Authed,
+): Promise<Response> {
+  const body = (await req.json().catch(() => null)) as null | Record<string, unknown>;
+  if (!body) throw new HttpError(400, "invalid_json");
+
+  if (body.auto === true) {
+    const username = await ensureProfile(env, authed);
+    if (!username) throw new HttpError(500, "profile_generation_failed");
+    return json({ username }, { status: 200 });
+  }
+
+  const requested = asString(body.username).trim();
+  const validationError = validateUsername(requested);
+  if (validationError) throw new HttpError(400, "invalid_username", validationError);
+
+  try {
+    const adminRes = await supabaseFetch(env, "forum_admins?select=display_name", { method: "GET" });
+    if (adminRes.ok) {
+      const admins = (await adminRes.json()) as { display_name: string }[];
+      const lower = requested.toLowerCase();
+      if (admins.some((a) => a.display_name.toLowerCase() === lower)) {
+        throw new HttpError(400, "reserved_username", "This username is not available.");
+      }
+    }
+  } catch (e) {
+    if (e instanceof HttpError) throw e;
+  }
+
+  const rlKey = `profile-change:${authed.userId}`;
+  const rlVal = await env.RATE_LIMIT_KV.get(rlKey);
+  const rlCount = rlVal ? parseInt(rlVal, 10) : 0;
+  if (rlCount >= 3) throw new HttpError(429, "rate_limited", "You can change your username up to 3 times per day.");
+
+  const r = await supabaseFetch(env, "forum_profiles", {
+    method: "POST",
+    jwt: authed.jwt,
+    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+    body: JSON.stringify({
+      user_id: authed.userId,
+      username: requested,
+      updated_at: new Date().toISOString(),
+    }),
+  });
+
+  if (!r.ok) {
+    const data = await safeJson(r);
+    const detail = JSON.stringify(data);
+    if (r.status === 409 || detail.includes("23505") || detail.includes("unique") || detail.includes("duplicate")) {
+      return json({ error: "username_taken", message: "That username is already taken." }, { status: 409 });
+    }
+    return json({ error: "supabase_error", details: data }, { status: 502 });
+  }
+
+  await env.RATE_LIMIT_KV.put(rlKey, String(rlCount + 1), { expirationTtl: 86400 });
+
+  console.log(`[Forum:Profile] updated username=${requested} user=${authed.userId}`);
+  const created = (await r.json()) as { username: string; created_at: string }[];
+  return json({ username: created[0]?.username || requested, createdAt: created[0]?.created_at }, { status: 200 });
+}
+
 /**
  * Handle DELETE /threads/:id
  * Deletes a thread (admin only)
@@ -984,11 +1302,26 @@ async function handleAdminMe(
 async function handleDeleteThread(
   req: Request,
   env: Env,
+  ctx: ExecutionContext,
   authed: Authed,
   threadId: string,
 ): Promise<Response> {
   // Verify admin status
   await requireAdmin(env, authed);
+
+  // Before deleting, fetch comment images so we can clean up R2
+  const cParams = new URLSearchParams();
+  cParams.set("select", "images");
+  cParams.set("thread_id", `eq.${threadId}`);
+  const cRes = await supabaseFetch(env, `comments?${cParams.toString()}`, {
+    method: "GET",
+  });
+  if (cRes.ok) {
+    const commentRows = (await cRes.json()) as Record<string, unknown>[];
+    for (const row of commentRows) {
+      cleanupR2Images(env, ctx, row.images);
+    }
+  }
 
   // Delete the thread via Supabase
   const params = new URLSearchParams();
@@ -1009,13 +1342,16 @@ async function handleDeleteThread(
     );
   }
 
-  const deleted = (await r.json()) as unknown[];
+  const deleted = (await r.json()) as Record<string, unknown>[];
   if (!deleted.length) {
     return json(
       { error: "not_found", message: "Thread not found or already deleted" },
       { status: 404 },
     );
   }
+
+  // Clean up thread images from R2
+  cleanupR2Images(env, ctx, deleted[0]?.images);
 
   return json({ success: true, deleted: deleted[0] }, { status: 200 });
 }
@@ -1027,6 +1363,7 @@ async function handleDeleteThread(
 async function handleDeleteComment(
   req: Request,
   env: Env,
+  ctx: ExecutionContext,
   authed: Authed,
   commentId: string,
 ): Promise<Response> {
@@ -1052,13 +1389,16 @@ async function handleDeleteComment(
     );
   }
 
-  const deleted = (await r.json()) as unknown[];
+  const deleted = (await r.json()) as Record<string, unknown>[];
   if (!deleted.length) {
     return json(
       { error: "not_found", message: "Comment not found or already deleted" },
       { status: 404 },
     );
   }
+
+  // Clean up comment images from R2
+  cleanupR2Images(env, ctx, deleted[0]?.images);
 
   return json({ success: true, deleted: deleted[0] }, { status: 200 });
 }
@@ -2852,7 +3192,7 @@ async function handleSeoThread(
     const cParams = new URLSearchParams();
     cParams.set(
       "select",
-      "id,body,created_at,updated_at,score,user_id,is_accepted",
+      "id,body,images,created_at,updated_at,score,user_id,is_accepted",
     );
     cParams.set("thread_id", `eq.${threadId}`);
     cParams.set("order", "score.desc");
@@ -2945,11 +3285,20 @@ async function handleSeoThread(
       ],
     };
 
+    const threadImages = Array.isArray(thread.images) ? thread.images as string[] : [];
+    const threadImagesHtml = threadImages
+      .map((url) => `<img src="${escapeAttr(url)}" alt="${escapeAttr(title)}" loading="lazy">`)
+      .join("\n");
+
     const commentsHtml = comments
       .map((c) => {
         const cBody = String(c.body ?? "");
+        const cImages = Array.isArray(c.images) ? c.images as string[] : [];
+        const cImagesHtml = cImages
+          .map((url) => `<img src="${escapeAttr(String(url))}" alt="Reply attachment" loading="lazy">`)
+          .join("\n");
         const isAccepted = c === accepted;
-        return `<div class="answer"${isAccepted ? ' data-accepted="true"' : ""}>${isAccepted ? "<strong>Accepted Answer</strong>" : ""}<div>${cBody}</div></div>`;
+        return `<div class="answer"${isAccepted ? ' data-accepted="true"' : ""}>${isAccepted ? "<strong>Accepted Answer</strong>" : ""}<div>${cBody}</div>${cImagesHtml}</div>`;
       })
       .join("\n");
 
@@ -2964,7 +3313,8 @@ async function handleSeoThread(
 <meta property="og:title" content="${escapeAttr(title)} | TPU Forum">
 <meta property="og:description" content="${escapeAttr(metaDesc)}">
 <meta property="og:url" content="${escapeAttr(canonicalUrl)}">
-<meta name="twitter:card" content="summary">
+${threadImages.length ? `<meta property="og:image" content="${escapeAttr(threadImages[0])}">` : ""}
+<meta name="twitter:card" content="${threadImages.length ? "summary_large_image" : "summary"}">
 <script type="application/ld+json">${JSON.stringify(qaSchema)}</script>
 <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
 </head>
@@ -2974,6 +3324,7 @@ async function handleSeoThread(
 <h1>${escapeHtml(title)}</h1>
 ${summary ? `<div class="summary"><p>${escapeHtml(summary)}</p></div>` : ""}
 <div class="question">${body}</div>
+${threadImagesHtml ? `<div class="question-images">${threadImagesHtml}</div>` : ""}
 <h2>Answers (${comments.length})</h2>
 ${commentsHtml || "<p>No answers yet.</p>"}
 </article>
@@ -3104,8 +3455,9 @@ export default {
 
       // DELETE requires authentication (admin-only, checked in handlers)
       const isDelete = req.method === "DELETE";
+      const isPut = req.method === "PUT";
 
-      const isWrite = (req.method === "POST" && !isPublicPost) || isDelete;
+      const isWrite = (req.method === "POST" && !isPublicPost) || isDelete || isPut;
       if (isWrite) {
         authed = await requireSupabaseJwt(req, env);
         // Tight write limits.
@@ -3147,6 +3499,15 @@ export default {
         return await handleSitemap(req, env, ctx);
       }
 
+      // Profile routes
+      if (req.method === "GET" && path === "/me/profile") {
+        if (!authed) authed = await requireSupabaseJwt(req, env);
+        return withCors(req, env, await handleGetProfile(req, env, authed));
+      }
+      if (req.method === "PUT" && path === "/me/profile") {
+        return withCors(req, env, await handleUpdateProfile(req, env, authed!));
+      }
+
       if (req.method === "GET" && path === "/threads") {
         return withCors(req, env, await handleThreadsFeed(req, env, ctx));
       }
@@ -3182,8 +3543,13 @@ export default {
         );
       }
 
+      if (req.method === "POST" && path === "/upload/image") {
+        await rateLimitOrThrow(env, `${ip}:${authed!.userId}:upload`, 10, 300);
+        return withCors(req, env, await handleImageUpload(req, env, authed!));
+      }
+
       if (req.method === "POST" && path === "/threads") {
-        return withCors(req, env, await handleCreateThread(req, env, authed!));
+        return withCors(req, env, await handleCreateThread(req, env, ctx, authed!));
       }
 
       // Admin endpoint: check admin status (requires auth)
@@ -3214,6 +3580,7 @@ export default {
           await handleDeleteThread(
             req,
             env,
+            ctx,
             authed!,
             decodeURIComponent(threadIdMatch[1]!),
           ),
@@ -3255,6 +3622,7 @@ export default {
           await handleCreateComment(
             req,
             env,
+            ctx,
             authed!,
             decodeURIComponent(threadCommentsMatch[1]!),
           ),
@@ -3284,6 +3652,7 @@ export default {
           await handleDeleteComment(
             req,
             env,
+            ctx,
             authed!,
             decodeURIComponent(commentIdMatch[1]!),
           ),

@@ -36,6 +36,26 @@ import { signOut as supabaseSignOut } from "../../lib/supabase";
 import { forumApi, getAuth } from "./forumApi";
 import { sanitizeUserHtml } from "./forumSanitize";
 import { clearForumSeo, setForumFeedTitle, setForumThreadSeo } from "./forumSeo";
+import { ImageUploader } from "./ImageUploader";
+import { timeAgo } from "./timeAgo";
+
+function ImageGallery({ images, altPrefix }) {
+  if (!Array.isArray(images) || !images.length) return null;
+  const prefix = altPrefix || "Attachment";
+  return (
+    <div className="tpu-forum__images">
+      {images.map((url, i) => (
+        <a key={url} href={url} target="_blank" rel="noopener noreferrer">
+          <img
+            src={url}
+            alt={`${prefix} — image ${i + 1} of ${images.length}`}
+            loading="lazy"
+          />
+        </a>
+      ))}
+    </div>
+  );
+}
 
 function isForumPath(pathname) {
   const p = (pathname || "").replace(/\/+$/, "");
@@ -297,9 +317,11 @@ function validateTags(tags) {
   return errors;
 }
 
-function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting }) {
+function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting, api }) {
   const [title, setTitle] = React.useState("");
   const [body, setBody] = React.useState("");
+  const [images, setImages] = React.useState([]);
+  const [uploading, setUploading] = React.useState(false);
   const [tags, setTags] = React.useState({
     trailerType: "Utility",
     capacity: "3500",
@@ -312,6 +334,8 @@ function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting }) {
   React.useEffect(() => {
     if (!open) {
       setErrors({});
+      setImages([]);
+      setUploading(false);
     }
   }, [open]);
 
@@ -326,7 +350,7 @@ function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting }) {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
-    onSubmit({ title: title.trim(), body: body.trim(), tags });
+    onSubmit({ title: title.trim(), body: body.trim(), tags, images });
   };
 
   return (
@@ -370,6 +394,12 @@ function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting }) {
               {errors.body && (
                 <Badge variant="destructive">{errors.body}</Badge>
               )}
+              <ImageUploader
+                api={api}
+                maxFiles={3}
+                onChange={setImages}
+                onUploadingChange={setUploading}
+              />
             </CardContent>
           </Card>
 
@@ -498,8 +528,8 @@ function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting }) {
         </div>
 
         <SheetFooter>
-          <Button type="button" onClick={submit} disabled={submitting}>
-            {submitting ? "Submitting…" : "Submit"}
+          <Button type="button" onClick={submit} disabled={submitting || uploading}>
+            {submitting ? "Submitting…" : uploading ? "Uploading…" : "Submit"}
           </Button>
         </SheetFooter>
       </SheetContent>
@@ -507,13 +537,17 @@ function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting }) {
   );
 }
 
-function ReplyDrawer({ open, onOpenChange, onSubmit, submitting, title }) {
+function ReplyDrawer({ open, onOpenChange, onSubmit, submitting, title, api }) {
   const [body, setBody] = React.useState("");
+  const [images, setImages] = React.useState([]);
+  const [uploading, setUploading] = React.useState(false);
   const [error, setError] = React.useState("");
 
   React.useEffect(() => {
     if (!open) {
       setBody("");
+      setImages([]);
+      setUploading(false);
       setError("");
     }
   }, [open]);
@@ -523,7 +557,7 @@ function ReplyDrawer({ open, onOpenChange, onSubmit, submitting, title }) {
       setError("Reply cannot be empty.");
       return;
     }
-    onSubmit({ body: body.trim() });
+    onSubmit({ body: body.trim(), images });
   };
 
   return (
@@ -542,9 +576,15 @@ function ReplyDrawer({ open, onOpenChange, onSubmit, submitting, title }) {
             placeholder="Write your reply…"
           />
           {error && <Badge variant="destructive">{error}</Badge>}
+          <ImageUploader
+            api={api}
+            maxFiles={3}
+            onChange={setImages}
+            onUploadingChange={setUploading}
+          />
         </div>
         <SheetFooter>
-          <Button type="button" onClick={submit} disabled={submitting}>
+          <Button type="button" onClick={submit} disabled={submitting || uploading}>
             {submitting ? "Posting…" : "Post Reply"}
           </Button>
         </SheetFooter>
@@ -645,6 +685,15 @@ function ThreadCard({
           onUpvote={() => onVote(1)}
           onDownvote={() => onVote(-1)}
         />
+        <div className="tpu-forum__thread-meta">
+          <span className="tpu-forum__author">
+            {thread.author || "Member"}
+          </span>
+          <span className="tpu-forum__meta-dot">·</span>
+          <span className="tpu-forum__timestamp">
+            {timeAgo(thread.created_at || thread.createdAt)}
+          </span>
+        </div>
         <div className="tpu-forum__thread-footer-actions">
           <span style={badgeStyle}>
             {typeof thread.commentCount === "number"
@@ -652,6 +701,11 @@ function ThreadCard({
               : thread.comment_count || thread.comments || 0}{" "}
             comments
           </span>
+          {Array.isArray(thread.images) && thread.images.length > 0 && (
+            <span style={badgeStyle}>
+              {thread.images.length} {thread.images.length === 1 ? "photo" : "photos"}
+            </span>
+          )}
           {showDelete && (
             <Button
               type="button"
@@ -717,6 +771,86 @@ function DeleteConfirmDrawer({
   );
 }
 
+function ProfileDrawer({ open, onOpenChange, currentUsername, onSave, saving }) {
+  const [username, setUsername] = React.useState(currentUsername || "");
+  const [error, setError] = React.useState("");
+  const [success, setSuccess] = React.useState(false);
+
+  React.useEffect(() => {
+    if (open) {
+      setUsername(currentUsername || "");
+      setError("");
+      setSuccess(false);
+    }
+  }, [open, currentUsername]);
+
+  const submit = async () => {
+    const trimmed = username.trim();
+    if (!trimmed || trimmed.length < 3 || trimmed.length > 24) {
+      setError("Username must be 3–24 characters.");
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(trimmed)) {
+      setError("Letters, numbers, and underscores only.");
+      return;
+    }
+    if (trimmed === currentUsername) {
+      onOpenChange(false);
+      return;
+    }
+    setError("");
+    try {
+      await onSave(trimmed);
+      setSuccess(true);
+      setTimeout(() => onOpenChange(false), 1200);
+    } catch (e) {
+      const msg = e?.data?.message || e?.message || "Could not update username.";
+      if (e?.status === 409 || msg.includes("taken")) {
+        setError("That username is already taken.");
+      } else if (e?.status === 429) {
+        setError("Too many changes today. Try again tomorrow.");
+      } else {
+        setError(msg);
+      }
+    }
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom">
+        <SheetHeader>
+          <SheetTitle>Your Profile</SheetTitle>
+          <SheetDescription>
+            Choose a username that other members will see.
+          </SheetDescription>
+        </SheetHeader>
+        <div className="tpu-forum__drawer-body">
+          <Input
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value);
+              if (error) setError("");
+              if (success) setSuccess(false);
+            }}
+            placeholder="Username"
+            maxLength={24}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") submit();
+            }}
+          />
+          {error && <Badge variant="destructive">{error}</Badge>}
+          {success && <Badge variant="success">Username updated!</Badge>}
+        </div>
+        <SheetFooter>
+          <Button type="button" onClick={submit} disabled={saving || success}>
+            {saving ? "Saving…" : "Save"}
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 function CommentCard({
   comment,
   depth,
@@ -752,7 +886,7 @@ function CommentCard({
           )}
         </CardTitle>
         <CardDescription>
-          {comment.createdAt || comment.created_at || ""}
+          {timeAgo(comment.createdAt || comment.created_at)}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -760,6 +894,7 @@ function CommentCard({
           className="tpu-forum__richtext"
           dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
+        <ImageGallery images={comment.images} />
       </CardContent>
       <CardFooter className="tpu-forum__comment-footer">
         <VoteWidget
@@ -884,6 +1019,17 @@ export function ForumApp({ config }) {
     window.location.href = logoutUrl;
   }, [logoutUrl]);
 
+  const handleProfileSave = React.useCallback(async (newUsername) => {
+    setProfileSaving(true);
+    try {
+      const res = await api.updateProfile({ username: newUsername });
+      setProfile(res);
+      console.log("[Forum] Username updated:", res.username);
+    } finally {
+      setProfileSaving(false);
+    }
+  }, [api]);
+
   // BC sync overlay state (M1)
   const [bcSyncState, setBcSyncState] = React.useState(null); // null | 'syncing' | 'failed'
 
@@ -891,6 +1037,11 @@ export function ForumApp({ config }) {
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [adminDisplayName, setAdminDisplayName] = React.useState(null);
   const [adminList, setAdminList] = React.useState({}); // { email: displayName }
+
+  // Profile state
+  const [profile, setProfile] = React.useState(null);
+  const [profileOpen, setProfileOpen] = React.useState(false);
+  const [profileSaving, setProfileSaving] = React.useState(false);
 
   // Re-check auth immediately on mount (in case token was set just before render)
   React.useEffect(() => {
@@ -1013,6 +1164,29 @@ export function ForumApp({ config }) {
         console.warn("[Forum] Failed to fetch admin list:", e.message);
       });
   }, [api]);
+
+  // Fetch user profile when authenticated
+  React.useEffect(() => {
+    if (!auth.token) {
+      setProfile(null);
+      return;
+    }
+
+    api.getProfile()
+      .then((res) => {
+        setProfile(res);
+      })
+      .catch((e) => {
+        if (e?.status === 404) {
+          // Auto-provision profile
+          api.updateProfile({ auto: true })
+            .then((res) => setProfile(res))
+            .catch((err) => console.warn("[Forum] Auto-provision profile failed:", err.message));
+        } else {
+          console.warn("[Forum] Failed to fetch profile:", e.message);
+        }
+      });
+  }, [api, auth.token]);
 
   // Re-check auth when page becomes visible (user may have logged in in another tab)
   React.useEffect(() => {
@@ -1306,13 +1480,14 @@ export function ForumApp({ config }) {
     }
   };
 
-  const submitReply = async ({ body }) => {
+  const submitReply = async ({ body, images }) => {
     if (!requireAuth()) return;
     if (!thread || !thread.id) return;
     setPosting(true);
     try {
       await api.createComment(thread.id, {
         body,
+        images: images || [],
         parentId: replyParentId || null,
       });
       setReplyOpen(false);
@@ -1478,9 +1653,20 @@ export function ForumApp({ config }) {
             Ask a question
           </Button>
           {canInteract && (
-            <Button type="button" variant="outline" size="sm" onClick={handleForumSignOut}>
-              Sign Out
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setProfileOpen(true)}
+                className="tpu-forum__profile-badge"
+              >
+                {profile?.username || "…"}
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={handleForumSignOut}>
+                Sign Out
+              </Button>
+            </>
           )}
         </CardFooter>
       </Card>
@@ -1581,6 +1767,7 @@ export function ForumApp({ config }) {
         onOpenChange={setAskOpen}
         onSubmit={submitThread}
         submitting={posting}
+        api={api}
       />
     </div>
   );
@@ -1676,6 +1863,15 @@ export function ForumApp({ config }) {
                   </Badge>
                 ))}
               </span>
+              <div className="tpu-forum__thread-byline">
+                <span className="tpu-forum__author">
+                  {thread.author || "Member"}
+                </span>
+                <span className="tpu-forum__meta-dot">·</span>
+                <span className="tpu-forum__timestamp">
+                  {timeAgo(thread.created_at || thread.createdAt)}
+                </span>
+              </div>
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -1683,6 +1879,7 @@ export function ForumApp({ config }) {
               className="tpu-forum__richtext"
               dangerouslySetInnerHTML={{ __html: threadBody }}
             />
+            <ImageGallery images={thread.images} altPrefix={thread.title} />
           </CardContent>
           <CardFooter className="tpu-forum__thread-footer">
             <VoteWidget
@@ -1723,6 +1920,7 @@ export function ForumApp({ config }) {
                   ),
                 }}
               />
+              <ImageGallery images={accepted.images} />
             </CardContent>
             <CardFooter className="tpu-forum__comment-footer">
               <VoteWidget
@@ -1835,6 +2033,7 @@ export function ForumApp({ config }) {
           onSubmit={submitReply}
           submitting={posting}
           title={replyParentId ? "Reply to comment" : "Reply to thread"}
+          api={api}
         />
       </div>
     );
@@ -1879,6 +2078,13 @@ export function ForumApp({ config }) {
         onConfirm={executeDelete}
         targetType={deleteTarget?.type || "item"}
         isDeleting={posting}
+      />
+      <ProfileDrawer
+        open={profileOpen}
+        onOpenChange={setProfileOpen}
+        currentUsername={profile?.username || ""}
+        onSave={handleProfileSave}
+        saving={profileSaving}
       />
     </div>
   );

@@ -39,7 +39,7 @@ module.exports = {
         ],
     },
     output: {
-        chunkFilename: 'theme-bundle.chunk.[name].js',
+        chunkFilename: 'theme-bundle.chunk.[id].js',
         filename: 'theme-bundle.[name].js',
         path: path.resolve(__dirname, 'assets/dist'),
     },

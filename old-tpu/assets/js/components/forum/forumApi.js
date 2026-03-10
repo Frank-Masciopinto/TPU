@@ -224,6 +224,51 @@ export function forumApi(config) {
         async deleteComment(commentId) {
             return request(config, `/comments/${encodeURIComponent(commentId)}`, { method: 'DELETE', needsAuth: true });
         },
+
+        async getProfile() {
+            return request(config, '/me/profile', { method: 'GET', needsAuth: true });
+        },
+
+        async updateProfile(payload) {
+            return request(config, '/me/profile', { method: 'PUT', body: payload, needsAuth: true });
+        },
+
+        /**
+         * Upload an image file to the forum.
+         * Uses standalone fetch (NOT the request() helper) because multipart
+         * uploads must not have Content-Type set manually — the browser sets
+         * the multipart boundary automatically.
+         * @param {File} file
+         * @returns {Promise<{url: string}>}
+         */
+        async uploadImage(file) {
+            const base = normalizeBase(config && (config.apiBase || config.apiBaseUrl || config.apiBaseURL));
+            const { token } = getAuth(config);
+            if (!token) throw new Error('Not authenticated');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch(`${base}/upload/image`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData,
+                credentials: 'include',
+            });
+
+            const isJson = (res.headers.get('content-type') || '').includes('application/json');
+            const data = isJson ? await res.json().catch(() => null) : null;
+
+            if (!res.ok) {
+                const message = (data && (data.message || data.code)) || `Upload failed (${res.status})`;
+                const err = new Error(message);
+                err.status = res.status;
+                err.data = data;
+                throw err;
+            }
+
+            return data;
+        },
     };
 }
 

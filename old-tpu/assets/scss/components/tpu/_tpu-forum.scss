@@ -1030,3 +1030,182 @@ body.tpu-forum-page {
     transition: transform 300ms ease;
 }
 
+
+// =============================================================================
+// Image Gallery (thread & comment attached images)
+// =============================================================================
+
+.tpu-forum__images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: $tpu-space-2;
+    margin-top: $tpu-space-3;
+
+    a {
+        display: block;
+        border-radius: $tpu-radius-md;
+        overflow: hidden;
+        border: 1px solid $tpu-border-secondary;
+        transition: border-color 150ms ease, box-shadow 150ms ease;
+
+        &:hover {
+            border-color: $tpu-accent-primary;
+            box-shadow: $tpu-shadow-md;
+        }
+    }
+
+    img {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 240px;
+        object-fit: cover;
+    }
+}
+
+
+// =============================================================================
+// Image Uploader (file picker + previews in drawers)
+// =============================================================================
+
+.tpu-forum__image-uploader {
+    display: flex;
+    flex-direction: column;
+    gap: $tpu-space-2;
+}
+
+.tpu-forum__image-dropzone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $tpu-space-2;
+    padding: $tpu-space-3 $tpu-space-4;
+    border: 2px dashed $tpu-border-secondary;
+    border-radius: $tpu-radius-md;
+    color: $tpu-text-tertiary;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+    user-select: none;
+
+    &:hover,
+    &:focus-visible {
+        border-color: $tpu-accent-primary;
+        color: $tpu-text-primary;
+        background-color: rgba($tpu-accent-primary-raw, 0.04);
+    }
+
+    svg {
+        flex-shrink: 0;
+        opacity: 0.6;
+    }
+}
+
+.tpu-forum__image-previews {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: $tpu-space-2;
+}
+
+.tpu-forum__image-preview {
+    position: relative;
+    border-radius: $tpu-radius-md;
+    overflow: hidden;
+    border: 1px solid $tpu-border-secondary;
+    aspect-ratio: 1;
+    background-color: $tpu-bg-tertiary;
+
+    img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.tpu-forum__image-preview-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: $tpu-bg-tertiary;
+}
+
+.tpu-forum__image-preview-overlay {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.tpu-forum__image-preview-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    cursor: pointer;
+    padding: 0;
+
+    &:hover {
+        background-color: rgba(220, 38, 38, 0.9);
+    }
+}
+
+.tpu-forum__image-preview-error {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    font-size: 0.6875rem;
+    text-align: center;
+}
+
+@keyframes tpuSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.tpu-forum__upload-spinner {
+    animation: tpuSpin 1s linear infinite;
+}
+
+// =============================================================================
+// Author & Timestamp meta
+// =============================================================================
+
+.tpu-forum__thread-meta {
+    display: flex;
+    align-items: center;
+    gap: $tpu-space-1;
+    flex-shrink: 0;
+}
+
+.tpu-forum__thread-byline {
+    display: flex;
+    align-items: center;
+    gap: $tpu-space-1;
+    margin-top: $tpu-space-2;
+}
+
+.tpu-forum__author {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: $tpu-text-secondary;
+}
+
+.tpu-forum__timestamp {
+    font-size: 0.75rem;
+    color: $tpu-text-tertiary;
+}
+
+.tpu-forum__meta-dot {
+    font-size: 0.75rem;
+    color: $tpu-text-muted;
+    line-height: 1;
+}
+
