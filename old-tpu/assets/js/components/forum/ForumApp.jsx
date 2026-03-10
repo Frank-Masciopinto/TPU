@@ -36,6 +36,7 @@ import { signOut as supabaseSignOut } from "../../lib/supabase";
 import { forumApi, getAuth } from "./forumApi";
 import { sanitizeUserHtml } from "./forumSanitize";
 import { clearForumSeo, setForumFeedTitle, setForumThreadSeo } from "./forumSeo";
+import { ForumAdmin } from "./ForumAdmin";
 import { ImageUploader } from "./ImageUploader";
 import { timeAgo } from "./timeAgo";
 
@@ -72,6 +73,9 @@ function parseRoute(loc) {
     return { name: "thread", threadId, slug };
   }
   if (pathname.startsWith("/forum")) {
+    if (search.get("view") === "admin") {
+      return { name: "admin" };
+    }
     return {
       name: "feed",
       q: search.get("q") || "",
@@ -1654,6 +1658,17 @@ export function ForumApp({ config }) {
           </Button>
           {canInteract && (
             <>
+              {isAdmin && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/forum?view=admin")}
+                  style={{ borderColor: "#f0ad4e", color: "#856404" }}
+                >
+                  Admin
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="secondary"
@@ -2038,6 +2053,31 @@ export function ForumApp({ config }) {
       </div>
     );
   };
+
+  if (route.name === "admin") {
+    if (!isAdmin) {
+      return (
+        <div className="tpu-forum">
+          <Card style={{ maxWidth: 480, margin: "3rem auto", textAlign: "center", padding: "2rem" }}>
+            <CardHeader>
+              <CardTitle>Access Denied</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p style={{ margin: 0, color: "#666" }}>
+                {canInteract
+                  ? "You do not have admin privileges."
+                  : "Please sign in with an admin account."}
+              </p>
+            </CardContent>
+            <CardFooter style={{ justifyContent: "center" }}>
+              <Button onClick={() => navigate("/forum")}>Back to Forum</Button>
+            </CardFooter>
+          </Card>
+        </div>
+      );
+    }
+    return <ForumAdmin config={config} api={api} navigate={navigate} />;
+  }
 
   return (
     <div className="tpu-forum">

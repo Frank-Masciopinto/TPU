@@ -269,6 +269,36 @@ export function forumApi(config) {
 
             return data;
         },
+
+        // =====================================================================
+        // Admin Dashboard API Methods
+        // =====================================================================
+
+        async getAdminThreads(filter, sort, page, limit) {
+            const p = new URLSearchParams();
+            if (filter) p.set('filter', filter);
+            if (sort) p.set('sort', sort);
+            if (page) p.set('page', String(page));
+            if (limit) p.set('limit', String(limit));
+            const qs = p.toString() ? `?${p.toString()}` : '';
+            return request(config, `/admin/threads${qs}`, { method: 'GET', needsAuth: true });
+        },
+
+        async patchThread(threadId, updates) {
+            return request(config, `/threads/${encodeURIComponent(threadId)}`, { method: 'PATCH', body: updates, needsAuth: true });
+        },
+
+        async patchComment(commentId, updates) {
+            return request(config, `/comments/${encodeURIComponent(commentId)}`, { method: 'PATCH', body: updates, needsAuth: true });
+        },
+
+        async lookupUser(email) {
+            return request(config, `/admin/users?email=${encodeURIComponent(email)}`, { method: 'GET', needsAuth: true });
+        },
+
+        async revokeUser(userId) {
+            return request(config, '/auth/revoke', { method: 'POST', body: { userId }, needsAuth: true });
+        },
     };
 }
 
