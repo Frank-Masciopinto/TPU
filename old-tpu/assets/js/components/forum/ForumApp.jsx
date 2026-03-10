@@ -321,7 +321,7 @@ function validateTags(tags) {
   return errors;
 }
 
-function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting, api }) {
+function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting, api, serverError, onClearServerError }) {
   const [title, setTitle] = React.useState("");
   const [body, setBody] = React.useState("");
   const [images, setImages] = React.useState([]);
@@ -340,6 +340,7 @@ function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting, api }) {
       setErrors({});
       setImages([]);
       setUploading(false);
+      if (onClearServerError) onClearServerError();
     }
   }, [open]);
 
@@ -354,6 +355,7 @@ function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting, api }) {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
+    if (onClearServerError) onClearServerError();
     onSubmit({ title: title.trim(), body: body.trim(), tags, images });
   };
 
@@ -368,6 +370,7 @@ function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting, api }) {
         </SheetHeader>
 
         <div className="tpu-forum__drawer-body">
+          {serverError && <Badge variant="destructive">{serverError}</Badge>}
           <Card>
             <CardHeader>
               <CardTitle as="h3">Question</CardTitle>
@@ -541,7 +544,7 @@ function AskQuestionDrawer({ open, onOpenChange, onSubmit, submitting, api }) {
   );
 }
 
-function ReplyDrawer({ open, onOpenChange, onSubmit, submitting, title, api }) {
+function ReplyDrawer({ open, onOpenChange, onSubmit, submitting, title, api, serverError, onClearServerError }) {
   const [body, setBody] = React.useState("");
   const [images, setImages] = React.useState([]);
   const [uploading, setUploading] = React.useState(false);
@@ -553,6 +556,7 @@ function ReplyDrawer({ open, onOpenChange, onSubmit, submitting, title, api }) {
       setImages([]);
       setUploading(false);
       setError("");
+      if (onClearServerError) onClearServerError();
     }
   }, [open]);
 
@@ -561,8 +565,12 @@ function ReplyDrawer({ open, onOpenChange, onSubmit, submitting, title, api }) {
       setError("Reply cannot be empty.");
       return;
     }
+    setError("");
+    if (onClearServerError) onClearServerError();
     onSubmit({ body: body.trim(), images });
   };
+
+  const displayError = error || serverError || "";
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -576,10 +584,14 @@ function ReplyDrawer({ open, onOpenChange, onSubmit, submitting, title, api }) {
         <div className="tpu-forum__drawer-body">
           <Textarea
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={(e) => {
+              setBody(e.target.value);
+              if (error) setError("");
+              if (serverError && onClearServerError) onClearServerError();
+            }}
             placeholder="Write your reply…"
           />
-          {error && <Badge variant="destructive">{error}</Badge>}
+          {displayError && <Badge variant="destructive">{displayError}</Badge>}
           <ImageUploader
             api={api}
             maxFiles={3}
@@ -997,6 +1009,8 @@ export function ForumApp({ config }) {
   const [replyParentId, setReplyParentId] = React.useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
   const [deleteTarget, setDeleteTarget] = React.useState(null); // { type: 'thread'|'comment', id: string }
+  const [replyServerError, setReplyServerError] = React.useState("");
+  const [askServerError, setAskServerError] = React.useState("");
 
   // Auth state - use state so we can refresh when user returns to tab after login
   const [auth, setAuth] = React.useState(() => getAuth(config));
@@ -1469,16 +1483,26 @@ export function ForumApp({ config }) {
     try {
       const created = await api.createThread(payload);
       const createdThread = (created && (created.thread || created)) || null;
+      setAskServerError("");
       if (createdThread && (createdThread.slug || createdThread.id)) {
         setAskOpen(false);
         navigate(buildThreadUrl(createdThread, createdThread.slug));
       } else {
-        // fallback: just refresh feed
         setAskOpen(false);
         navigate(buildFeedUrl({ q: "", sort: "hot", filter: "", page: 1 }));
       }
     } catch (e) {
-      setSignInOpen(true);
+      if (e.status === 401) {
+        setSignInOpen(true);
+      } else {
+        const code = e.data?.error || "";
+        let msg;
+        if (code === "comment_too_short") msg = "Your post is too short (minimum 5 characters).";
+        else if (code === "too_many_links") msg = "Too many links (maximum 2 allowed).";
+        else if (e.status === 429) msg = "Too many posts — please wait a moment.";
+        else msg = e.message || "Failed to create thread.";
+        setAskServerError(msg);
+      }
     } finally {
       setPosting(false);
     }
@@ -1489,23 +1513,53 @@ export function ForumApp({ config }) {
     if (!thread || !thread.id) return;
     setPosting(true);
     try {
-      await api.createComment(thread.id, {
+      const result = await api.createComment(thread.id, {
         body,
         images: images || [],
         parentId: replyParentId || null,
       });
+      const newComment = result && (result.data || result);
+
       setReplyOpen(false);
       setReplyParentId(null);
-      // refresh comments
-      const c = await api.listComments(thread.id, commentSort);
-      const commentItemsRaw =
-        (c && (c.data || c.items || c.comments || c)) || [];
-      const commentItems = Array.isArray(commentItemsRaw)
-        ? commentItemsRaw
-        : [];
-      setComments(commentItems);
+      setReplyServerError("");
+
+      if (newComment && newComment.id) {
+        setComments((prev) => [
+          ...prev,
+          {
+            ...newComment,
+            body: newComment.body || body,
+            author: profile?.username || "You",
+            createdAt: newComment.created_at || new Date().toISOString(),
+            votes: 0,
+            score: 0,
+            myVote: 0,
+            images: newComment.images || images || [],
+            parentId: replyParentId || null,
+          },
+        ]);
+      }
+
+      api.listComments(thread.id, commentSort)
+        .then((c) => {
+          const raw = (c && (c.data || c.items || c.comments || c)) || [];
+          if (Array.isArray(raw) && raw.length) setComments(raw);
+        })
+        .catch(() => {});
     } catch (e) {
-      setSignInOpen(true);
+      if (e.status === 401) {
+        setSignInOpen(true);
+      } else {
+        const code = e.data?.error || "";
+        let msg;
+        if (code === "comment_too_short") msg = "Your reply is too short (minimum 5 characters).";
+        else if (code === "too_many_links") msg = "Too many links (maximum 2 allowed).";
+        else if (code === "thread_locked") msg = "This thread is locked.";
+        else if (e.status === 429) msg = "Too many posts — please wait a moment.";
+        else msg = e.message || "Failed to post reply.";
+        setReplyServerError(msg);
+      }
     } finally {
       setPosting(false);
     }
@@ -1783,6 +1837,8 @@ export function ForumApp({ config }) {
         onSubmit={submitThread}
         submitting={posting}
         api={api}
+        serverError={askServerError}
+        onClearServerError={() => setAskServerError("")}
       />
     </div>
   );
@@ -2048,6 +2104,8 @@ export function ForumApp({ config }) {
           submitting={posting}
           title={replyParentId ? "Reply to comment" : "Reply to thread"}
           api={api}
+          serverError={replyServerError}
+          onClearServerError={() => setReplyServerError("")}
         />
       </div>
     );

@@ -1,0 +1,7 @@
+**/*.jsx
+**/*.tsx
+**/*.map
+**/*.cjs
+assets/js/lib/
+assets/dist/report.html
+workers/

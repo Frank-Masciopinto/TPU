@@ -8,13 +8,20 @@ module.exports = merge(commonConfig, {
         emitOnErrors: true,
         splitChunks: {
             chunks: 'async',
-            maxSize: 4 * 1024 * 1024,
+            maxSize: 2 * 1024 * 1024,
+            enforceSizeThreshold: 4 * 1024 * 1024,
             cacheGroups: {
                 reactVendor: {
                     test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
                     name: 'vendors-react',
                     chunks: 'async',
                     priority: 20,
+                },
+                coreJs: {
+                    test: /[\\/]node_modules[\\/]core-js[\\/]/,
+                    chunks: 'async',
+                    priority: 15,
+                    maxSize: 2 * 1024 * 1024,
                 },
                 defaultVendors: {
                     test: /[\\/]node_modules[\\/]/,
