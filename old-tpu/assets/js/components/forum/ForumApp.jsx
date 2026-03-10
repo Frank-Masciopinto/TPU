@@ -1981,10 +1981,9 @@ export function ForumApp({ config }) {
                   0,
                   50,
                 );
-                // Check if comment author is admin by matching email in adminList
                 const cAuthorEmail = c.author_email || c.authorEmail || "";
                 const cIsAuthorAdmin =
-                  cAuthorEmail && adminList[cAuthorEmail.toLowerCase()];
+                  c.author_is_admin || (cAuthorEmail && adminList[cAuthorEmail.toLowerCase()]);
                 return (
                   <div key={String(c.id)} className="tpu-forum__comment-block">
                     <CommentCard
@@ -2008,8 +2007,8 @@ export function ForumApp({ config }) {
                       const childAuthorEmail =
                         child.author_email || child.authorEmail || "";
                       const childIsAuthorAdmin =
-                        childAuthorEmail &&
-                        adminList[childAuthorEmail.toLowerCase()];
+                        child.author_is_admin || (childAuthorEmail &&
+                        adminList[childAuthorEmail.toLowerCase()]);
                       return (
                         <CommentCard
                           key={String(child.id)}

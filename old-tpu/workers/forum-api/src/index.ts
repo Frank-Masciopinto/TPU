@@ -436,6 +436,32 @@ async function ensureProfile(env: Env, authed: Authed): Promise<string | null> {
   }
 }
 
+async function fetchAdminMap(
+  env: Env,
+): Promise<Record<string, string>> {
+  try {
+    const r = await supabaseFetch(env, "forum_admins?select=email,display_name", { method: "GET" });
+    if (!r.ok) return {};
+    const rows = (await r.json()) as Array<{ email: string; display_name: string }>;
+    const map: Record<string, string> = {};
+    for (const row of rows) map[row.email.toLowerCase()] = row.display_name;
+    return map;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Cache a user_id → email mapping in KV so enrichWithAuthors can
+ * detect admin posts for both Supabase and BigCommerce users.
+ */
+async function cacheUserEmail(env: Env, userId: string, email: string): Promise<void> {
+  if (!email || !userId) return;
+  try {
+    await env.RATE_LIMIT_KV.put(`email:${userId}`, email.toLowerCase(), { expirationTtl: 86400 * 90 });
+  } catch { /* best effort */ }
+}
+
 async function enrichWithAuthors(
   env: Env,
   rows: Record<string, unknown>[],
@@ -447,6 +473,8 @@ async function enrichWithAuthors(
     const userIds = [...new Set(rows.map((r) => r.user_id as string).filter(Boolean))];
     if (!userIds.length) return;
 
+    const admins = adminMap ?? await fetchAdminMap(env);
+
     const r = await supabaseFetch(
       env,
       `forum_profiles?user_id=in.(${userIds.join(",")})&select=user_id,username`,
@@ -456,11 +484,24 @@ async function enrichWithAuthors(
     const profiles = (await r.json()) as { user_id: string; username: string }[];
     const profileMap = new Map(profiles.map((p) => [p.user_id, p.username]));
 
+    // Resolve user_id → email from KV cache (works for both Supabase and BC users)
+    const emailMap = new Map<string, string>();
+    if (Object.keys(admins).length > 0) {
+      const lookups = userIds.map(async (uid) => {
+        try {
+          const cached = await env.RATE_LIMIT_KV.get(`email:${uid}`);
+          if (cached) emailMap.set(uid, cached);
+        } catch { /* ignore */ }
+      });
+      await Promise.all(lookups);
+    }
+
     for (const row of rows) {
       const uid = row.user_id as string;
-      const email = (row.author_email || "") as string;
-      if (adminMap && email && adminMap[email.toLowerCase()]) {
-        row.author = adminMap[email.toLowerCase()];
+      const email = emailMap.get(uid) || "";
+      if (email && admins[email]) {
+        row.author = admins[email];
+        row.author_email = email;
         row.author_is_admin = true;
       } else {
         row.author = profileMap.get(uid) || "Member";
@@ -853,9 +894,12 @@ async function handleCreateThread(
       { status: 502 },
     );
   ctx.waitUntil(
-    ensureProfile(env, authed).catch((e) =>
-      console.warn(`[Forum:Profile] auto-provision failed user=${authed.userId}`, e instanceof Error ? e.message : e)
-    )
+    Promise.all([
+      ensureProfile(env, authed).catch((e) =>
+        console.warn(`[Forum:Profile] auto-provision failed user=${authed.userId}`, e instanceof Error ? e.message : e)
+      ),
+      cacheUserEmail(env, authed.userId, asString(authed.claims.email)),
+    ])
   );
   const created = (await r.json()) as unknown[];
   return json({ data: created[0] ?? null }, { status: 201 });
@@ -1020,9 +1064,12 @@ async function handleCreateComment(
       { status: 502 },
     );
   ctx.waitUntil(
-    ensureProfile(env, authed).catch((e) =>
-      console.warn(`[Forum:Profile] auto-provision failed user=${authed.userId}`, e instanceof Error ? e.message : e)
-    )
+    Promise.all([
+      ensureProfile(env, authed).catch((e) =>
+        console.warn(`[Forum:Profile] auto-provision failed user=${authed.userId}`, e instanceof Error ? e.message : e)
+      ),
+      cacheUserEmail(env, authed.userId, asString(authed.claims.email)),
+    ])
   );
   const created = (await r.json()) as unknown[];
   return json({ data: created[0] ?? null }, { status: 201 });
@@ -1111,6 +1158,7 @@ async function handleAcceptComment(
   if (!threadId) return json({ error: "not_found" }, { status: 404 });
 
   // Ownership check: only the thread author or an admin can accept an answer
+  let isAdminAction = false;
   const ownerParams = new URLSearchParams();
   ownerParams.set("select", "user_id");
   ownerParams.set("id", `eq.${threadId}`);
@@ -1124,14 +1172,18 @@ async function handleAcceptComment(
       if (!adminStatus.isAdmin) {
         throw new HttpError(403, "not_thread_owner", "Only the thread author or an admin can accept answers");
       }
+      isAdminAction = true;
     }
   }
+
+  // Use service_role JWT when admin is accepting on someone else's thread
+  const patchJwt = isAdminAction ? await adminServiceJwt(env) : authed.jwt;
 
   const tParams = new URLSearchParams();
   tParams.set("id", `eq.${threadId}`);
   const r = await supabaseFetch(env, `threads?${tParams.toString()}`, {
     method: "PATCH",
-    jwt: authed.jwt,
+    jwt: patchJwt,
     headers: { Prefer: "return=representation" },
     body: JSON.stringify({ accepted_comment_id: commentId }),
   });
@@ -1301,6 +1353,19 @@ async function requireAdmin(env: Env, authed: Authed): Promise<AdminStatus> {
 }
 
 /**
+ * Sign a short-lived service_role JWT for admin operations that need to
+ * bypass RLS (e.g. deleting/updating rows the admin doesn't own).
+ */
+async function adminServiceJwt(env: Env): Promise<string> {
+  const secret = new TextEncoder().encode(env.SUPABASE_JWT_SECRET);
+  return new SignJWT({ role: "service_role", iss: "supabase" })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setIssuedAt()
+    .setExpirationTime("1m")
+    .sign(secret);
+}
+
+/**
  * Handle GET /admin/me
  * Returns admin status for the authenticated user
  */
@@ -1435,13 +1500,16 @@ async function handleDeleteThread(
     }
   }
 
+  // Use service_role JWT to bypass RLS (admin already verified above)
+  const svcJwt = await adminServiceJwt(env);
+
   // Delete the thread via Supabase
   const params = new URLSearchParams();
   params.set("id", `eq.${threadId}`);
 
   const r = await supabaseFetch(env, `threads?${params.toString()}`, {
     method: "DELETE",
-    jwt: authed.jwt,
+    jwt: svcJwt,
     headers: { Prefer: "return=representation" },
   });
 
@@ -1484,13 +1552,16 @@ async function handleDeleteComment(
   // Verify admin status
   await requireAdmin(env, authed);
 
+  // Use service_role JWT to bypass RLS (admin already verified above)
+  const svcJwt = await adminServiceJwt(env);
+
   // Delete the comment via Supabase
   const params = new URLSearchParams();
   params.set("id", `eq.${commentId}`);
 
   const r = await supabaseFetch(env, `comments?${params.toString()}`, {
     method: "DELETE",
-    jwt: authed.jwt,
+    jwt: svcJwt,
     headers: { Prefer: "return=representation" },
   });
 
@@ -1677,12 +1748,15 @@ async function handlePatchThread(
 
   allowed.updated_at = new Date().toISOString();
 
+  // Use service_role JWT to bypass RLS (admin already verified above)
+  const svcJwt = await adminServiceJwt(env);
+
   const params = new URLSearchParams();
   params.set("id", `eq.${threadId}`);
 
   const r = await supabaseFetch(env, `threads?${params.toString()}`, {
     method: "PATCH",
-    jwt: authed.jwt,
+    jwt: svcJwt,
     headers: { Prefer: "return=representation" },
     body: JSON.stringify(allowed),
   });
@@ -1714,12 +1788,15 @@ async function handlePatchComment(
   if (content.length < 5) throw new HttpError(400, "comment_too_short");
   if (content.length > 10000) throw new HttpError(400, "comment_too_long");
 
+  // Use service_role JWT to bypass RLS (admin already verified above)
+  const svcJwt = await adminServiceJwt(env);
+
   const params = new URLSearchParams();
   params.set("id", `eq.${commentId}`);
 
   const r = await supabaseFetch(env, `comments?${params.toString()}`, {
     method: "PATCH",
-    jwt: authed.jwt,
+    jwt: svcJwt,
     headers: { Prefer: "return=representation" },
     body: JSON.stringify({ body: content, updated_at: new Date().toISOString() }),
   });
@@ -3831,6 +3908,8 @@ export default {
         authed = await requireSupabaseJwt(req, env);
         // Tight write limits.
         await rateLimitOrThrow(env, `${ip}:${authed.userId}:write`, 20, 60);
+        // Cache user_id → email mapping for admin badge detection
+        ctx.waitUntil(cacheUserEmail(env, authed.userId, asString(authed.claims.email)));
       } else if (isPublicPost) {
         // Public POST endpoints - rate limit by IP only
         await rateLimitOrThrow(env, `${ip}:public:write`, 30, 60);
