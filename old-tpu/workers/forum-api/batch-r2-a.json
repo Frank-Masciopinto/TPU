@@ -1,0 +1,357 @@
+[
+  {
+    "thread_id": "5e54b04f-a959-4bc0-81f0-319cf9aedbb7",
+    "new_comments": [
+      {
+        "username": "BrakeShoeBarry",
+        "body": "Quick question on this — when you go from 7K to 8K, does the brake size change too? I know 7K axles typically run 12x2 electric brakes but I'm not sure if 8K bumps up to 12-1/4 x 3-3/8. That would affect the backing plates and drums you need to order along with the axle.",
+        "role": "followup_question"
+      },
+      {
+        "username": "DropAxleDenny",
+        "body": "Yes, 8K axles use 12-1/4 x 3-3/8 inch electric brakes — bigger shoes and bigger drums than the 7K setup. So you'll need new drums, backing plates, and brake assemblies. The hub bolt pattern also changes on most 8K axles to 8 on 6.5 inches, so your existing wheels probably won't carry over either. Plan for that in your budget.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TandemTommy",
+        "body": "Did this exact upgrade on my 24-foot equipment trailer last year. Went from 7K Dexter axles to 8K. The spring center measurement was the same at 33 inches so the hangers didn't need to change at all — just pulled the old axles out, slid the new ones in, and bolted up. Whole job took about 4 hours with a buddy and a floor jack. Well worth it if you're regularly loading near capacity.",
+        "role": "anecdote"
+      },
+      {
+        "username": "FrameRailRick",
+        "body": "One thing people forget — measure the drop on your current axle too. Spring-under vs spring-over, and the actual drop dimension at the spindle matters for ride height. If your 7K is a straight axle and your 8K replacement is a drop axle (or vice versa), the trailer will sit at a totally different height. Write down the drop measurement before you order.",
+        "role": "correction"
+      },
+      {
+        "username": "SpindleSam",
+        "body": "Also worth confirming whether your current 7K axle is a 5 on 4.5 bolt pattern or 8-lug. Some 7K axles already run 8 on 6.5 if they were specced with heavy duty hubs. If you're already on 8-lug, the wheel swap is a non-issue. Just check before you start buying new wheels.",
+        "role": "direct_help"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "If you're not sure how to measure the spring center, it's from the center of the front spring hanger bolt to the center of the rear spring hanger bolt. Use a tape measure along the frame rail. Most common spring centers on utility and equipment trailers are 33\", 35\", or 36\". If you can snap a photo of the axle tag or data plate, that usually has the spec printed right on it too.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "Don't forget tires. Going from 7K to 8K you'll want at least a Load Range E tire rated for the higher capacity per wheel. A lot of guys upgrade the axle but leave the old ST225/75R15 tires on there — those might not be rated high enough for the 8K capacity split across 4 tires. Check the tire sidewall for the max load rating.",
+        "role": "direct_help"
+      },
+      {
+        "username": "HubCapHenry",
+        "body": "Learned this the hard way — I measured my spring center wrong the first time because I measured to the outside of the hanger instead of the bolt center. Was off by almost 2 inches and the axle I ordered didn't sit right. Had to send it back and wait another week. Measure to the center of the bolt, not the edge of the hanger bracket.",
+        "role": "anecdote"
+      },
+      {
+        "username": "EqualizerEd",
+        "body": "The accepted answer is spot on, spring center is the number one measurement. I'd add: take a photo of a tape measure laid across it and send that to whoever you're ordering from. Eliminates any confusion. I've done maybe a dozen axle swaps and the spring center has matched every time as long as you measure correctly.",
+        "role": "confirmation"
+      },
+      {
+        "username": "NevR_Adjust_Nick",
+        "body": "While you're at it, are you running electric or hydraulic brakes on your 7K setup? If you're switching to electric on the 8K, make sure your brake controller can handle the higher amp draw from the larger 12-1/4 inch magnets. Most 7-way controllers are fine but some of the cheaper ones max out around 2 axles of 7K brakes.",
+        "role": "followup_question"
+      }
+    ]
+  },
+  {
+    "thread_id": "59aad523-03b8-4c76-bd8c-7c71345ad1e1",
+    "new_comments": [
+      {
+        "username": "DumpTrailerDave",
+        "body": "Ordered the TPU-8-430-5 for my 10K tandem dump trailer. Fit was perfect, bolt pattern lined right up. Same 8 on 6.5 pattern as the original Dexter drum. No issues after about 3,000 miles of hauling gravel.",
+        "role": "confirmation"
+      },
+      {
+        "username": "TandemTommy",
+        "body": "Does anyone know what the equivalent part is for 9K/10K axles made BEFORE April 2023? I have an older gooseneck and the drum numbers don't match the 9-123. Wondering if there was a different Dexter part number for the pre-2023 drums.",
+        "role": "followup_question"
+      },
+      {
+        "username": "HeavyHaulHank",
+        "body": "Just a heads up — the 9K and 10K brake drums are 12-1/4 x 3-3/8 on the standard setups, and the bolt pattern is 8 on 6.5 inches. Make sure you verify that matches what you're replacing before ordering. I've seen a few oddball trailers with 12-1/4 x 5 inch brakes on 10K axles and those use a completely different drum.",
+        "role": "correction"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "Had to replace both drums on my gooseneck flatbed last fall. The Dexter originals had worn past the max diameter — you could feel the lip with your finger. The cross-reference drum from TPU was the same casting dimensions. I compared them side by side before installing. Bearings and seals seated identically.",
+        "role": "anecdote"
+      },
+      {
+        "username": "BearingBuddy_Bill",
+        "body": "When you swap the drum, it's a good time to inspect the bearings and replace the grease seal while you're in there. The 9K/10K hubs typically use a 25580 inner bearing and a 02475 outer bearing. Seals are cheap insurance — I always replace them when the drum comes off.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SpindleSam",
+        "body": "One more thing — when you put the new drum on, check for any casting flash around the hub pilot and the bearing seats. I've had aftermarket drums need a light cleanup with emery cloth on the pilot diameter before the hub would slide on smoothly. Nothing major, just a minute of work, but don't force it.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "ff39f104-342c-4ab4-bbcc-1422d8ef0b7a",
+    "new_comments": [
+      {
+        "username": "HubCapHenry",
+        "body": "Ran the 90865A-17 on my 7K equipment trailer for about a season now. Fits exactly like the Dexter A-219 it replaced. Same pilot, same bearing bores, same stud circle. No complaints.",
+        "role": "confirmation"
+      },
+      {
+        "username": "DropAxleDenny",
+        "body": "Is there a version of the A-219 with 5/8-inch studs instead of 1/2-inch? I've got a 7K axle but with the 8-lug pattern and 5/8 studs. Just want to make sure I don't accidentally order the wrong stud size.",
+        "role": "followup_question"
+      },
+      {
+        "username": "BearingBuddy_Bill",
+        "body": "For anyone ordering this hub, the bearing sizes you'll need are 25580 for the inner and 15123 for the outer on the standard 7K Dexter setup. Races are 25520 inner and 15245 outer. If you're doing a full repack or new install, grab a seal kit too — the grease seal is what keeps everything protected.",
+        "role": "direct_help"
+      },
+      {
+        "username": "LubeJobLarry",
+        "body": "Upgraded my boat trailer from stock hubs to the A-219 equivalent a couple years back because the originals were pitted from saltwater. These aftermarket hubs have been solid. I pack them with marine-grade bearing grease and they've held up through two seasons of boat ramp launches.",
+        "role": "anecdote"
+      },
+      {
+        "username": "FrameRailRick",
+        "body": "Make sure you verify the bolt pattern before ordering. The A-219 is specifically an 8 on 6.5 inch bolt pattern with 1/2-inch studs. If your 7K axle runs a different lug pattern — some older 7K setups used 6 on 5.5 — this hub won't work. Check your wheel bolt circle first.",
+        "role": "correction"
+      },
+      {
+        "username": "SealSaverSue",
+        "body": "Don't forget the grease seal when you install the new hub. The seal presses into the back of the hub over the inner bearing and keeps dirt and water out. On 7K hubs it's typically a 2.125 x 3.376 seal. Press it in flush and square — a block of wood and a hammer works, or use a seal driver if you have one.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "8a69adc1-0521-43d3-b975-d684d9fbaa04",
+    "new_comments": [
+      {
+        "username": "SpindleSam",
+        "body": "Important thing to remember: the 28682 is just the bearing cone. You also need the matching race, which is the 28622. The race presses into the hub and the cone rides on the race. Don't reuse an old race with a new bearing — they wear as a matched set. Always replace both together.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TandemTommy",
+        "body": "What's the inner bearing number for 12K hubs? I know the 28682 is the outer, but I need to replace the full set and I'm not sure which inner goes with it.",
+        "role": "followup_question"
+      },
+      {
+        "username": "DropAxleDenny",
+        "body": "Inner bearing on Dexter 12K hubs is the HM218248 with the HM218210 race. That's a pretty beefy bearing — 3.543\" OD on the race. Between the 28682 outer and the HM218248 inner, you've got a solid bearing setup for heavy loads.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "I went with the SKF BR28682 on my 12K flatbed gooseneck last summer. Exact same dimensions as the Timken, pressed right onto the spindle with no issues. About 8,000 miles on them hauling equipment and they're running smooth. I pack them with Valvoline multi-purpose bearing grease and check them every 5,000 miles.",
+        "role": "anecdote"
+      },
+      {
+        "username": "BrakeShoeBarry",
+        "body": "One thing — I've heard guys say you can mix bearing brands but you should never mix a cone from one brand with a race from another. The tolerances between manufacturers can vary just enough to cause premature wear. If you buy a Timken cone, get a Timken race. Same goes for SKF or National.",
+        "role": "correction"
+      },
+      {
+        "username": "LubeJobLarry",
+        "body": "Instead of ordering the bearing and race separately, you might want to look at a complete bearing kit for 12K hubs. Usually includes both inner and outer bearings with races, the grease seal, and a cotter pin. Ends up being about the same price and you know everything matches. Saves you from accidentally getting the wrong race.",
+        "role": "alternative"
+      },
+      {
+        "username": "HeavyHaulHank",
+        "body": "All those cross-reference numbers listed above are interchangeable, can confirm. I've used Timken, National, and SKF in 12K hubs and never had a problem with any of them. Quality is comparable across the board for standard trailer use. Just make sure you're buying from a reputable source — there are counterfeits floating around on some of the discount sites.",
+        "role": "confirmation"
+      },
+      {
+        "username": "SealSaverSue",
+        "body": "When you install the new bearing, pack it with grease thoroughly before putting it on the spindle. Get grease into every roller gap — I use a bearing packer tool but you can do it by hand if you push grease into the large end and work it through until it comes out between each roller on the small end. Don't just smear grease on the outside and call it good. Under-greased bearings on a 12K axle hauling heavy loads will fail fast.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "7113248f-8e46-4868-8179-9a36d4cd6fc1",
+    "new_comments": [
+      {
+        "username": "AxleAlley_Al",
+        "body": "To add some context, the lighter duty axles — your 3.5K, 5.2K, and 6K — typically use 1-3/4 inch wide springs. Once you get to 7K and 8K, most go to 2-inch wide springs. Then at 10K heavy-duty and above, you jump to the 3-inch wide springs. So there's basically three tiers of spring width depending on capacity.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DumpTrailerDave",
+        "body": "How many leaves are typically in a 15K spring pack? I'm looking at replacing the springs on my triaxle dump and want to make sure I get the right count. The old ones are pretty beat up and I can't tell if any leaves are missing.",
+        "role": "followup_question"
+      },
+      {
+        "username": "HeavyHaulHank",
+        "body": "Replaced all the springs on my 16K tandem equipment trailer last year. All 3 inches wide, just like the answer says. The main difference between the 15K and 16K springs isn't the width — it's the number of leaves and the arch. More leaves and a different arch give you the higher rating. Width stays at 3 inches across those heavy-duty capacities.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SlipperSpringScott",
+        "body": "Worth noting that the 10K capacity is sort of a crossover point. I've seen standard 10K axles with 2-inch springs and heavy-duty 10K axles with 3-inch springs. If you're replacing 10K springs, measure the width before ordering — don't just assume it's 2 or 3 inches. The 15K and above are always 3 though, no ambiguity there.",
+        "role": "correction"
+      },
+      {
+        "username": "CoilOverCarl",
+        "body": "If you're running a heavy-duty application and you're tired of leaf spring maintenance, air ride suspension is worth considering for 15K+ axles. Higher upfront cost but you get adjustable ride height, smoother ride, and less wear on the trailer frame. Trade-off is more complexity and air bags can fail if they get road debris damage. Not for everyone but it's an option.",
+        "role": "alternative"
+      },
+      {
+        "username": "EqualizerEd",
+        "body": "Can confirm the Hutch detail in the answer — every Hutch suspension spring I've dealt with has been 3 inches wide regardless of axle capacity. That's just how they build their system. Also worth mentioning that the spring seat pads on the axle need to match the spring width. A 3-inch spring needs a 3-inch spring seat welded to the axle tube. If you're mixing components, make sure they line up.",
+        "role": "confirmation"
+      },
+      {
+        "username": "PinBoxPete",
+        "body": "Another dimension that changes as you go up in capacity is the spring eye diameter. Lighter springs use a 9/16-inch or 5/8-inch eye bolt, but once you get into 3-inch wide heavy-duty springs for 12K-16K axles, the eye bolts are typically 3/4-inch diameter. Make sure your hangers accept the right bolt size if you're upgrading spring capacity.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "26de2739-b24f-4ce6-8855-cb8f4409cce8",
+    "new_comments": [
+      {
+        "username": "FrameRailRick",
+        "body": "This measurement matters because it tells you how much clearance you have between the brake assemblies and the inside of the trailer frame. If your frame is narrower than 69-1/2 inches between the rails, the brakes are going to hit. Always check this before ordering if you're fitting new axles to an existing trailer.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TandemTommy",
+        "body": "Does anyone know the inside drum-to-drum measurement on the 74-inch hub face 8K axles with the same 12-1/4 x 3-3/8 brakes? I'm working with a narrower trailer and need to figure out if the 74 hub face will clear.",
+        "role": "followup_question"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "Had to verify this exact spec when I was building an 8K tandem car hauler. The 69-1/2 inch inside measurement gave me plenty of room with my 72-inch inside frame width. I measured with the drums fully seated and the backing plates bolted up. No interference at all.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SpindleSam",
+        "body": "For anyone wondering how to get this measurement on an axle that's already on the trailer — put a long straight edge or tape measure from the inside face of one brake drum across to the inside face of the other drum. Make sure you're measuring the drum face, not the backing plate edge. The backing plate actually extends a bit further inward on some setups.",
+        "role": "direct_help"
+      },
+      {
+        "username": "BrakeShoeBarry",
+        "body": "Just to be clear, this 69-1/2 inch number is specific to the 12-1/4 x 3-3/8 brake setup on the 82-inch hub face axle. If someone is running 12-1/4 x 5 inch brakes (which some heavy-duty 8K axles use), the inside measurement will be different because the drum and backing plate are wider. Always confirm which brake size is on the axle.",
+        "role": "correction"
+      },
+      {
+        "username": "HubCapHenry",
+        "body": "69-1/2 inches sounds right to me. I pulled the same measurement when I swapped my drums last season. One tip: if you're tight on clearance, make sure the brake magnet wires and the adjuster mechanism on the backing plate aren't sticking out past the drum face. Sometimes they can add a fraction of an inch that causes interference with the frame.",
+        "role": "confirmation"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "Keep in mind that 8K axles also come in a 95-inch hub face configuration for wider trailers. On those, the inside drum-to-drum measurement is going to be larger since the spindles are farther apart. So if you're working with a wider frame and need more clearance, the 95-inch hub face variant might be the better fit. Check with your supplier for that specific inside measurement.",
+        "role": "alternative"
+      }
+    ]
+  },
+  {
+    "thread_id": "1fcab6c9-c2f6-479e-bc98-e63c64be6bb4",
+    "new_comments": [
+      {
+        "username": "AxleAlley_Al",
+        "body": "The 95-inch hub face is the standard for 102-inch wide trailers, but the overall width depends on your tire and wheel combination too. With a standard 235/80R16 tire on a 16x6 wheel, the tire sticks out about 3-1/2 inches past the hub face on each side. That puts you right at about 102 inches total. If you run a wider tire, you could go over 102 and have DOT issues.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DumpTrailerDave",
+        "body": "What capacity axle are you looking at? The 95-inch hub face / 80-inch spring center combo is available in everything from 3.5K to 8K. If this is a flatbed or equipment trailer, I'd go at least 5.2K per axle for a single or 7K per axle for a tandem setup. What are you planning to haul?",
+        "role": "followup_question"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "Built a 102-inch wide car hauler a few years back using 7K axles with the 95-inch hub face and 80-inch spring center. Everything lined up exactly like the answer says. The key was making sure the spring hanger spacing matched the 80-inch spring center — once that was right, the rest was straightforward. Used 235/80R16 tires and came out to about 101-3/4 inches overall.",
+        "role": "anecdote"
+      },
+      {
+        "username": "HeavyHaulHank",
+        "body": "Just to be really clear on the regulations — DOT maximum trailer width is 102 inches (8 feet 6 inches) for highway use in all 50 states. That's measured at the widest point, which is usually the outside of the tires or fenders. So when you spec your axle and tire combo, make absolutely sure the total width including tires doesn't exceed 102 inches or you'll need an overwidth permit.",
+        "role": "direct_help"
+      },
+      {
+        "username": "WeldedWilliam",
+        "body": "One thing to watch out for — if you're running fenders mounted inside the frame rails, the fender width and standoff can push your overall width past 102 inches even if the tires are within spec. I've seen guys build to 102 on the axle and then add fenders that stick out another inch on each side. Measure everything before you weld the fender mounts.",
+        "role": "correction"
+      },
+      {
+        "username": "DropAxleDenny",
+        "body": "If you're building from scratch and don't absolutely need 102 inches, consider going with an 86-inch hub face and 72-inch spring center for a 96-inch wide trailer instead. Narrower trailers are easier to tow, you get better rearview mirror visibility, and you don't have to worry about tight parking lots or narrow driveways. Just a thought depending on what you're hauling.",
+        "role": "alternative"
+      },
+      {
+        "username": "BrakeShoeBarry",
+        "body": "When you order the axle, make sure to spec the brakes at the same time. Electric brakes are the most common for utility and equipment trailers. On a 5.2K or 6K axle, you'll get 10-inch brakes. On a 7K, you're looking at 12x2 inch brakes. This affects the drum and backing plate dimensions and is part of the overall axle build.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TandemTommy",
+        "body": "Are you going single axle or tandem? For a 102-inch wide trailer, most builds I've seen are tandem axle for stability. Single axle works if you're keeping it short (like a 10-12 foot deck), but anything longer really benefits from two axles. The spring center stays at 80 inches either way.",
+        "role": "followup_question"
+      },
+      {
+        "username": "SlipperSpringScott",
+        "body": "Built mine with the 80-inch spring center on a tandem 7K setup. Used standard double-eye slipper springs with a 33-inch spring center between hangers. The hangers welded right to my 2x6 rectangular tube frame with even spacing. If your frame is a different size, the hanger brackets are available for different tube widths — just make sure you specify that when ordering.",
+        "role": "anecdote"
+      },
+      {
+        "username": "EqualizerEd",
+        "body": "The 95-inch hub face with 80-inch spring center is definitely the go-to for 102-inch wide builds, can confirm. I'll add that the spring seat pads on the axle should be positioned for the 80-inch center and welded square. If you're ordering a complete axle, this is all done for you. If you're having a bare tube built, make sure the spring seats are positioned and welded by someone who knows the spec.",
+        "role": "confirmation"
+      },
+      {
+        "username": "NevR_Adjust_Nick",
+        "body": "Something a lot of first-time builders overlook: wheel offset. A zero-offset wheel keeps the tire centered on the hub, but some trailer wheels have a slight positive offset that tucks the tire in a bit. On a 102-inch build where every fraction of an inch counts, the wheel offset can mean the difference between legal and overwidth. Check the backspacing on whatever wheels you plan to run.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "7916c058-359a-4f0e-bc54-d4e110fb205b",
+    "new_comments": [
+      {
+        "username": "EqualizerEd",
+        "body": "Good clear answer. I'll second this — the hub and drum is just a shell with bearing bores and studs. It doesn't know or care whether the spindle behind it has a grease zerk or not. Same part, either way.",
+        "role": "confirmation"
+      },
+      {
+        "username": "TrailerParkTech",
+        "body": "How can you tell if your existing spindle is EZ lube without pulling the hub off? I bought a used trailer and I'm not sure what I've got.",
+        "role": "followup_question"
+      },
+      {
+        "username": "LubeJobLarry",
+        "body": "Look at the end of the spindle where the dust cap or grease cap sits. On an EZ lube spindle, there's a rubber grease fitting (zerk) built right into the end of the spindle, accessible through a hole in the dust cap. On a standard spindle, there's no zerk — just a smooth spindle end with a plain dust cap pressed on. You can usually spot the difference without removing anything.",
+        "role": "direct_help"
+      },
+      {
+        "username": "BearingBuddy_Bill",
+        "body": "Switched from standard grease to EZ lube spindles a few years ago on my landscape trailer and I love the convenience. Instead of pulling the hubs every year to repack, I just hit the zerk with a grease gun every few months. Takes about 30 seconds per hub. That said, you can't just add a zerk to a standard spindle — the EZ lube spindle has an internal passage that routes grease from the zerk through to the bearing area. It's a different forging.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SpindleSam",
+        "body": "One thing people get wrong: EZ lube does NOT mean you never have to repack your bearings. The zerk lets you add grease between full services, but you should still pull the hubs, inspect the bearings, and do a proper repack every 12,000 miles or once a year — whichever comes first. I've seen guys just pump grease in for years without ever checking the bearings, and by the time they look, the inner seal has blown out and the inner bearing is toast.",
+        "role": "correction"
+      },
+      {
+        "username": "HubCapHenry",
+        "body": "The dust cap is another visual clue. EZ lube caps usually have a small rubber plug in the center that you pop out to access the zerk fitting. Standard caps are just a plain stamped steel cap with no hole. If you see a rubber plug in the cap, you've got EZ lube spindles.",
+        "role": "direct_help"
+      },
+      {
+        "username": "IdlerHub_Ian",
+        "body": "If you really want low-maintenance hubs and you're hauling heavy, oil bath hubs are another option worth looking at. Instead of grease, the hub runs in a bath of gear oil and has a translucent cap so you can see the oil level. Very common on boat trailers and heavy commercial trailers. The downside is they can leak if the seals aren't perfect, and if you lose the oil, the bearings go fast. But for high-mileage applications they're hard to beat.",
+        "role": "alternative"
+      },
+      {
+        "username": "SealSaverSue",
+        "body": "Whether you run EZ lube or standard, make sure you're using the right grease. For trailer bearings, a lithium-based NLGI #2 bearing grease is the standard. If you're running a boat trailer that sees saltwater, go with a marine-grade grease that has corrosion inhibitors. Don't mix grease types — if you're switching from one grease to another, do a full repack and clean the old grease out first.",
+        "role": "direct_help"
+      }
+    ]
+  }
+]

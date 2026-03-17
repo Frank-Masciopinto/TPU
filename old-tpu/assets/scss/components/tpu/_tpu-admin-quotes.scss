@@ -1,0 +1,381 @@
+// =============================================================================
+// TPU Admin — Quote Browse & Search page (/admin-quotes/)
+// All selectors scoped under .aq to avoid theme conflicts.
+// Uses the site's standard $tpu-* design tokens (white/light theme).
+// =============================================================================
+
+// ---- Page wrapper -----------------------------------------------------------
+
+.aq {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: $tpu-space-8 $tpu-space-4;
+
+    @media (min-width: $tpu-screen-md) {
+        padding: $tpu-space-12 $tpu-space-8;
+    }
+}
+
+// ---- Page header ------------------------------------------------------------
+
+.aq-header {
+    display: flex;
+    align-items: center;
+    gap: $tpu-space-3;
+    margin-bottom: $tpu-space-8;
+    padding-bottom: $tpu-space-5;
+    border-bottom: 2px solid $tpu-border-primary;
+
+    h1 {
+        font-family: $tpu-font-headline;
+        font-size: $tpu-text-2xl;
+        font-weight: $tpu-font-bold;
+        text-transform: uppercase;
+        letter-spacing: $tpu-tracking-wide;
+        color: $tpu-text-primary;
+        margin: 0;
+
+        &::after {
+            content: "";
+            display: block;
+            width: 32px;
+            height: 3px;
+            background: $tpu-accent-primary;
+            margin-top: $tpu-space-1;
+        }
+    }
+}
+
+.aq-header-badge {
+    margin-left: auto;
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-xs;
+    font-weight: $tpu-font-semibold;
+    text-transform: uppercase;
+    letter-spacing: $tpu-tracking-wider;
+    color: $tpu-text-inverse;
+    background: $tpu-accent-primary;
+    padding: $tpu-space-1 $tpu-space-3;
+    border-radius: $tpu-radius-full;
+}
+
+// ---- Auth states ------------------------------------------------------------
+
+.aq-state-card {
+    @include tpu-card;
+    max-width: 520px;
+    margin: $tpu-space-12 auto;
+    padding: $tpu-space-10 $tpu-space-8;
+    text-align: center;
+    border-top: 4px solid $tpu-border-primary;
+
+    &--denied { border-top-color: $tpu-accent-tertiary; }
+
+    h2 {
+        font-family: $tpu-font-headline;
+        font-size: $tpu-text-xl;
+        font-weight: $tpu-font-bold;
+        text-transform: uppercase;
+        letter-spacing: $tpu-tracking-wide;
+        color: $tpu-text-primary;
+        margin: 0 0 $tpu-space-3;
+    }
+
+    p {
+        font-family: $tpu-font-body;
+        font-size: $tpu-text-base;
+        color: $tpu-text-secondary;
+        margin: 0 0 $tpu-space-6;
+        line-height: $tpu-leading-relaxed;
+    }
+}
+
+.aq-checking {
+    text-align: center;
+    padding: $tpu-space-20 $tpu-space-4;
+    color: $tpu-text-muted;
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-sm;
+}
+
+// ---- Spinner ----------------------------------------------------------------
+
+.aq-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid $tpu-border-primary;
+    border-top-color: $tpu-accent-primary;
+    border-radius: $tpu-radius-full;
+    animation: aq-spin 0.7s linear infinite;
+    margin-bottom: $tpu-space-3;
+}
+
+@keyframes aq-spin { to { transform: rotate(360deg); } }
+
+// ---- Toolbar ----------------------------------------------------------------
+
+.aq-toolbar {
+    margin-bottom: $tpu-space-6;
+}
+
+// ---- Apple-style search pill ------------------------------------------------
+
+.aq-search-pill {
+    display: flex;
+    align-items: center;
+    gap: $tpu-space-2;
+    background: $tpu-bg-secondary;
+    border: 1.5px solid $tpu-border-primary;
+    border-radius: $tpu-radius-full;
+    padding: $tpu-space-2 $tpu-space-4;
+    transition: border-color $tpu-transition-fast, box-shadow $tpu-transition-fast, background $tpu-transition-fast;
+
+    &:focus-within {
+        border-color: $tpu-accent-primary;
+        box-shadow: 0 0 0 3px rgba($tpu-accent-primary-raw, 0.10);
+        background: $tpu-bg-elevated;
+    }
+}
+
+.aq-search-icon {
+    flex-shrink: 0;
+    color: $tpu-text-muted;
+    transition: color $tpu-transition-fast;
+
+    .aq-search-pill:focus-within & { color: $tpu-accent-primary; }
+}
+
+.aq-search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-base;
+    color: $tpu-text-primary;
+    padding: 0;
+    min-width: 0;
+
+    &::placeholder { color: $tpu-text-muted; }
+
+    // Remove browser default search input decorations
+    &::-webkit-search-decoration,
+    &::-webkit-search-cancel-button { display: none; }
+}
+
+.aq-clear-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: $tpu-radius-full;
+    border: none;
+    background: $tpu-text-muted;
+    color: $tpu-text-inverse;
+    cursor: pointer;
+    padding: 0;
+    transition: background $tpu-transition-fast;
+
+    &:hover { background: $tpu-text-secondary; }
+}
+
+// ---- Scope bar (pill tabs) --------------------------------------------------
+
+.aq-scope-bar {
+    display: flex;
+    gap: $tpu-space-2;
+    margin-top: $tpu-space-3;
+    flex-wrap: wrap;
+}
+
+.aq-scope-tab {
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-sm;
+    font-weight: $tpu-font-medium;
+    padding: $tpu-space-1 $tpu-space-4;
+    border-radius: $tpu-radius-full;
+    border: 1.5px solid $tpu-border-primary;
+    background: transparent;
+    color: $tpu-text-secondary;
+    cursor: pointer;
+    transition: all $tpu-transition-fast;
+    line-height: 1.6;
+
+    &:hover:not(.is-active) {
+        border-color: $tpu-text-muted;
+        color: $tpu-text-primary;
+    }
+
+    &.is-active {
+        background: $tpu-accent-primary;
+        border-color: $tpu-accent-primary;
+        color: $tpu-text-inverse;
+        font-weight: $tpu-font-semibold;
+    }
+}
+
+// ---- Summary row (count chip + actions) ------------------------------------
+
+.aq-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $tpu-space-4;
+    min-height: 28px;
+}
+
+.aq-count-chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-xs;
+    font-weight: $tpu-font-bold;
+    text-transform: uppercase;
+    letter-spacing: $tpu-tracking-wider;
+    color: $tpu-text-muted;
+    background: $tpu-bg-secondary;
+    border: 1px solid $tpu-border-secondary;
+    padding: $tpu-space-1 $tpu-space-3;
+    border-radius: $tpu-radius-full;
+}
+
+// ---- Table ------------------------------------------------------------------
+
+.aq-table-wrap {
+    @include tpu-card;
+    overflow-x: auto;
+    padding: 0;
+}
+
+.aq table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.aq thead th {
+    background: $tpu-bg-secondary;
+    padding: $tpu-space-3 $tpu-space-4;
+    text-align: left;
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-xs;
+    font-weight: $tpu-font-bold;
+    text-transform: uppercase;
+    letter-spacing: $tpu-tracking-wider;
+    color: $tpu-text-secondary;
+    border-bottom: 1px solid $tpu-border-primary;
+    white-space: nowrap;
+
+    &:first-child { border-radius: $tpu-radius-lg $tpu-radius-none $tpu-radius-none $tpu-radius-none; }
+    &:last-child  { border-radius: $tpu-radius-none $tpu-radius-lg $tpu-radius-none $tpu-radius-none; }
+}
+
+.aq tbody tr {
+    border-bottom: 1px solid $tpu-border-secondary;
+    transition: background $tpu-transition-fast;
+
+    &:last-child { border-bottom: none; }
+    &:hover      { background: $tpu-bg-secondary; }
+}
+
+.aq tbody tr.aq-row-expired {
+    background: rgba($tpu-accent-tertiary-raw, 0.05);
+
+    &:hover { background: rgba($tpu-accent-tertiary-raw, 0.09); }
+}
+
+.aq tbody td {
+    padding: $tpu-space-3 $tpu-space-4;
+    vertical-align: middle;
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-sm;
+    color: $tpu-text-primary;
+}
+
+.aq-cell-muted { color: $tpu-text-muted; }
+.aq-cell-warn  { color: $tpu-accent-tertiary; font-weight: $tpu-font-semibold; }
+.aq-cell-ok    { color: $tpu-accent-success; }
+
+.aq-badge {
+    display: inline-block;
+    padding: 2px $tpu-space-2;
+    border-radius: $tpu-radius-sm;
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-xs;
+    font-weight: $tpu-font-bold;
+    text-transform: uppercase;
+    letter-spacing: $tpu-tracking-wide;
+    white-space: nowrap;
+}
+
+.aq-badge-expired {
+    background: rgba($tpu-accent-tertiary-raw, 0.1);
+    color: $tpu-accent-tertiary;
+}
+
+.aq-badge-active {
+    background: rgba($tpu-accent-success-raw, 0.1);
+    color: $tpu-accent-success;
+}
+
+.aq-quote-num {
+    font-family: $tpu-font-mono;
+    font-size: $tpu-text-sm;
+    font-weight: $tpu-font-semibold;
+    color: $tpu-text-primary;
+}
+
+.aq a.aq-link {
+    color: $tpu-accent-primary;
+    text-decoration: none;
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-xs;
+    font-weight: $tpu-font-semibold;
+
+    &:hover { text-decoration: underline; }
+}
+
+// ---- Pagination -------------------------------------------------------------
+
+.aq-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $tpu-space-4;
+    margin-top: $tpu-space-6;
+}
+
+.aq-page-info {
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-sm;
+    color: $tpu-text-muted;
+}
+
+.aq-pag-btn {
+    font-size: $tpu-text-sm !important;
+    padding: $tpu-space-2 $tpu-space-4 !important;
+}
+
+// ---- Empty / error / loading states -----------------------------------------
+
+.aq-empty,
+.aq-loading {
+    text-align: center;
+    padding: $tpu-space-16 $tpu-space-4;
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-base;
+    color: $tpu-text-muted;
+}
+
+.aq-error {
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-sm;
+    color: $tpu-accent-tertiary;
+    background: rgba($tpu-accent-tertiary-raw, 0.06);
+    border: 1px solid rgba($tpu-accent-tertiary-raw, 0.2);
+    border-radius: $tpu-radius-md;
+    padding: $tpu-space-4;
+    margin-top: $tpu-space-4;
+}

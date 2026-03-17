@@ -1,0 +1,362 @@
+[
+  {
+    "thread_id": "3b364513-9d0e-4714-aef9-2dfeacfeab7e",
+    "new_comments": [
+      {
+        "username": "DualAxleDave",
+        "body": "Another way to think about it — tandem just refers to two things placed one behind the other. Same word gets used for tandem bicycles. On trailers, it means two axles inline. The big advantage over a single axle is stability, especially at highway speeds. Less sway, better weight distribution. If you're hauling over about 3500 lbs consistently, tandem is the way to go.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "Ran a single 3500 lb axle on my utility trailer for years. Blew a tire on the highway once and almost lost the whole rig. Switched to a tandem setup after that. With two axles, if one tire goes flat you can usually still limp to the shoulder safely. That alone was worth the upgrade for me.",
+        "role": "anecdote"
+      },
+      {
+        "username": "CampingRigChris",
+        "body": "Quick question related to this — when people say \"tandem axle hanger kit\" does that come with the equalizer too? Or is the equalizer separate? I'm trying to price out rebuilding my suspension and want to make sure I order everything.",
+        "role": "followup_question"
+      },
+      {
+        "username": "HorseFarmerHank",
+        "body": "Yes, a tandem axle hanger kit typically includes the hangers, equalizers, and bolts for a two-axle setup. The equalizer is the rocker arm that sits between the two axles and lets the suspension flex independently. Without the equalizer, the tandem setup wouldn't work correctly because one axle would take all the impact over bumps instead of distributing the load.",
+        "role": "direct_help"
+      },
+      {
+        "username": "BackyardBuilderBill",
+        "body": "One thing to keep in mind — tandem doesn't always mean better. For light loads like a small landscape trailer or a jet ski, a single axle is easier to maneuver, lighter on fuel economy, and cheaper to maintain. Half the bearings, half the brakes, half the tires. Tandem really starts making sense above about 5000 lb GVWR in my experience.",
+        "role": "alternative"
+      },
+      {
+        "username": "GravelGuyGreg",
+        "body": "Small clarification: you'll sometimes see \"tandem\" used loosely by sellers to describe any multi-axle trailer, but technically tandem is specifically two axles. If it's three axles, that's a triple or tri-axle. I've seen a few eBay listings calling triple axle trailers \"tandem\" which just confuses people shopping for parts.",
+        "role": "correction"
+      }
+    ]
+  },
+  {
+    "thread_id": "86af39e1-f01a-49d8-a099-57306cef57b4",
+    "new_comments": [
+      {
+        "username": "BrakeDrumBenny",
+        "body": "Can confirm the Carter 8K brakes fit perfect on the 7200 lb Dexter. Swapped mine out last spring. Bolt pattern and drum diameter are identical. The self-adjusting feature is a nice upgrade — I used to have to crawl under and turn the star wheel adjuster every few months on the old ones.",
+        "role": "confirmation"
+      },
+      {
+        "username": "SpringShopGary",
+        "body": "One thing to double check before ordering — make sure you know which side is which. The right hand (KC23-623) goes on the passenger side and the left hand (KC23-622) goes on the driver side. People mix these up all the time because they think \"right\" and \"left\" refer to their perspective standing behind the trailer, but it's based on the vehicle's forward-facing orientation.",
+        "role": "direct_help"
+      },
+      {
+        "username": "LandscaperLee",
+        "body": "Replaced my Dexter 7200 lb brakes with the Carter 8K assemblies about 8 months ago on my enclosed landscape trailer. Over 12,000 miles on them now with zero issues. Stopping power feels the same or maybe slightly better than the factory Dexter assemblies. Installation was straightforward if you've done brake work before — maybe 45 minutes per side.",
+        "role": "anecdote"
+      },
+      {
+        "username": "HeavyHaulHarry",
+        "body": "When you install new brake assemblies, make sure you also inspect the drum for scoring or a worn lip. New shoes on a scored drum will wear unevenly and you'll be right back where you started. Also worth checking your brake controller amperage output while you're at it. A lot of guys run them way too low on 7K axles and wonder why their trailer doesn't stop well.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FenceCrewPhil",
+        "body": "Do I need new drums too when switching from Dexter to Carter brakes, or do the existing drums work with the Carter assemblies?",
+        "role": "followup_question"
+      },
+      {
+        "username": "BrakeDrumBenny",
+        "body": "No, the existing drums are fine as long as they're not scored or worn past spec. The Carter assemblies use the same 12-1/4 x 2-1/2 inch drum as the Dexter 7200 lb. Same bolt pattern too. Just swap the backing plate assembly and you're good.",
+        "role": "direct_help"
+      },
+      {
+        "username": "CarCarrierKen",
+        "body": "One gotcha to be aware of — the Carter 8K brakes are for the \"new style\" 8K Dexter axle, which uses the thinner 12-1/4 x 2-1/2 inch brake. The OLD style 8K Dexter used a 12-1/4 x 3-3/8 inch brake, which is a completely different assembly. Make sure you verify your drum size before ordering. The 7200 lb axles are all 12-1/4 x 2-1/2 so no issue there, but if you see this thread and have an older 8K Dexter, double check.",
+        "role": "correction"
+      },
+      {
+        "username": "DumpTrailerDan",
+        "body": "Had the same situation on my dump trailer — 7200 lb Dexter axles, needed new brakes. Went with Carter and saved a decent chunk compared to OEM Dexter pricing. Honestly couldn't tell you the difference in braking feel. They just work.",
+        "role": "anecdote"
+      },
+      {
+        "username": "JetSkiJason",
+        "body": "If you're already pulling the brakes apart, might be worth considering whether electric-over-hydraulic disc brakes make sense for your setup long-term. I know that's a bigger investment, but if you ever tow heavy down mountain grades, disc brakes with hydraulic actuation are a different world. Just something to think about for the future.",
+        "role": "alternative"
+      }
+    ]
+  },
+  {
+    "thread_id": "380191cc-ed3f-4cb0-a453-f785700e99b4",
+    "new_comments": [
+      {
+        "username": "BoatTrailerBob",
+        "body": "Makes total sense. I've ordered the same tire size three different times from different suppliers and gotten Loadstar, Kenda, and one with a brand I'd never heard of. All had the same load range, same ply, same size. Couldn't tell the difference once they were on the trailer.",
+        "role": "confirmation"
+      },
+      {
+        "username": "TowRigTina",
+        "body": "This is actually common across the whole trailer tire industry, not just one supplier. Trailer tires are ST rated (Special Trailer), and the factories that produce them often make the same tire under multiple brand labels. What actually matters is the size like ST225/75R15, the load range (C, D, E), and the ply rating. Those determine how much weight the tire can handle — the brand name on the sidewall doesn't change the construction.",
+        "role": "direct_help"
+      },
+      {
+        "username": "RaceHaulerRick",
+        "body": "Learned this the hard way years ago. Ordered a specific brand from a different supplier, complained when I got a different name on the sidewall. Supplier showed me they were literally the same tire from the same factory. Same DOT number prefix and everything. Now I just buy by size and load range and don't stress about the name stamped on them.",
+        "role": "anecdote"
+      },
+      {
+        "username": "CampingRigChris",
+        "body": "So if the brand doesn't really matter, what should I actually focus on when comparing trailer tires? Just load range and size? What about radial vs bias ply — does that make a real difference?",
+        "role": "followup_question"
+      },
+      {
+        "username": "PineParkRandy",
+        "body": "Radial vs bias is probably the biggest real decision you'll make on trailer tires. Radial (the \"R\" in the size code, like ST225/75R15) runs cooler at highway speeds, lasts longer, and gives a smoother ride. Bias ply has stiffer sidewalls, which some guys prefer for load stability, and they're usually cheaper upfront. For highway towing I'd go radial every time. For short-distance stuff around a property or farm, bias ply works fine and saves money.",
+        "role": "direct_help"
+      },
+      {
+        "username": "MarineMechMark",
+        "body": "One thing people get wrong — trailer tires are NOT interchangeable with passenger car or light truck tires even if the size looks similar. ST tires have reinforced sidewalls designed for the vertical load and lateral stresses specific to trailers. Putting a P-rated or LT-rated tire on a trailer is asking for a blowout because the construction isn't designed for how trailers load and flex. Always stick with ST rated.",
+        "role": "correction"
+      },
+      {
+        "username": "BoatTrailerBob",
+        "body": "Also worth checking — the date code on the sidewall matters more than the brand. Look for the DOT stamp, the last four digits tell you the week and year of manufacture. For example, \"2423\" means week 24 of 2023. Even if a tire has never been used, I wouldn't put one on that's more than 5-6 years old. Rubber degrades from UV and ozone exposure even sitting in a warehouse.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "096eaeb2-b858-455a-8b77-dd311b5e275d",
+    "new_comments": [
+      {
+        "username": "FlatbedFrank",
+        "body": "The answer above is spot on. I have an 83-inch frame on my flatbed and went with the 97-inch hub face 8K axles with 80-inch spring centers. Fit perfectly with about an inch of clearance between the backing plates and the frame rails on each side. If I'd gone 95-inch hub face it would've been touching.",
+        "role": "confirmation"
+      },
+      {
+        "username": "SpringShopGary",
+        "body": "Here's a quick reference I keep for 8K axle fitment:\n\n- 95\" hub face with 74\" spring center = backing plate to backing plate roughly 83-3/8\"\n- 97\" hub face with 80\" spring center = backing plate to backing plate roughly 85-3/8\"\n\nYou want at least 1-2 inches of clearance between the backing plates and the inside of the frame rails. With an 83\" frame, the 97\" hub face gives you that margin comfortably.",
+        "role": "direct_help"
+      },
+      {
+        "username": "WeldShopWes",
+        "body": "A buddy of mine tried to squeeze 95-inch hub face axles under an 83-inch frame. The backing plates were touching the frame on one side right out of the gate. When the suspension flexed even slightly going over bumps, the plates would grind against the steel. He ended up having to cut and reweld the frame wider by 2 inches per side, which was way more work and money than just ordering the right axle to begin with.",
+        "role": "anecdote"
+      },
+      {
+        "username": "EquipHaulerEd",
+        "body": "Don't forget to account for tire clearance too, not just backing plates. With 8K axles you're probably running 16-inch wheels with ST235/80R16 tires or similar. Make sure you have enough room between the tire sidewall and the frame rail at full suspension compression. I like to see at least 1.5 inches of clearance at full bump. Load the trailer to max weight and measure before you call it done.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DualAxleDave",
+        "body": "What about the 89-inch hub face option for 8K axles? I've seen some listings with that measurement. Does that just have a shorter spring center, or is it a completely different axle tube?",
+        "role": "followup_question"
+      },
+      {
+        "username": "SpringShopGary",
+        "body": "The 89-inch hub face is a real option. It would typically use a shorter spring center around 72 inches. That's designed for narrower frames, like some boat trailers and smaller enclosed trailers in the 72-78 inch frame width range. Same axle capacity, just a narrower track width. Make sure your wheel and tire combo still clears the frame at that width.",
+        "role": "direct_help"
+      },
+      {
+        "username": "HeavyHaulHarry",
+        "body": "One thing I see people confuse constantly — \"hub face\" and \"spring center\" are two completely different measurements. Hub face is the distance from the outside face of one hub to the outside face of the other hub. Spring center is the distance between the spring mounting pads welded on the axle beam. You need both numbers to figure out if an axle fits your trailer. Don't mix them up when ordering or you'll get the wrong axle.",
+        "role": "correction"
+      },
+      {
+        "username": "ConcreteCraigW",
+        "body": "If you're right on the edge measurement-wise, I've seen people use spacer plates between the springs and the axle to nudge positioning slightly. But honestly, it's better to just order the correct hub face measurement from the start. Spacers add variables, can change your ride height, and if they shift under load you've got a tracking problem.",
+        "role": "alternative"
+      },
+      {
+        "username": "BackyardBuilderBill",
+        "body": "For anyone reading this and trying to measure their own frame — measure the INSIDE width between the frame rails, not the outside. That inside dimension is what matters for backing plate clearance. I've seen guys measure outside-to-outside and end up 4-5 inches off because they forgot to subtract the rail thickness on both sides.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "6eba17da-ea94-42cb-bca5-a21f5704d349",
+    "new_comments": [
+      {
+        "username": "HitchDocMike",
+        "body": "Solid maintenance guide. I'd add one thing — if your axles use oil bath hubs instead of grease-packed, check the oil level through the sight glass on the cap every time you hook up. Takes five seconds and can save you from a burned bearing. The oil should be visible at about the halfway mark on the sight glass when the trailer is level.",
+        "role": "confirmation"
+      },
+      {
+        "username": "BoatTrailerBob",
+        "body": "I pull my boat trailer through saltwater ramps about 20 times a season. I repack bearings every spring and do a visual inspection mid-summer. Saltwater is absolutely brutal on bearings and seals. My first year with the boat I skipped the mid-season check and had a bearing seize on I-95 coming back from the coast. Smoke pouring off the hub, had to get towed. Never skipped it again.",
+        "role": "anecdote"
+      },
+      {
+        "username": "DualAxleDave",
+        "body": "One maintenance item that gets overlooked — the leaf springs themselves. Check them for cracks, separation between leaves, and sagging. A cracked spring won't fail all at once. It'll gradually sag to one side and cause uneven tire wear on that axle. I check mine visually every time I change oil on the truck, roughly every 5,000 miles.",
+        "role": "direct_help"
+      },
+      {
+        "username": "LawnCrewLuis",
+        "body": "What type of grease do you guys recommend for repacking wheel bearings? I've been using regular automotive wheel bearing grease from the parts store but someone told me I should be using marine-grade grease since my trailer sits outside uncovered.",
+        "role": "followup_question"
+      },
+      {
+        "username": "MarineMechMark",
+        "body": "For any trailer that sees water or sits outside year-round, use a marine-grade wheel bearing grease. It has much better water washout resistance than standard automotive grease. Most guys I know use Lucas Marine Grease or Royal Purple Marine — just make sure whatever you pick is NLGI #2 rated for wheel bearing use. And the critical thing: never mix different grease types or brands in the same hub. If you're switching, clean out all the old grease completely first.",
+        "role": "direct_help"
+      },
+      {
+        "username": "HorseFarmerHank",
+        "body": "I haul horses about 15,000 miles a year with a gooseneck. I do a full bearing repack every 10,000 miles and inspect brakes at the same time. Caught a cracked brake magnet last year during a routine check that could've left me with no brakes on the rear axle at highway speed with 4,000 lbs of horses behind me. Boring work but it absolutely pays off.",
+        "role": "anecdote"
+      },
+      {
+        "username": "PaddockPatty",
+        "body": "Something easy to forget — check your brake wiring connections for corrosion, especially at the axle-to-frame junction where the plug connectors are. Those are exposed to road spray, mud, and salt and they corrode over time. A corroded connection means weak or zero braking force on that axle. I clean mine and apply dielectric grease every spring.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TrailerParkTech",
+        "body": "Want to clarify something from the original answer — the \"check after first 50 miles\" advice applies to ALL fasteners on a new trailer, not just lug nuts. That includes U-bolts, hanger bolts, spring bolts, equalizer bolts, and tie plate bolts. Everything settles and loosens slightly during initial break-in. I've seen equalizer bolts back out on brand new trailers because nobody retorqued after the first few trips. It's a 15-minute job that prevents real problems.",
+        "role": "correction"
+      },
+      {
+        "username": "SnowbirdSteve",
+        "body": "If you're tired of repacking bearings every year, consider upgrading to oil bath hubs. The conversion kit isn't cheap upfront but maintenance drops way down — just check the oil level regularly and do a full oil change once a year. I switched both axles on my travel trailer to oil bath and it's been so much less hassle, especially for long highway trips from the Midwest to Florida and back.",
+        "role": "alternative"
+      },
+      {
+        "username": "DumpTrailerDan",
+        "body": "For guys running dump trailers or anything with hydraulics — add checking your hydraulic fluid level and cylinder pins to your regular maintenance routine. Those pins wear over time, and if one fails mid-dump you've got a dangerous situation. A five-minute check every 3 months takes almost no effort.",
+        "role": "direct_help"
+      },
+      {
+        "username": "HitchDocMike",
+        "body": "Tire pressure is honestly the most neglected maintenance item I see. People check it once when they buy the trailer and never again. Under-inflated ST tires on a trailer generate excess heat and cause blowouts, and trailer tire blowouts at 65 mph can rip your fender off or worse. I keep a dedicated tire pressure gauge in the truck and check cold pressure before every trip. The correct PSI is molded into the tire sidewall — don't rely on a placard that might be wrong or missing.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FenceCrewPhil",
+        "body": "Learned the hard way about lug nut torque. Threw a wheel on the highway because I hand-tightened the lugs after a roadside flat change and forgot to go back with the torque wrench. Luckily it bounced into a ditch and didn't hit anyone. Now I carry a torque wrench in every truck. Most 1/2-inch trailer lug nuts torque to 90-120 ft-lbs depending on the stud size — check your axle manufacturer's spec.",
+        "role": "anecdote"
+      }
+    ]
+  },
+  {
+    "thread_id": "a63084c9-dfc5-4d98-970d-13433b9137d4",
+    "new_comments": [
+      {
+        "username": "CoastGuardCarl",
+        "body": "Installed two of these on my 10K Dexter axles last month. The KC21-302 drops right in where the plastic 21-88 cap was. Fit is tight and clean. The aluminum feels way more substantial in your hand — the factory plastic caps always felt like they'd crack if you overtightened them even slightly.",
+        "role": "confirmation"
+      },
+      {
+        "username": "TowRigTina",
+        "body": "The plastic Dexter caps on my enclosed trailer cracked twice in two years. The second time I lost oil on the highway and didn't notice until I smelled burning from the hub. Caught it before the bearing fully went but it was close. Switched to the Carter aluminum caps after that and haven't had a single issue in over a year of regular use.",
+        "role": "anecdote"
+      },
+      {
+        "username": "HeavyHaulHarry",
+        "body": "When you swap to the aluminum cap, take a minute to clean the hub face where the cap seats. Any old sealant, road grime, or corrosion on that surface can prevent a proper seal. I wipe mine down with brake cleaner and then apply a thin bead of RTV silicone around the cap edge before pressing it in. Belt and suspenders approach, but zero leaks so far.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SailboatSam",
+        "body": "Do these aluminum oil caps work with the EZ Lube spindle setup? My Dexter 10K axles have the grease fitting on the end of the spindle and I'm not sure if the oil bath cap is compatible with that.",
+        "role": "followup_question"
+      },
+      {
+        "username": "BrakeDrumBenny",
+        "body": "Oil bath caps and EZ Lube caps are two completely different systems. If your hubs are set up for EZ Lube grease, you need a grease cap, not an oil bath cap. The KC21-302 is specifically for oil bath hubs. Easy way to tell — if your current cap has a sight glass or fill plug, it's oil bath. If it just has a rubber plug or dust cap with a zerk fitting on the spindle, that's EZ Lube. Don't mix them up.",
+        "role": "direct_help"
+      },
+      {
+        "username": "WeldShopWes",
+        "body": "If the plastic caps keep cracking and you don't want to spend the money on aluminum, the Dexter Fortress caps are a harder plastic with a reinforced metal ring that holds up better than the standard 21-88. But honestly for the $10-15 difference per cap, the Carter forged aluminum is the better long-term investment. You'll never replace them.",
+        "role": "alternative"
+      },
+      {
+        "username": "GravelGuyGreg",
+        "body": "Make sure when you order the KC21-302 that you confirm it's the 10K version. Carter makes aluminum oil caps for 8K, 7K, and other axle sizes too, and they look very similar but have different diameters. The 10K cap won't fit an 8K hub and vice versa. Ask me how I know — had to eat return shipping on a pair because I grabbed the wrong ones.",
+        "role": "correction"
+      }
+    ]
+  },
+  {
+    "thread_id": "f420e175-cfe4-4136-8ad9-7883dc66aaa0",
+    "new_comments": [
+      {
+        "username": "LandscaperLee",
+        "body": "I've ordered from TPU three times now. First order shipped same day, second took two days, third shipped next morning. All three times I got tracking emails within a few hours of shipment. Pretty consistent from my experience.",
+        "role": "anecdote"
+      },
+      {
+        "username": "CarCarrierKen",
+        "body": "Ordered axle seals and a bearing kit on a Monday afternoon, had tracking by Tuesday evening, parts arrived Thursday. I'm in Texas so ground shipping from their location was about 2-3 transit days. No complaints at all.",
+        "role": "confirmation"
+      },
+      {
+        "username": "JetSkiJason",
+        "body": "Do they offer expedited or overnight shipping? I've got a trip planned in 5 days and need brake assemblies before then.",
+        "role": "followup_question"
+      },
+      {
+        "username": "PineParkRandy",
+        "body": "I believe they ship UPS and you can select expedited options at checkout. If you're in a real time crunch I'd call them directly — they've been responsive on the phone in my experience and can confirm whether the parts are in stock before you commit to the order. Saves you the worry of ordering and then waiting to find out it's backordered.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SnowbirdSteve",
+        "body": "Ordered hanger bolts and spring eye bushings during what I assume was a busy period and it took about 3 business days to actually ship. Still got everything in under a week total door to door. Packaging was solid — every part wrapped individually so nothing banged around in the box. Appreciated that.",
+        "role": "anecdote"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "One tip if you're ordering multiple items — ask whether they do partial shipments if something is backordered. Some places hold your entire order until every item is in stock. If you need certain parts urgently and others can wait, it's worth a quick phone call to see if they'll split the shipment.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "6d4220ac-2dad-4dc7-abba-7b53d02a58d8",
+    "new_comments": [
+      {
+        "username": "HitchDocMike",
+        "body": "Yep, zero offset is standard. Been working with trailer parts for a long time and I've yet to see a factory single trailer wheel that's anything other than zero offset. Keeps the hub loads balanced and makes fitment straightforward across different axle brands.",
+        "role": "confirmation"
+      },
+      {
+        "username": "DualAxleDave",
+        "body": "Zero offset means the mounting surface of the wheel sits exactly at the centerline between the inner and outer bead seats. On passenger vehicles you see positive and negative offsets to accommodate suspension geometry, but trailers don't need that — the axle spindle dictates everything. Zero offset keeps even loading on the bearings and centers the tire in the fender opening.",
+        "role": "direct_help"
+      },
+      {
+        "username": "RaceHaulerRick",
+        "body": "What about dual wheel setups? I've got a tandem axle trailer and I'm thinking about converting to dually configuration for more load capacity. Do the inner and outer wheels both need to be zero offset, or does one need to be different?",
+        "role": "followup_question"
+      },
+      {
+        "username": "BackyardBuilderBill",
+        "body": "For dual wheel setups, the inner wheel is typically a standard zero-offset wheel mounted normally. The outer wheel gets mounted using a wheel adapter or spacer that provides the correct spacing between the two rims. Some dual wheel conversion kits specify their own offset for the outer wheel, so you'd need to match whatever the adapter manufacturer recommends for your bolt pattern and hub.",
+        "role": "direct_help"
+      },
+      {
+        "username": "MarineMechMark",
+        "body": "I want to clarify that zero offset on trailer wheels is a simpler concept than offset on car wheels, even though the term is the same. On a car, offset affects scrub radius and handling dynamics. On a trailer, it just means the mounting flange is centered in the wheel. But be careful with cheap import wheels sold online as \"trailer wheels\" — some actually have a slight positive offset. If you're buying from an unknown source, measure before you mount.",
+        "role": "correction"
+      },
+      {
+        "username": "PaddockPatty",
+        "body": "Bought budget trailer wheels online once that were listed as zero offset. Turns out they were about half an inch positive. Didn't realize until I noticed the inside edges of my tires wearing faster than the outside. The bearings probably weren't thrilled about the uneven loading either. Ended up replacing them after one season. Lesson learned — buy from a reputable trailer parts supplier.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SailboatSam",
+        "body": "For anyone trying to measure offset on a wheel they already have — lay it face down on a flat surface, put a straight edge across the back lip, and measure from the straight edge down to the hub mounting face. Then flip the wheel and measure the same way from the front. If both measurements are equal, it's zero offset. If the back measurement is larger, it's positive offset. Simple check that takes two minutes.",
+        "role": "direct_help"
+      },
+      {
+        "username": "ConcreteCraigW",
+        "body": "If you ever need to push the wheel out slightly for fender clearance, hub-centric wheel spacers are an option. But use ones specifically rated for trailer use, not the universal ones from the auto parts store. And make sure your wheel studs are still long enough for full thread engagement on the lug nuts after adding the spacer. I've seen guys run spacers and only get 3-4 turns on the nut — that's asking for a wheel to come off.",
+        "role": "alternative"
+      }
+    ]
+  }
+]

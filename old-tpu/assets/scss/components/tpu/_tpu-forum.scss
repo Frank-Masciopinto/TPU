@@ -201,6 +201,15 @@ body.tpu-forum-page {
     }
 }
 
+.tpu-forum__community-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 13px;
+    color: $tpu-text-tertiary;
+    margin-top: 4px;
+}
+
 .tpu-forum__section-heading {
     font-family: $tpu-font-body;
     font-size: 1.25rem;

@@ -1,0 +1,352 @@
+[
+  {
+    "thread_id": "6cd577ce-bcfe-4a22-a983-f8ac1987b576",
+    "new_comments": [
+      {
+        "username": "HubCapHank",
+        "body": "I swapped out the Al-Ko K08-490-90 on my 10K tandem last fall with the Rockwell 120865-1P475A and it bolted right up. Same 8x6.5 bolt pattern, same 5/8\" studs. Only thing I'll mention is double-check your pilot diameter — the 4.75\" and 4.88\" versions look almost identical but you don't want to force-fit the wrong one onto your spindle.",
+        "role": "anecdote"
+      },
+      {
+        "username": "BearingBobby",
+        "body": "One thing the answer doesn't mention — when you get the Rockwell hub drum, make sure you also pick up the correct grease seal. The Al-Ko seal and the Rockwell seal aren't always the same part number even though the hub is a direct swap. On the 10K HD spindle you'll want a 10-36 seal. Ask me how I know… had to make a second trip to get the right one.",
+        "role": "correction"
+      },
+      {
+        "username": "TandemTony",
+        "body": "Quick question for anyone who's done this swap — does the Rockwell hub drum come with new races pressed in, or do you need to press your own? My old Al-Ko hub had the races pretty well seized in there and I had to use a drift punch to knock them out.",
+        "role": "followup_question"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "Confirmed, the Rockwell complete kit (120865-1P475A-C) comes with races already pressed in plus bearings, seal, and cap. If you're just getting the hub drum only (120865-1P475A) you'll need to press your own races. For the 10K HD spindle the bearing combo is typically 25580 inner and 14125A outer but verify against your spindle. The complete kit is worth the extra cost if you're doing a full rebuild anyway.",
+        "role": "direct_help"
+      },
+      {
+        "username": "CarHaulerKing",
+        "body": "I run 10K Al-Ko axles on my car hauler and went through this exact cross-reference headache last year. The Hayes 09080587 is the same hub too if you can find one, but the Rockwell seems to be more widely stocked. Made sure to torque my lug nuts to 120 ft-lbs after the swap and re-torqued after 50 miles. No issues at all through about 8,000 miles now.",
+        "role": "confirmation"
+      },
+      {
+        "username": "EquipmentHaulerEric",
+        "body": "If you can't find the Rockwell in stock, another option is to have your existing Al-Ko hub drum re-machined if the drum surface is still within spec. A local brake shop can turn the drum for about $30-40 per side. Only makes sense if the drum isn't cracked or worn past the max diameter stamped on it. But if you need new bearings and seals anyway, a fresh hub drum kit is the better move.",
+        "role": "alternative"
+      },
+      {
+        "username": "WeldingWayne",
+        "body": "Just a heads up for anyone doing this on a trailer with hydraulic surge brakes — when you pull the old hub drum off, inspect the brake shoes and the backing plate while you're in there. The 10K HD drums are thick and heavy, and if your brake shoes are down to 1/16\" or less it's not worth putting a new drum on old shoes. I usually do shoes and hardware at the same time if I'm already tearing into it.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "56351ac1-529a-4a0f-b229-62f1a4e283a0",
+    "new_comments": [
+      {
+        "username": "SpringShopSteve",
+        "body": "The 10-56 seal is definitely the correct cross for the Lippert 295924. I've installed probably 50 of these on 12K and 15K Lippert axles. One thing to be aware of — make sure you install it with the lip facing inward toward the bearings. The seal lip should ride on the spindle journal surface. If you flip it the wrong way it won't retain grease and you'll cook your bearings in short order.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DumpTrailerDan",
+        "body": "Replaced both seals on my 16K Lippert axles last month using the 10-56. They press right in with a seal driver or a piece of PVC pipe that matches the outer diameter. Don't use a hammer directly on the seal face — you'll distort it. I use a 3\" PVC coupling as a makeshift driver and it works perfectly every time.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TireGuruTerry",
+        "body": "While you're in there replacing the seal, it's worth inspecting the spindle surface where the seal lip rides. If there's a groove worn into the spindle from the old seal, the new one will just leak in the same spot. You can get a speedi-sleeve to go over a grooved spindle — it gives the new seal a fresh surface to ride on. Saved me from having to replace an entire spindle on a 15K axle.",
+        "role": "direct_help"
+      },
+      {
+        "username": "BoatTrailerBill",
+        "body": "Does anyone know if the 10-56 seal works on the Lippert 10K axles too, or is it strictly for the 12K-16K range? My Lippert 10K uses a different part number on the seal and I want to make sure I'm not mixing things up.",
+        "role": "followup_question"
+      },
+      {
+        "username": "HubCapHank",
+        "body": "No, the 10-56 is specifically for the 12K through 16K Lippert axle spindle diameter. The 10K Lippert axles use a smaller spindle and a different seal — usually a 10-40 or 10-36 depending on the specific 10K model. The spindle OD is different so even though they look similar they're not interchangeable. Always match the seal to your spindle diameter.",
+        "role": "correction"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "If you're doing seals you might as well do the full bearing and seal kit. Saves you from tearing it apart again in 6 months if a bearing starts going. The kits for 12K-16K Lippert axles usually include inner and outer bearings, races, seal, cotter pin, and spindle nut. Costs maybe $25-30 more than just the seal alone and gives you peace of mind.",
+        "role": "alternative"
+      }
+    ]
+  },
+  {
+    "thread_id": "681384a7-3498-4c74-be59-b57b5ec44f6a",
+    "new_comments": [
+      {
+        "username": "TireGuruTerry",
+        "body": "I've been running the CoPartner ST225/75R15 Load Range F on my 24-foot aluminum enclosed for about 12,000 miles now. They ride noticeably smoother than the Westlakes I had before, and the all-steel construction gives me a lot more confidence towing on the interstate at 65 mph. The sidewalls are much stiffer so you don't get that sway feeling when a semi passes you. Definitely not a semi truck tire — the ST designation means it's purpose-built for trailer use.",
+        "role": "anecdote"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "Just to clarify for anyone confused — \"ST\" stands for Special Trailer. These are specifically designed for trailer axle loads and tracking characteristics. They're NOT the same as LT (Light Truck) tires. The CoPartner ST225/75R15 is engineered for trailer duty with stiffer sidewalls and different tread compounds than what you'd put on a truck. Load Range F means 12-ply rating which handles 2,830 lbs per tire at 80 PSI.",
+        "role": "correction"
+      },
+      {
+        "username": "EnclosedTrailerEd",
+        "body": "What PSI are you guys running these at? I know Load Range F is rated to 80 PSI but I've heard some people running them lower for a softer ride on aluminum trailers. Worried about running too low and generating excess heat.",
+        "role": "followup_question"
+      },
+      {
+        "username": "CarHaulerKing",
+        "body": "Run them at the max PSI on the sidewall — 80 PSI for Load Range F. Trailer tires aren't like truck tires where you can air down for comfort. Underinflating a trailer tire is the fastest way to a blowout because they generate way more heat when underinflated. The stiff sidewall is a feature, not a bug. I check mine with a quality gauge before every trip.",
+        "role": "direct_help"
+      },
+      {
+        "username": "BoatTrailerBill",
+        "body": "I switched from Westlake to CoPartner on my aluminum boat trailer and the difference is night and day. The Westlakes started showing sidewall cracking after about 2 years regardless of tread wear. I'm 18 months into the CoPartners and no cracking, no cupping, even tread wear across all four. The all-steel belts really do make a difference in longevity.",
+        "role": "anecdote"
+      },
+      {
+        "username": "LandscapeLarry",
+        "body": "Something to keep in mind with the 12-ply on an aluminum trailer — the stiffer tire might transmit more vibration to the trailer frame compared to an 8-ply or 10-ply. On a steel frame trailer you'd never notice, but aluminum can ring a bit more. That said I still think it's worth it for the load capacity and durability. Just make sure your cargo is secured well because the ride is a touch firmer.",
+        "role": "alternative"
+      },
+      {
+        "username": "TandemTony",
+        "body": "If you're on the fence between the CoPartner and other brands in that size, the Taskmaster is another solid all-steel option in the ST225/75R15 Load Range F. Slightly different tread pattern but similar specs. The CoPartner tends to be a few bucks cheaper per tire from what I've seen. Both are miles ahead of the basic Westlakes.",
+        "role": "alternative"
+      },
+      {
+        "username": "HitchHikeHarry",
+        "body": "Ran Westlakes on two different trailers and had sidewall failures on both within 3 years. Switched everything over to all-steel 12-ply tires and haven't had a single issue in 4+ years. The CoPartner is a legit tire for the money. One tip — if you're storing your aluminum trailer outside, get some tire covers. UV is what kills trailer tires more than anything, even the good ones.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SlipperSpringShawn",
+        "body": "I'll add that if you're upgrading to the 12-ply Load Range F from a lower ply rating, double check that your wheels are rated for 80 PSI. Some older aluminum trailer wheels were only rated for 65 PSI max which matches Load Range D or E tires. Putting 80 PSI into a 65 PSI rated wheel is asking for trouble. The wheel should have a max PSI stamped or stickered on it somewhere.",
+        "role": "correction"
+      },
+      {
+        "username": "DiscBrakeDoug",
+        "body": "Strongly recommend picking up a TPMS (tire pressure monitoring system) if you're running Load Range F tires. At 80 PSI you really want to know immediately if you start losing pressure. A slow leak at highway speed on a trailer tire can go from \"low pressure\" to \"shredded tire\" in minutes. I use a basic 4-sensor TPMS that reads out in the cab and it's saved me twice now.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "b2c79c85-6e32-4cb0-b6cf-35d359ed36b6",
+    "new_comments": [
+      {
+        "username": "TorsionAxleTom",
+        "body": "Before you go the custom route, have you verified that 41.5\" isn't close enough to a standard size? Common spring centers are 33\", 34\", 35\", 40\", 42\", 46\", and 50\". If you're measuring center-to-center of the spring seats and getting 41.5\", it might be worth double-checking — sometimes the measurement is off by a bit if the tape isn't perfectly centered on the spring pads. A half inch can be the difference between custom and off-the-shelf.",
+        "role": "correction"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "I ordered a custom axle about two years ago for a specialty lowboy trailer with a 37\" spring center. The process was pretty straightforward — called in, gave them my spring center, hub face, axle capacity, brake type, bolt pattern, and spindle size. Took about 5 weeks to get it. Fit perfectly. The wait is the hardest part but if your measurements are truly non-standard there's really no other option.",
+        "role": "anecdote"
+      },
+      {
+        "username": "WeldingWayne",
+        "body": "Another option if you're handy with a welder — you could move your spring hanger brackets to match a standard axle size. If your hangers are bolt-on that's even easier. Depends on whether you'd rather wait 3-7 weeks for a custom axle or spend a weekend repositioning hangers. On some trailers moving the hangers is actually simpler, especially if the frame is straight and you can just re-drill.",
+        "role": "alternative"
+      },
+      {
+        "username": "EquipmentHaulerEric",
+        "body": "What capacity axle do you need? That'll affect lead time and cost quite a bit. A custom 3,500 lb axle is a lot simpler and cheaper than a custom 7K or 10K. Also, are you running electric brakes or no brakes? And what bolt pattern — 5 lug, 6 lug, 8 lug? The more info you have ready when you call in, the faster the order goes.",
+        "role": "followup_question"
+      },
+      {
+        "username": "UtilityBedMark",
+        "body": "Just a word of caution from experience — when you give them your spring center measurement, measure it three times from different reference points. I ordered a custom axle once, was off by 3/4 of an inch on my measurement, and had to wait another month for the correct one. Custom axles are typically non-returnable since they're built to your spec. Measure center-to-center of the spring seat pads, not the edges.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DumpTrailerDan",
+        "body": "Had a custom 7K built with a 38\" spring center for a dump trailer conversion. Total cost was about 15-20% more than the equivalent standard axle. The 3-7 week window is accurate — mine came in right at 4 weeks. They welded the spring seats exactly where I specified. One thing I'd recommend: also specify your hub face measurement so the overall axle width matches your fenders and tire clearance.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SpringShopSteve",
+        "body": "If you end up going custom, make sure to specify whether you need straight axle or cambered. Most trailer axles have a slight upward camber so they flatten out under load. A straight axle will bow downward when loaded. Also specify drop or no-drop on the spindles if that matters for your ride height. These are details that can get overlooked on a custom order and they'll build exactly what you tell them.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TandemTony",
+        "body": "I'll second what others said about triple-checking measurements. But also — take a photo of your current axle setup showing the spring seats, spindle type, and brake backing plates before you call. It helps the sales team verify you're ordering the right config. I've seen guys order electric brake axles when they needed hydraulic, or get the wrong spindle for their existing hubs. A photo saves everyone headaches.",
+        "role": "confirmation"
+      }
+    ]
+  },
+  {
+    "thread_id": "4ae5a154-d5c7-4d33-99f3-631c3f87cbfe",
+    "new_comments": [
+      {
+        "username": "CarHaulerKing",
+        "body": "I have a 2019 Kaufman 20K car hauler and can confirm — mine came with 10K axles, 70\" hub face, 42\" spring center. Electric brakes on both axles, 8 on 6.5\" bolt pattern with 1/2\" studs. That said, Kaufman has used slightly different specs over the years depending on the model and production run, so definitely measure yours to be safe.",
+        "role": "confirmation"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "Have you tried contacting Kaufman directly with your VIN? They can usually pull up the exact axle specs for your specific trailer. Their customer service is pretty responsive. That way you don't have to guess — you'll know the exact spring center, hub face, spindle size, bearing numbers, everything. Saves you from measuring and potentially getting it wrong.",
+        "role": "alternative"
+      },
+      {
+        "username": "TorsionAxleTom",
+        "body": "Here's how to measure if you want to verify yourself: Spring center is measured from the center of one spring mounting pad to the center of the other. Hub face is measured from the face of one hub (where the wheel mounts) to the face of the other hub on the opposite side. You'll need a long tape measure or a straight edge and tape for the hub face. Do it on level ground with the trailer unhitched and sitting on jack stands.",
+        "role": "direct_help"
+      },
+      {
+        "username": "RaceCarRick",
+        "body": "I haul cars on a Kaufman and one thing I'll mention — some of the older Kaufman 20K models used a slightly shorter spring center, like 40\" instead of 42\". If your trailer is pre-2015 or so, don't assume it's 42\". Even a 2\" difference on the spring center means the axle won't bolt in. The 70\" hub face has been pretty consistent across Kaufman though.",
+        "role": "correction"
+      },
+      {
+        "username": "DiscBrakeDoug",
+        "body": "Does your Kaufman have electric brakes or hydraulic disc brakes? Some of the newer 20K Kaufman haulers come with hydraulic disc setups. That changes what you need to order for replacement axles since the spindles and mounting hardware are different between electric drum and hydraulic disc. Check if you see a brake line running to each wheel or just an electrical wire.",
+        "role": "followup_question"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "Bought replacement 10K axles for my Kaufman about a year ago. The 70\" hub face / 42\" spring center combo was spot on for my 2020 model. I went with electric brake axles with the 8x6.5 bolt pattern. Everything lined up with the existing spring hangers and brake wiring. Took me about 4 hours per axle to swap with a floor jack, jack stands, and basic hand tools. Not a bad weekend project if you're mechanically inclined.",
+        "role": "anecdote"
+      },
+      {
+        "username": "AxleAlley",
+        "body": "One more measurement to grab while you're under there — the spindle length and diameter. On most Kaufman 10K axles you'll find the standard 2\" round spindle with a 10\" overall spindle length. This matters because it determines which bearings and hubs fit. If you can pull a hub and read the bearing numbers off the old ones, that's the most foolproof way to confirm you're ordering the right setup.",
+        "role": "direct_help"
+      },
+      {
+        "username": "WeldingWayne",
+        "body": "I made the mistake of ordering axles based on what I \"thought\" my Kaufman specs were without measuring. Ended up with a spring center that was 2 inches off. Lesson learned — always crawl under there with a tape measure. It takes 10 minutes and saves you the hassle of returning an axle and waiting for the correct one. The spring center measurement is king.",
+        "role": "anecdote"
+      }
+    ]
+  },
+  {
+    "thread_id": "6e51aaa6-8200-4f33-9ef2-cf0d377cfb23",
+    "new_comments": [
+      {
+        "username": "SpringShopSteve",
+        "body": "The accepted answer is right — spring center is the measurement that has to be dead-on because those spring hangers are welded to the frame and you can't easily move them. Hub face affects your overall track width, meaning how far your tires stick out or tuck in relative to the fenders. A half inch difference on hub face usually just means the tire sits a quarter inch further in or out on each side, which is rarely an issue. But if your spring center is off even an inch, the bolt holes won't line up.",
+        "role": "direct_help"
+      },
+      {
+        "username": "UtilityBedMark",
+        "body": "Learned this one the hard way on a utility trailer rebuild. Ordered an axle with the right hub face but wrong spring center. The axle physically wouldn't drop into the spring hangers — the mounting eyes were about 1.5\" off from where they needed to be. Had to send it back and wait two weeks for the correct one. Now I always measure spring center first, hub face second.",
+        "role": "anecdote"
+      },
+      {
+        "username": "EnclosedTrailerEd",
+        "body": "On your Load Rite trailers — how different are the hub face measurements? If they're all within an inch or two of each other, you might be able to order one standard axle that works across all three. The spring center being the same (70\") is good news. A slightly different hub face might just mean your wheel track is a touch wider or narrower on one trailer vs another, which is usually fine as long as the tires clear the fenders.",
+        "role": "followup_question"
+      },
+      {
+        "username": "TandemTony",
+        "body": "To put some numbers on it — most axle manufacturers consider hub face to be within spec if it's plus or minus about 1\" from what you order. So if you order a 74\" hub face axle, you might get one that measures 73.5\" or 74.5\" and that's considered normal. Spring center though? That needs to be exact to the half inch at most. If your hangers are at 70\" spring center, order 70\" spring center.",
+        "role": "direct_help"
+      },
+      {
+        "username": "BearingBobby",
+        "body": "One scenario where hub face does matter a lot: if you're running tandem axles and the hub faces are significantly different between the two, your tires won't track straight. The front axle tires will be at a different width than the rear axle tires. On a single axle trailer it matters less, but on a tandem you really want both axles to have matching hub face measurements or you'll get uneven tire wear and weird handling.",
+        "role": "correction"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "Here's how I measure spring center to make sure I get it right every time: put a mark at the exact center of each spring mounting pad on the axle tube. Then measure from mark to mark. That's your spring center. Don't measure from the edge of the pad — measure from center to center. On a lot of axles the pads are about 2\" wide, so measuring edge-to-edge vs center-to-center could throw you off by an inch or more.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TiltDeckTim",
+        "body": "Also worth noting — on some Load Rite boat trailers I've seen, the original axles were Torflex (torsion) style which don't have a traditional spring center measurement at all. If any of your three trailers use torsion axles, you need the start-to-start measurement of the torsion arm brackets instead. Different measurement entirely. Just making sure we're comparing apples to apples here.",
+        "role": "correction"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "The thing that can bite you with hub face being too far off is fender clearance. If the hub face is significantly wider than the original, your tires might rub or stick out past the fenders which could be a DOT issue depending on your state. If it's significantly narrower, you might have clearance issues with the frame or suspension components. So while it doesn't need to be exact, you don't want it wildly different either — try to stay within 2\" of the original.",
+        "role": "direct_help"
+      },
+      {
+        "username": "LandscapeLarry",
+        "body": "Had a similar situation with three landscape trailers all needing axles. All had 62\" spring center but hub faces ranged from 71\" to 74\". Ordered all three with 72\" hub face and they all worked fine. Tires cleared the fenders on every one. The one that was originally 74\" just had the tires tucked in about an inch more per side — no big deal. Spring center was the non-negotiable.",
+        "role": "anecdote"
+      },
+      {
+        "username": "PinStripePete",
+        "body": "If you're nervous about getting the hub face wrong, one thing you can do is get adjustable spring seats. Some axle suppliers offer spring seats that can slide along the axle tube before you tighten them down. That way you can dial in the spring center exactly and adjust the hub face slightly if needed. Not all axles offer this but it's worth asking about, especially if your measurements are borderline between two standard sizes.",
+        "role": "alternative"
+      }
+    ]
+  },
+  {
+    "thread_id": "378227fd-21a6-4e97-942b-a5d57c939b9e",
+    "new_comments": [
+      {
+        "username": "AxleAlley",
+        "body": "That 25580 inner and outer bearing setup is the dead giveaway that this is the Lippert straight spindle hub, not a standard 8K hub. A normal 8K hub uses a larger inner bearing (like a 25580 inner and a 15123 outer, or similar stepped combo). The fact that both bearings are the same size means this is a unique spindle — do NOT try to put a standard 8K hub on this axle, it won't fit.",
+        "role": "correction"
+      },
+      {
+        "username": "CarHaulerKing",
+        "body": "I have a Kaufman Mini 5 with these same Lippert torsion axles. Getting the right hub was a pain until I found the 696107 part number. The casting number 696104 is what you see stamped into the hub itself, but the actual part you order is 696107. Came with races pre-pressed for the 25580 bearings. Dropped right on. Just make sure you pack those bearings well — I use a bearing packer tool and Valvoline full synthetic marine grease.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TorsionAxleTom",
+        "body": "For anyone with this hub — what size brake shoes does it take? I'm seeing 12-1/4\" x 3-3/8\" in the specs above. Is this the same as a standard 8K electric brake shoe or is it a different size because of the straight spindle setup? Want to make sure I order the right shoes when I do my brakes.",
+        "role": "followup_question"
+      },
+      {
+        "username": "DiscBrakeDoug",
+        "body": "The 12-1/4\" x 3-3/8\" brake shoes are the same as standard 8K electric brake shoes — the drum size is the same, it's just the hub and spindle that are different on this Lippert setup. So you can use regular 8K brake shoes and hardware. The backing plate and magnet are standard 8K electric as well. It's really only the hub and bearings that are unique to this axle.",
+        "role": "direct_help"
+      },
+      {
+        "username": "HubCapHank",
+        "body": "When you're packing the 25580 bearings on this hub, pay attention to the spindle nut torque. The typical procedure is to tighten the spindle nut to about 50 ft-lbs while rotating the hub to seat the bearings, then back it off and re-tighten to 15-20 ft-lbs finger tight, then back off to the nearest cotter pin hole. You want just a tiny bit of end play — maybe .001\" to .005\". Too tight and you'll overheat the bearings. Too loose and the hub wobbles.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DumpTrailerDan",
+        "body": "If you're struggling to find just the hub drum, another route is to pick up the complete hub assembly that includes the hub, drum, bearings, races, seal, and dust cap all pre-assembled. Costs more but you literally just slide it on the spindle and torque the nut. For a torsion axle setup where everything is integrated and hard to get at, the complete assembly saves a lot of frustration.",
+        "role": "alternative"
+      },
+      {
+        "username": "EquipmentHaulerEric",
+        "body": "I'll add that if you're replacing just one side, try to do both sides at the same time if budget allows. The other hub has the same mileage on it and those 25580 bearings don't last forever, especially on a torsion axle that doesn't have as much suspension travel to absorb road shock. Torsion axles put more stress on the hub and bearing assembly than leaf spring setups. I replace both sides every time now after having a bearing failure on the side I didn't replace.",
+        "role": "confirmation"
+      }
+    ]
+  },
+  {
+    "thread_id": "b0a8c730-9885-450c-aa48-8b3ddcedcc9c",
+    "new_comments": [
+      {
+        "username": "HitchHikeHarry",
+        "body": "4-3/8\" backspacing sounds right for the -0.19 offset 17.5\" wheels. Just to make sure we're all speaking the same language — backspacing and offset are related but not the same thing. Offset is the distance from the wheel centerline to the hub mounting surface, measured in inches or mm. Backspacing is the distance from the hub mounting surface to the inner edge of the wheel. A negative offset like -0.19\" means the hub mounting surface is slightly inboard of the wheel centerline, pushing the tire outward a tiny bit.",
+        "role": "correction"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "What bolt pattern are you working with on the 17.5\" wheel? Most 17.5\" trailer wheels I've seen come in 8 on 6.5\" bolt pattern for 7K-10K axles. If you're matching this to a specific axle, make sure the bolt pattern and the pilot bore diameter match too. The backspacing is important but it's only one piece of the fitment puzzle.",
+        "role": "followup_question"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "I run 17.5\" wheels on my flatbed with the 4-3/8\" backspacing and they clear everything fine — fenders, leaf springs, brake drums. If you're swapping from a different size wheel (like 16\") to the 17.5\", make sure the new tire/wheel combo clears your fender height. The 17.5\" wheel with a 215/75R17.5 tire has a slightly larger overall diameter than a typical 16\" setup which can affect fender clearance on some trailers.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TandemTony",
+        "body": "The measurement method described in the answer is spot on. I'll add one detail — make sure the surface you set the wheel on is truly flat. If you measure on uneven ground or a gravel surface, your measurement will be off. I use a piece of flat plywood on my garage floor. Also, measure at two or three points around the circumference and average them, because some wheels can have slight variations in the mounting surface.",
+        "role": "confirmation"
+      },
+      {
+        "username": "BearingBobby",
+        "body": "If the -0.19\" offset doesn't give you enough clearance for your setup, some manufacturers offer 17.5\" trailer wheels in a zero offset or even positive offset configuration. Zero offset gives you about 4.5\" backspacing on a 6.75\" wide wheel, which tucks the tire in a bit more. Depends on whether you need the tires further out for stability or further in for fender clearance. Just something to consider if the -0.19 offset doesn't work out.",
+        "role": "alternative"
+      },
+      {
+        "username": "SlipperSpringShawn",
+        "body": "When mounting 17.5\" wheels, torque the lug nuts to spec and re-torque after the first 50-100 miles. Most 17.5\" trailer wheels with 8 on 6.5\" bolt pattern take 1/2\"-20 lug nuts torqued to about 120 ft-lbs for steel wheels. If you have aluminum 17.5\" wheels the torque spec might be different — usually around 100-110 ft-lbs. Check the wheel manufacturer's specs because over-torquing can warp the mounting surface and cause wheel runout.",
+        "role": "direct_help"
+      }
+    ]
+  }
+]

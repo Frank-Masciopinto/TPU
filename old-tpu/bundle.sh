@@ -20,4 +20,7 @@ sed -i '' "s/\"name\": \"$current_name\"/\"name\": \"$base_name $new_version\"/"
 echo "Version bumped: $current → $new_version"
 echo "Theme name: $base_name $new_version"
 
+echo "Clearing dist folder..."
+rm -rf assets/dist
+
 stencil bundle

@@ -1,0 +1,362 @@
+[
+  {
+    "thread_id": "0361041b-1c2a-4b65-8c67-6ead4dd0ff5b",
+    "new_comments": [
+      {
+        "username": "TandemTom",
+        "body": "Quick question before I order — when they say hub face to hub face, do they mean the outer face of each hub or from the mounting flanges? I've got a 102\" wide equipment trailer and want to make sure I measure right the first time.",
+        "role": "followup_question"
+      },
+      {
+        "username": "AxleWorks_TX",
+        "body": "Hub face to hub face is measured from the flat mounting surface of one hub (where the wheel bolts on) to the same point on the opposite side. Lay a straight edge across and measure center to center. Spring center is the distance between the centers of your spring mounting bolts on each side of the frame. Both measurements need to be taken with the trailer on level ground and nothing hanging off the axle. Take your time — getting it wrong means the axle won't track straight and you'll eat through tires.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "I bought a complete 10K kit last spring for my flatbed gooseneck. Came with the axle, hubs, drums, electric brakes, springs, hangers, U-bolts — everything. Added the 235/80R16 tire and wheel package. Took me about 6 hours per axle to swap out working alone in my shop. The hardest part was getting the old U-bolts off because they were rusted solid. If your old ones are corroded, budget extra time or get a cutoff wheel ready.",
+        "role": "anecdote"
+      },
+      {
+        "username": "CargoKing_Mike",
+        "body": "One thing to consider: you might save a few bucks buying the axle kit and sourcing tires separately, especially if you already have wheels in good shape. 10K axles typically run 8-lug on 16\" wheels with a 6.5\" bolt pattern. But if your wheels are beat up or you want the convenience, the combo package is hard to argue with. Just double-check the load range on the tires — you want at least Load Range E for a 10K axle to stay within capacity.",
+        "role": "alternative"
+      },
+      {
+        "username": "TrailerTechRick",
+        "body": "Make sure you specify whether you need electric brakes or hydraulic disc brakes when ordering. Most 10K kits come standard with 12-1/4\" x 3-3/8\" electric drum brakes, but if you're running a hydraulic setup you'll want to confirm that upfront. Also, oil bath hubs are standard on most 10K kits, so if you prefer grease-packed you may need to mention that.",
+        "role": "direct_help"
+      },
+      {
+        "username": "HighwayHauler99",
+        "body": "Just a heads up — the axle weight rating and the tire weight rating are two different things. A 10K axle can handle 10,000 lbs, but your tires have their own max load stamped on the sidewall. If you're running single tires (not duals), each tire needs to be rated for at least 5,000 lbs to match the axle. I've seen guys put Load Range D tires on 10K axles and then wonder why they're blowing tires on the highway. Don't cheap out on rubber.",
+        "role": "correction"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "Bought two complete 10K kits for a tandem gooseneck rebuild last year. Everything fit and the quality was solid. One tip: when you get your spring center measurement, measure the actual bolt hole centers on both sides and take the average. My frame was slightly off from years of welding patches and the average saved me from ordering the wrong length.",
+        "role": "confirmation"
+      },
+      {
+        "username": "WeldedUpWes",
+        "body": "Don't forget to factor in your spring center measurement carefully. On a lot of equipment trailers the spring hangers are welded to the frame, so your spring center is fixed. If you're also replacing hangers, you've got some flexibility. Standard spring centers for 10K tandem setups are usually somewhere around 31\" to 33\" but it varies by manufacturer. Measure twice.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "9e5ef969-da2c-4a23-8160-96adbd240f41",
+    "new_comments": [
+      {
+        "username": "BearingBoss",
+        "body": "Can confirm, the lug count method is the fastest way. I've been doing trailer service for 15 years and it's never steered me wrong. Count the lugs, grab the right cap. Takes all of 30 seconds.",
+        "role": "confirmation"
+      },
+      {
+        "username": "TrailerTechRick",
+        "body": "One thing worth noting — if your hubs have EZ Lube fittings (the zerk fitting in the center of the dust cap), you need an EZ Lube grease cap, not a standard one. They look similar but the EZ Lube version has a rubber plug in the center so you can grease without removing the cap. Same diameter sizing applies: 1.98\" for 5-lug, 2.44\" for 6-lug, 2.72\" for 8-lug. Just check if there's a zerk hole before you order.",
+        "role": "direct_help"
+      },
+      {
+        "username": "BoatTrailerBob",
+        "body": "Learned this one the hard way. Ordered a 2.44\" cap for my boat trailer thinking it was a 6-lug and it was actually a 5-lug with aftermarket spacers someone had put on years ago. Ended up with a cap rattling around inside the hub at 60 mph. Always count the actual studs pressed into the hub flange, not whatever adapters or spacers might be on there.",
+        "role": "anecdote"
+      },
+      {
+        "username": "CoastalTrailers",
+        "body": "If your old grease cap is dented or lost and you can't count lugs for some reason, you can also just measure the hub bore directly with a caliper. The cap OD matches the hub bore: 1.98\", 2.44\", or 2.72\". Another option is rubber hub plugs instead of metal drive-in caps — they're easier to remove for inspections and they don't require a hammer to seat. We use them on all our rental fleet trailers.",
+        "role": "alternative"
+      },
+      {
+        "username": "LandscapeLenny",
+        "body": "What about 4-lug hubs? I've got a small 2,000 lb utility trailer with 4 lugs and none of those sizes fit. Is there a different cap for those?",
+        "role": "followup_question"
+      },
+      {
+        "username": "AxleWorks_TX",
+        "body": "Heads up — not every 6-lug hub takes the same cap. Most standard 6-lug trailer hubs on 5.2K to 7K axles use the 2.44\" cap, but some imports and oddball manufacturers use a slightly different bore. If you order a 2.44\" and it's loose or doesn't seat flush, measure the bore with calipers before hammering it in. A loose grease cap will vibrate out on the road and you'll lose your grease and eventually your bearings.",
+        "role": "correction"
+      }
+    ]
+  },
+  {
+    "thread_id": "04c26fe5-3db5-4b0d-921d-99d70d703ffe",
+    "new_comments": [
+      {
+        "username": "DexterDave",
+        "body": "For anyone ordering the replacement for the 122-094, make sure your bearing sizes match. Standard 6K hub and drums run a 25580 inner bearing and a 15123 outer bearing. If yours uses different bearing numbers, you might have an oddball setup and should double-check before buying. The races press into the drum, so if you're reusing races from the old drum, inspect them for pitting — any scoring means replace them.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SpringShackle_Jim",
+        "body": "Is the 122-094 a 6 on 5.5\" bolt pattern? I've got a similar Lippert drum on my cargo trailer but the bolt pattern is 6 on 5.5\" and I want to make sure I grab the right one.",
+        "role": "followup_question"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "Just swapped out the same drum on my enclosed trailer last month. Popped the old 122-094 off, bearings were toast. New one went on in about 45 minutes per side. One thing I'll add — set the bearing preload properly when you put it back together. Tighten the castle nut to about 50 ft-lbs while spinning the hub, back it off to finger tight, then tighten to the next cotter pin slot. Loose bearings on a 6K axle will chew up the spindle.",
+        "role": "anecdote"
+      },
+      {
+        "username": "BearingBoss",
+        "body": "If you're replacing the whole hub and drum assembly, check whether it comes pre-greased with bearings installed or if it's bare. Some come with bearings and seals already pressed in, which saves a bunch of time. Others ship bare and you'll need to buy bearings, races, seals, and grease separately. The 6K bearing kit for this hub is pretty standard — inner 25580/25520, outer 15123/15245 — but verify against your spindle.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TrailerTechRick",
+        "body": "Worth mentioning — if you're buying a replacement hub and drum and the old races are already pressed into the new drum, check that they're seated fully and not cocked. I've seen aftermarket drums ship with races that aren't perfectly square. A race that's sitting even slightly crooked will destroy a bearing in a few hundred miles. Tap them in with a brass drift if needed and visually check they're flush all the way around.",
+        "role": "correction"
+      },
+      {
+        "username": "DualWheelDan",
+        "body": "Another option if you're upgrading: some guys go with a galvanized hub and drum for the 6K application, especially on boat trailers or anything that sees salt water. Costs a bit more than the standard painted one but the corrosion resistance is night and day. Same bearing sizes, same bolt pattern, just a different finish. Something to think about if your trailer lives near the coast.",
+        "role": "alternative"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "I've run these Lippert 6K drums on two different trailers. Solid units, no complaints. The cross-reference part numbers make ordering easy when the OEM stamp is all you've got to go on. Good straightforward swap.",
+        "role": "confirmation"
+      }
+    ]
+  },
+  {
+    "thread_id": "de74dcc1-9b98-4e02-b0e4-d056db49e2ed",
+    "new_comments": [
+      {
+        "username": "FlatbedFrank",
+        "body": "Done this plenty of times. Put Dexter 12-1/4\" x 3-3/8\" electric brakes on a Lippert 10K axle last fall. Bolt pattern on the backing plate was identical, shoes fit the drum, magnets seated fine. Couldn't tell the difference from the factory setup. The key is matching the brake shoe width and drum diameter — if those line up, you're good.",
+        "role": "anecdote"
+      },
+      {
+        "username": "BearingBoss",
+        "body": "On the bearing side, both Dexter and Lippert use the same Timken-style bearing numbers for 10K axles. Inner bearing is a 28682/28622 set and outer is a 25580/25520. The seals are the same diameter too. So hubs, drums, bearings, and seals all cross-reference. Where you might run into a snag is if one brand switched to a newer style hub — Dexter did this a while back on the 10K — so just confirm you're matching old-to-old or new-to-new.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TandemTom",
+        "body": "What about the backing plates themselves? If I need to swap a backing plate on a 10K Lippert axle, will a Dexter backing plate bolt right up or do I need to worry about the flange bolt pattern?",
+        "role": "followup_question"
+      },
+      {
+        "username": "AxleWorks_TX",
+        "body": "Brake magnets interchange no problem between Dexter and Lippert on 10K and up. Same mounting arm, same electrical connections. The magnets on 12-1/4\" brakes are all the same footprint regardless of brand. If you're doing a brake job and can't find Lippert magnets locally, grab Dexter ones — they'll bolt right in. Just make sure you match the brake size (12-1/4\" x 3-3/8\" vs 12-1/4\" x 5\" for 12K).",
+        "role": "direct_help"
+      },
+      {
+        "username": "TrailerTechRick",
+        "body": "One thing to watch on the bigger axles — Dexter changed from an old style to a new style hub on 10K axles a few years back. The old style has a checker-plate pattern on the hub face. If you're mixing brands, make sure both hubs on the same axle are the same style, because the inner bearing journal diameter can be slightly different between old and new. Lippert drums will fit both as long as you match the bearing set. But don't put an old style hub on one side and a new style on the other thinking they're the same.",
+        "role": "correction"
+      },
+      {
+        "username": "HighwayHauler99",
+        "body": "Honestly, if you're rebuilding a whole axle or doing a major overhaul, it might be worth just going all one brand to keep things simple for future parts ordering. Mixing works fine mechanically, but down the road when you need a bearing kit or a seal, you don't want to be scratching your head about which side is Dexter and which is Lippert. Label your parts or keep a note in your maintenance log.",
+        "role": "alternative"
+      },
+      {
+        "username": "DumpTrailerDon",
+        "body": "We run a mixed fleet — some trailers came with Lippert axles, some with Dexter. On the 10K and 12K units we stock one set of brake parts and they fit everything. Springs, hangers, equalizers all interchange too. The only time we had an issue was with a 15K axle where the spindle nut size was different between an older Lippert and a newer Dexter. But 10K and 12K have been completely plug and play for us.",
+        "role": "anecdote"
+      },
+      {
+        "username": "WeldedUpWes",
+        "body": "Can confirm everything above. Dexter and Lippert are so interchangeable on the heavy axles that most trailer shops don't even think about it. The industry standardized the bearing sizes and brake dimensions a long time ago for 10K and up. The real question is usually just old style vs new style, not Dexter vs Lippert.",
+        "role": "confirmation"
+      },
+      {
+        "username": "SealSwapper_Sam",
+        "body": "One small detail — the grease seals on 10K Dexter and Lippert hubs are the same seal, but double-check the seal number if you're running oil bath vs grease. Oil bath seals and grease seals can have different lip configurations even though the outer diameter is identical. The seal sits in the same bore but the inner lip design matters. If you're mixing brands and also switching lubrication methods at the same time, just verify the seal type matches your setup.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "2d773516-257c-4afe-9b41-8a549af5cdb7",
+    "new_comments": [
+      {
+        "username": "BoatTrailerBob",
+        "body": "Had almost the exact same thing happen on my tandem boat trailer. Oil cap cracked on one side, didn't notice until I smelled something burning pulling into the ramp. By then the inner bearing was blue from heat. Outer bearing was scored too. Had to replace the spindle, both bearings, the seal, and the hub. All because of a $4 oil cap. Now I check every single trip.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TrailerTechRick",
+        "body": "There are some early warning signs you can watch for before it gets this bad. If you see oil streaks running down the inside of the wheel or dripping off the backing plate, that's your seal starting to go. If the hub feels noticeably hot to the touch after a drive (too hot to hold your hand on for more than a few seconds), something is wrong — either low oil, bad bearing, or overloaded. A laser temp gun pointed at the hub after a 20-mile drive should read under 150°F in normal conditions. Anything over 180°F and you need to pull over and investigate.",
+        "role": "direct_help"
+      },
+      {
+        "username": "LandscapeLenny",
+        "body": "How full should the oil be in an oil bath hub? I topped mine off to the fill line but I'm not sure if that's the center of the hub cap window or the top of it. Don't want to overfill and blow the seal out the other direction.",
+        "role": "followup_question"
+      },
+      {
+        "username": "AxleWorks_TX",
+        "body": "Oil level should be at the center line of the hub — basically the halfway point of the oil cap window when the trailer is sitting level. Overfilling is almost as bad as underfilling. Too much oil creates pressure inside the hub when it heats up and expands, which can push the seal out from the inside. Underfilling means the bearings aren't getting lubricated on the upper rotation. When in doubt, fill to the midpoint of the sight glass and check it again after driving 50 miles.",
+        "role": "direct_help"
+      },
+      {
+        "username": "MidwestMechanic",
+        "body": "I inspect oil bath hubs for a living and the number one cause of failure I see is water intrusion. People submerge their hubs at boat ramps, the hub cools down, creates a vacuum, and sucks water right past the seal. That water emulsifies the oil into a milky sludge that does not lubricate. If your oil looks milky or cloudy, drain it immediately, flush with fresh oil, and replace the seal. I see this kill bearings every single summer.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DualWheelDan",
+        "body": "Caught mine early once — noticed a very faint wobble in the wheel at highway speed. Pulled over, jacked it up, and could feel play in the bearing when I grabbed the tire at 12 and 6. Adjusted the bearing preload, topped off the oil, and it was fine. But if I'd kept driving another hundred miles it would've been a roadside catastrophe. That slight wobble is your last warning before things go south fast.",
+        "role": "anecdote"
+      },
+      {
+        "username": "PlatformHauler",
+        "body": "I know you asked about warranty, but realistically bearing failures from oil starvation or water contamination are maintenance issues, not defects. No manufacturer is going to warranty a hub that ran dry. I'm not being harsh, just setting expectations. The upside is that prevention is cheap — an oil cap is a few dollars, and checking your oil level takes 30 seconds. The repair after a blowout is $300+ per side and a tow bill on top of that.",
+        "role": "correction"
+      },
+      {
+        "username": "CoastalTrailers",
+        "body": "An infrared thermometer is the single best $25 tool you can buy for trailer maintenance. Point it at each hub after every long drive for the first few trips, then periodically after that. You'll build a baseline for what's normal on your trailer. A hub that's suddenly 30 degrees hotter than the other side is telling you something. Don't ignore it.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SpringShackle_Jim",
+        "body": "If the oil bath thing makes you nervous, consider converting to grease-packed hubs. I switched both my trailers from oil to grease and honestly it's less to worry about — no fluid levels, no leaking caps, no water emulsion. You do have to repack the bearings every 12,000 miles or annually, but I'd rather do that in my shop than deal with an oil leak on the interstate. Same seals work for both on most axle sizes.",
+        "role": "alternative"
+      },
+      {
+        "username": "EquipmentEd",
+        "body": "Been hauling equipment for 20 years and I do a full bearing repack or oil change every fall regardless of mileage. Pull the hubs, inspect the bearings and races under a light, clean everything, repack or refill, new cotter pins. Takes about an hour per axle once you've done it a few times. Cheap insurance compared to a wheel coming off on the highway with a loaded trailer behind you.",
+        "role": "anecdote"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "If your bearings are already damaged, don't just replace the bearings — inspect the spindle too. A bearing that's been running hot can gall the spindle surface. If the spindle has rough spots or discoloration where the bearing rides, the new bearing will fail prematurely. You might be able to clean it up with fine emery cloth if the damage is minor, but a badly scored spindle means replacing the whole axle or at least the spindle.",
+        "role": "direct_help"
+      },
+      {
+        "username": "RustBelt_Repair",
+        "body": "Worth adding to the maintenance list: replace your cotter pins every time you pull a hub. They're literally a penny each and they're the last line of defense keeping the castle nut from backing off. I've seen guys reuse bent cotter pins and then wonder why their wheel passed them on the highway. New pin, every time, no exceptions.",
+        "role": "confirmation"
+      }
+    ]
+  },
+  {
+    "thread_id": "1cb435f0-b715-4e27-bac2-f9044ed7ee0a",
+    "new_comments": [
+      {
+        "username": "DumpTrailerDon",
+        "body": "Did this on both axles of my dump trailer about two years ago. Drained the oil, pulled the hubs, cleaned everything with brake cleaner, packed fresh grease, and buttoned it back up. Been running fine ever since. The whole job took maybe 3 hours for both sides on two axles. No different seal needed, no special parts. Straightforward as it gets.",
+        "role": "confirmation"
+      },
+      {
+        "username": "MidwestMechanic",
+        "body": "The cleaning step is where most people cut corners and pay for it later. You need to get ALL the old oil out — out of the hub cavity, off the bearings, off the spindle, everywhere. Residual oil will thin out the grease and reduce its effectiveness. I spray everything down with brake parts cleaner, let it dry completely, then pack the bearings by hand with a quality wheel bearing grease. Push grease through from the large end of the bearing until it comes out evenly all the way around the small end. Then coat the hub cavity with a thin layer before reassembly.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TandemTom",
+        "body": "How often do you need to repack the bearings once you switch to grease? With oil bath I just checked the level. Grease seems like more hands-on maintenance in the long run.",
+        "role": "followup_question"
+      },
+      {
+        "username": "HighwayHauler99",
+        "body": "Switched my entire fleet of six trailers from oil bath to grease over the last three years. Not a single bearing issue since. My main reason was eliminating the oil leak problem — every single one of those trailers had at least one hub weeping oil at some point. With grease, I repack once a year or every 12,000 miles, whichever comes first. On 10K axles hauling near capacity, I lean toward every 10,000 miles to be safe.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TrailerTechRick",
+        "body": "One critical thing — do NOT just drain the oil and pack grease on top of whatever residue is in there. Oil and grease do not mix well. The oil will break down the grease and you'll end up with a thin slurry that doesn't protect anything. Full disassembly, full cleaning, full repack. If you're going to do this, do it right.",
+        "role": "correction"
+      },
+      {
+        "username": "BoatTrailerBob",
+        "body": "Counterpoint: I actually prefer oil bath on my boat trailer specifically because I'm constantly submerging the hubs at the ramp. Oil provides better protection against water intrusion in that scenario because it fills the entire cavity. With grease, water can sit in the voids between the packed grease and cause rust. If your trailer never sees water, grease is simpler. If you launch boats regularly, oil bath might actually be the better choice.",
+        "role": "alternative"
+      },
+      {
+        "username": "BearingBoss",
+        "body": "For 10K and 12K axles, use a high-temp lithium complex or synthetic bearing grease rated for at least 400°F drop point. Standard chassis grease is NOT the same thing and won't hold up under the heat and load of heavy trailer bearings. The bearing grease will be labeled for wheel bearings specifically. Costs a few dollars more per tube but it's the only thing between your bearings and failure at 65 mph.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SealSwapper_Sam",
+        "body": "If you want the best of both worlds after switching to grease, install Bearing Buddy–style spring-loaded caps. They maintain a slight positive pressure on the grease and keep water out. Also makes it easy to add grease through the zerk fitting without pulling the hub. I run them on my 10K axles and they've been bulletproof. Just don't overfill them — one or two pumps from a grease gun is plenty. Overpacking forces grease past the inner seal and onto your brakes.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "73633916-1e70-4e85-9b1c-6c0220148849",
+    "new_comments": [
+      {
+        "username": "AxleWorks_TX",
+        "body": "Another way to tell: measure the brake shoe width through the drum opening. If the shoes are 3-3/8 inches wide, it's a 10K. If they're 5 inches wide, it's a 12K. Both can have the checker-plate hub, but the brake width is the definitive answer. You can usually eyeball it — the 12K drum is noticeably deeper and heavier. If you can't see the shoes, measure the depth of the drum interior from the hub face to the friction surface.",
+        "role": "direct_help"
+      },
+      {
+        "username": "LandscapeLenny",
+        "body": "Where exactly is the part number stamped? I've been looking all over my drum and I can't find anything. Is it on the outside face, inside the drum, or on the hub flange?",
+        "role": "followup_question"
+      },
+      {
+        "username": "DumpTrailerDon",
+        "body": "Went through this exact confusion on my dump trailer last year. Thought I had 10K axles because the hubs had that checker-plate look. Ordered 10K brakes and they were too narrow for the drum. Turned out I had 12K axles with 5\" wide brakes. The drum depth was the giveaway — those 12K drums are noticeably deeper once you know what to look for. Cost me return shipping on the wrong brake kit. Measure before you order.",
+        "role": "anecdote"
+      },
+      {
+        "username": "BearingBoss",
+        "body": "The bearing numbers are different between old style and new style 10K hubs, and that matters when ordering parts. Old style 10K uses a 25580 inner and 15123 outer. New style 10K uses a 28682 inner and 25580 outer — the old outer bearing becomes the new inner bearing, and the new outer is a different size altogether. Get the bearing numbers off your current setup before ordering anything.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TrailerTechRick",
+        "body": "Small clarification — not every checker-plate hub is a 10K or 12K. Some aftermarket 8K hubs also have a similar textured pattern, though it's less common. The surest way to identify your axle capacity is to look for a tag or stamp on the axle tube itself. Most Dexter axles have the capacity stamped into the tube near the spring seat. If the tag is gone and the stamp is unreadable, then you fall back on measuring the drum and brake width as described above.",
+        "role": "correction"
+      },
+      {
+        "username": "PlatformHauler",
+        "body": "If all else fails, pull one of the bearings and look up the number. That will tell you the spindle size, which tells you the axle capacity. Dexter publishes spindle-to-capacity charts. For example, a 2-1/4\" spindle with a 28682 bearing is definitively a 10K new style. It's more work than eyeballing the drum, but it's the guaranteed answer if you're unsure.",
+        "role": "alternative"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "The checker plate method has always been reliable for me on Dexter hubs. Seen hundreds of them come through the shop. Skinny drum with checker plate = old 10K. Deep drum with checker plate = 12K. Smooth hub face = new style or different capacity. Pretty easy once you've seen a few side by side.",
+        "role": "confirmation"
+      },
+      {
+        "username": "DexterDave",
+        "body": "New style Dexter 10K hubs dropped the checker-plate pattern and went to a smooth cast finish. They also have a slightly larger hub bore for the new bearing configuration. If your hub has a smooth outer face and the drum measures about 3-3/8\" deep on the brake surface, you've got a new style 10K. The part number stamped on these newer drums is usually easier to read — look on the outside face near the lug studs or on the inner lip of the drum.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "4152a1ef-863a-4093-9923-801d8c9bf667",
+    "new_comments": [
+      {
+        "username": "SealSwapper_Sam",
+        "body": "The numbers on trailer grease seals follow a pattern that's useful to know. TCM is the manufacturer (a common seal brand in the trailer industry). The digits after that typically encode the shaft diameter, bore diameter, and width. So 171255 on your seal roughly corresponds to a 1.719\" shaft OD, 2.565\" bore, and a specific width. Knowing this lets you cross-reference to any brand — National, SKF, or the generic trailer part numbers. Saves a lot of guesswork when the original part number is worn off.",
+        "role": "direct_help"
+      },
+      {
+        "username": "RustBelt_Repair",
+        "body": "Had an old trailer with seals so worn the numbers were completely unreadable. Took one to the parts store and they mic'd it — measured the inner diameter (shaft size), outer diameter (bore), and width, then looked it up in a cross-reference book. Came back with the same 10-19 equivalent. If your seal numbers are gone, just bring the old seal in and they can match it by dimensions.",
+        "role": "anecdote"
+      },
+      {
+        "username": "LandscapeLenny",
+        "body": "Does it matter which direction you install the seal? There's a smooth side and a lip side on mine and I want to make sure I don't put it in backwards.",
+        "role": "followup_question"
+      },
+      {
+        "username": "TrailerTechRick",
+        "body": "For 3,500 lb axles, the standard grease seal dimensions are 1.719\" inner diameter x 2.565\" outer diameter. That's the 10-19 seal. It fits Dexter, Lippert, and most other 3,500 lb trailer axles with a standard 1-1/16\" x 1-3/8\" spindle. If you ever need to order by dimensions instead of part number, those are the numbers you want. Other common trailer seal sizes: 10-36 for 5.2K-7K axles (2.125\" x 3.376\") and 10-40 for 8K axles (2.250\" x 3.376\").",
+        "role": "direct_help"
+      },
+      {
+        "username": "AxleWorks_TX",
+        "body": "Yes, direction matters. The seal lip — the flexible rubber edge — faces inward toward the grease. It's designed to retain lubrication and keep contaminants out. If you install it backward with the lip facing out, it won't hold grease and water will get past it easily. Most seals have the open/lip side visible before you press them in, and the flat/smooth side faces outward after installation. Tap it in evenly with a seal driver or a socket that matches the outer diameter so you don't cock it in the bore.",
+        "role": "correction"
+      },
+      {
+        "username": "GooseneckGary",
+        "body": "The 10-19 is a solid seal, been using it on all my 3,500 lb axle trailers for years with zero issues. When you press it in, put a thin coat of grease on the outer edge of the seal too — helps it seat smoothly into the hub bore and provides an initial moisture barrier. Takes two seconds and it's cheap insurance.",
+        "role": "confirmation"
+      }
+    ]
+  }
+]

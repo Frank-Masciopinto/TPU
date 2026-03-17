@@ -1,0 +1,362 @@
+[
+  {
+    "thread_id": "1352271b-e598-4fbb-8b8e-1c6af9f50ffb",
+    "new_comments": [
+      {
+        "username": "LippertLarry",
+        "body": "Wait so I'm confused — if it has the same 12\"x2\" brakes as a 7K, what exactly makes it \"8K\"? Is it literally just the outer bearing being a 02475 instead of the standard one? Because that seems like a pretty thin upgrade to justify doubling the price.",
+        "role": "followup_question"
+      },
+      {
+        "username": "DrumBrakeDennis",
+        "body": "Yep, that's basically it. The 02475 outer bearing has a slightly larger inner diameter (1.250\") vs the standard L68149 (1.378\" OD cone) on the 7K. So the spindle neck is marginally bigger on the hybrid, which technically allows a higher static load rating. But the brake drums, brake shoes, magnet size — all identical to the 7K setup. That's why people call it a glorified 7K. The stopping power hasn't changed at all.",
+        "role": "direct_help"
+      },
+      {
+        "username": "CarHaulerChuck",
+        "body": "Bought a trailer off Facebook Marketplace last year — seller swore it was a \"true 8K axle\" setup. Got it home, looked at the brakes, 12\"x2\". Same as every 7K I've ever owned. Paid 8K pricing for 7K braking. Ended up swapping both axles out for Carter 8K with the 12-1/4\"x3-3/8\" brakes. Night and day difference when I'm hauling a loaded car down a grade. Lesson learned — always check brake size before buying a used trailer.",
+        "role": "anecdote"
+      },
+      {
+        "username": "AxleAlleyAl",
+        "body": "Here's the quick way to spot a hybrid vs a real 8K without crawling under the trailer: look at the axle tube diameter. Real 8K (Carter, Dexter) has a 3-1/2\" tube. Lippert hybrid 8K has a 3\" tube — same as their 7K. You can measure it in 10 seconds with a tape measure wrapped around the tube. 3\" tube = hybrid/glorified 7K. 3.5\" tube = real 8K.",
+        "role": "direct_help"
+      },
+      {
+        "username": "MountainPassMark",
+        "body": "Had the hybrid 8K on a flatbed I was using for construction materials. Fine around town, but I took a load of concrete blocks across the Ozarks and those brakes faded bad coming down a long 6% grade. You could smell the shoes burning. Swapped to Carter 8K the following week and never looked back. The bigger 3-3/8\" brake shoes make a massive difference in heat dissipation.",
+        "role": "anecdote"
+      },
+      {
+        "username": "RacerTrailerRon",
+        "body": "If you're already stuck with the hybrid axle and can't justify swapping the whole thing out right now, at least keep the brake magnets fresh and make sure your brake controller gain is set properly. Replace the magnets every 12,000 miles or so — they wear faster on the smaller 12\"x2\" assemblies because they're working harder to stop the same weight. It won't fix the fundamental problem but it buys you time.",
+        "role": "alternative"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "The cost difference is what kills me. I priced out two hybrid 8K axles from a dealer — came to about $1,800 for the pair with brakes. Two Carter real 8K axles with 12-1/4\"x3-3/8\" electric brakes and hub drums ran me about $2,200 total. For $400 more you get the correct tube size, proper brakes, and actual 8K stopping power. It's a no-brainer.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TrailerMathMatt",
+        "body": "Actually, I want to add some nuance here. The hybrid designation isn't completely fabricated — the spindle and bearing upgrade does raise the static load capacity to 8,000 lbs from a structural standpoint. The axle beam won't fail at 8K. The problem is dynamic braking. You have 8K of weight being stopped by brakes designed for 7K. It's like putting sedan brakes on a pickup truck. The truck might handle the weight fine rolling down the highway, but try stopping on a steep hill with a full payload.",
+        "role": "correction"
+      },
+      {
+        "username": "DexterDave",
+        "body": "Just to confirm what the original reply said — Carter 8K is the way to go here. The 3-1/2\" heavy duty tube, 12-1/4\"x3-3/8\" self-adjusting brakes, and the larger spindle all add up to an axle that's actually engineered for 8,000 lbs. One thing I'll add: make sure when you order the Carter 8K that you specify 5/8\" studs if you're running 17.5\" wheels, or 9/16\" if you're running 16\" wheels. Both options are available.",
+        "role": "confirmation"
+      }
+    ]
+  },
+  {
+    "thread_id": "2b74d755-0a0c-4e0d-8b86-3fa772a417ca",
+    "new_comments": [
+      {
+        "username": "DoublEyeDan",
+        "body": "Where exactly is this serial number on the torsion axle? I crawled under my trailer and can't find anything. Is it stamped into the metal or on a sticker? My axle tube is pretty rusty so it might be hard to read.",
+        "role": "followup_question"
+      },
+      {
+        "username": "SlipperSpringScott",
+        "body": "The serial number is typically stamped directly into the axle tube metal, usually dead center between the two torsion arms. On Dexter torsion axles it's around 9-10 digits. If it's rusted over, try hitting it with a wire wheel on an angle grinder — the stamps are deep enough that surface rust usually won't obliterate them. On Lippert/LCI torsion axles, sometimes there's a small metal tag riveted to the tube instead of a stamp.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TandemTony",
+        "body": "Plan ahead if you go this route. I ordered a torsion axle replacement last August and it took 6 weeks to arrive. My trailer sat in the yard the whole time. If you're anywhere near a busy season (spring/summer for boat trailers especially) I'd expect closer to 8 weeks. Wish I had ordered mine in the winter when the lead times are shorter.",
+        "role": "anecdote"
+      },
+      {
+        "username": "LeafSpringLou",
+        "body": "Depending on your situation, it might be worth considering converting from torsion to leaf spring suspension entirely. Leaf spring axles are stocked everywhere, parts are cheap and available same day, and installation is straightforward if you can weld. You'll need spring hangers welded to the frame and a set of leaf springs plus a standard round axle. The ride quality is slightly different — leaf springs are a bit stiffer — but for utility or equipment trailers most people won't notice. Just a thought if the 4-8 week wait is a dealbreaker.",
+        "role": "alternative"
+      },
+      {
+        "username": "TorsionBarTerry",
+        "body": "If you can't find the serial number, you can still order one — you just need to know these specs: axle capacity (lb rating), arm length measured from center of tube to center of hub bolt pattern, arm angle (up or down from horizontal, usually specified in degrees), inner arm spread (distance between mounting brackets), and the hub bolt pattern. Get those five measurements right and the manufacturer can build you a match. It takes more work but it's doable.",
+        "role": "direct_help"
+      },
+      {
+        "username": "BoatTrailerBob",
+        "body": "Four-plus weeks is the best case scenario honestly. I ordered a Dexter torsion axle for my center console boat trailer in June and it was 9 weeks before it shipped. Granted that's peak season. But just set your expectations accordingly — this isn't a next-day-ship kind of item. If your trailer is down and you need it running, leaf spring conversion might be your fastest path.",
+        "role": "correction"
+      },
+      {
+        "username": "TorsionBarTerry",
+        "body": "One more tip — check salvage yards and trailer recyclers in your area. I've found used OEM torsion axles with matching serial numbers for common boat trailer brands like Load Rite, Venture, and EZ Loader. If the rubber torsion cords aren't cracked or dried out, a used torsion axle can have plenty of life left. Saves you the wait time and usually costs about half of new. Just make sure the capacity and arm measurements match your setup exactly.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "e956d746-c4a9-4d77-ba7b-ef12382bea15",
+    "new_comments": [
+      {
+        "username": "IdlerHubIan",
+        "body": "Is there an easy way to measure the tube diameter without removing the axle? I'm trying to figure out if mine is a real 8K or one of those Lippert hybrids everyone talks about.",
+        "role": "followup_question"
+      },
+      {
+        "username": "RepackRandy",
+        "body": "Yeah, just wrap a flexible tape measure around the tube and divide by 3.14. A 3\" tube will measure about 9.42\" circumference, and a 3-1/2\" tube will be about 11\". Or if you have a caliper big enough, just clamp it on. Easiest spot to measure is right in the middle of the tube where there's nothing in the way. Takes 30 seconds.",
+        "role": "direct_help"
+      },
+      {
+        "username": "CarHaulerChuck",
+        "body": "Bought what was advertised as an \"8K Lippert axle\" on a used equipment trailer. Got it home and wrapped the tape around the tube — 9.4 inches, so right at 3\" diameter. Same as the 7K axles I pulled off my utility trailer. The brakes were 12\"x2\" too. It was a hybrid and the seller either didn't know or didn't care. If the tube isn't 3-1/2\", it's not a true 8K regardless of what the sticker says.",
+        "role": "anecdote"
+      },
+      {
+        "username": "DrumBrakeDennis",
+        "body": "To be fair, a 3\" tube can technically hold 8K from a beam-strength perspective — the tube itself isn't going to bend or fail at that weight. The real problem is everything else that comes with the hybrid: undersized brakes (12\"x2\" vs 12-1/4\"x3-3/8\"), smaller brake shoes, less heat dissipation surface area. The tube diameter is just the most visible indicator that tells you what class of components you're dealing with. Bigger tube = bigger everything else too.",
+        "role": "correction"
+      },
+      {
+        "username": "AxleAlleyAl",
+        "body": "Here's a rough guide for tube sizes by capacity:\n- 2K-3.5K: 2-3/8\" round tube\n- 5.2K-7K: 3\" round tube\n- Carter/Dexter 8K: 3-1/2\" round tube\n- 10K: 3-1/2\" round tube (sometimes 4\" on heavy duty models)\n- 12K+: typically 4\" or 5\" tube\nIf you measure 3\" and someone's calling it 8K, it's a hybrid or mislabeled.",
+        "role": "direct_help"
+      },
+      {
+        "username": "OilBathOtis",
+        "body": "If you already own a trailer with the Lippert 8K hybrid axle (3\" tube), don't panic and rip it out immediately. Just be realistic about what you're working with. Treat it like a strong 7K — keep your loads under 7,000 lbs per axle and you'll be fine. The brakes will handle that weight no problem. It's only when people load them up to the full 8K rating repeatedly that the braking limitations become dangerous, especially on grades.",
+        "role": "alternative"
+      },
+      {
+        "username": "BrakeShoeBarry",
+        "body": "Switched from Lippert 7K to Carter 8K on my car hauler last spring. The 3-1/2\" tube is noticeably stiffer — less flex on uneven roads and the trailer tracks way better at highway speed. The bigger brakes are confidence-inspiring too. I haul a 5,500 lb car regularly on mountain roads in West Virginia and the Carter 8K stops like it should. Couldn't say the same about the old setup.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TorsionBarTerry",
+        "body": "Good info in this thread. One more thing to note — the spindle diameter is also different between a real 8K and a 7K/hybrid. A true 8K has a larger spindle to accept bigger bearings (typically 25580 inner and 02475 outer). The 7K and hybrid use the L68149/25580 combo. So the hubs, drums, and bearings are NOT the same between a real 8K and a 7K — make sure you're ordering the right parts for what you actually have.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "9870b42e-fc5e-480a-a594-e7acc6fbaec6",
+    "new_comments": [
+      {
+        "username": "HubCapHank",
+        "body": "Running 16\" steel wheels on my Carter 8K tandem setup for about two years now with the 5/8\" studs. No issues at all. I'm using ST235/80R16 Load Range E tires — rated at 3,640 lbs per tire which gives me plenty of margin on the 8K axle.",
+        "role": "anecdote"
+      },
+      {
+        "username": "BoltPatternBen",
+        "body": "Make sure you're ordering wheels with the correct bolt pattern. The Carter 8K uses 8 on 6.5\" (8x6.5\") bolt pattern. And the lug holes on the wheel need to accommodate 5/8\" studs — some cheaper 16\" trailer wheels are drilled for 9/16\" studs only and the 5/8\" studs won't pass through. Double-check the listing before you order.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FrameFitFred",
+        "body": "Do you need different lug nuts for 5/8\" studs vs 9/16\"? I've been running 9/16\" on everything and I'm not sure if my lug nuts will work if I switch to Carter 8K.",
+        "role": "followup_question"
+      },
+      {
+        "username": "SteelWheelStan",
+        "body": "Yes, 5/8\" studs require 5/8\"-18 lug nuts. They are physically larger than 9/16\" lugs and are NOT interchangeable. If you try threading a 9/16\" lug nut onto a 5/8\" stud, it won't thread on at all. Most trailer parts suppliers sell them individually or in packs of 16 for the 8-lug setup. Torque spec on 5/8\" lug nuts is typically 120-140 ft-lbs.",
+        "role": "direct_help"
+      },
+      {
+        "username": "RacerTrailerRon",
+        "body": "If you're on the fence between 16\" and 17.5\", consider this: 17.5\" tires generally have higher load ratings per tire and run cooler at sustained highway speeds because of the larger diameter. But 16\" tires are cheaper, more widely available at tire shops if you get a blowout on the road, and the lower profile can matter if you're tight on fender clearance. For most people hauling under 12K total, 16\" is perfectly fine.",
+        "role": "alternative"
+      },
+      {
+        "username": "AxleAlleyAl",
+        "body": "One thing that trips people up: just because a wheel physically bolts on doesn't mean it's rated for the load. A 16\" wheel meant for a 3,500 lb axle might only be rated for 2,150 lbs. On an 8K axle you need wheels rated for at least 4,000 lbs each. Check the load rating stamped on the wheel — it's usually on the back or inside the barrel. Cheap imported wheels from big box stores are often underrated for heavy axles.",
+        "role": "correction"
+      }
+    ]
+  },
+  {
+    "thread_id": "d95cfe72-4742-405a-84f3-83b71430a2aa",
+    "new_comments": [
+      {
+        "username": "SquareAxleSam",
+        "body": "What size round axle replaces a 2\" square tube? My old boat trailer has a 2\" square and I'm trying to figure out what the equivalent round tube diameter is for ordering U-bolts and everything.",
+        "role": "followup_question"
+      },
+      {
+        "username": "GalvanizedGreg",
+        "body": "A 2\" square axle is typically found on 2,000-3,500 lb rated boat and utility trailers. The equivalent round tube for that capacity is 2-3/8\" diameter. Order your U-bolt kit for a 2-3/8\" round axle and you'll be set. If your square axle is 1.5\" then you'd be looking at a 2\" round tube, but that's pretty rare — mostly on very small jet ski trailers.",
+        "role": "direct_help"
+      },
+      {
+        "username": "BoatTrailerBob",
+        "body": "Did this exact swap on my 2004 EZ Loader boat trailer last fall. Had the original 2\" square axle and it was corroded beyond repair — the corners were paper thin from salt water exposure. Bought a 3,500 lb round axle with 73\" hub face and 58\" spring center, which matched my old setup. Bolted right in with the new U-bolts. Honestly the round axle felt like an upgrade — the galvanized round tubes hold up way better against corrosion than the painted square ones.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SpringSeatSteve",
+        "body": "Step by step for the swap: 1) Measure spring center on your existing square axle before removing anything. 2) Note whether your springs sit over or under the axle. 3) Remove the old square axle by unbolting the U-bolts. 4) Check your leaf springs — if they're still in decent shape you can reuse them. 5) Set the new round axle in place on the springs and install the new round-profile U-bolts. 6) Torque the U-bolts to spec (usually 35-55 ft-lbs for 3.5K, check your specific size). 7) Reinstall wheels and check alignment by measuring hub face on each side.",
+        "role": "direct_help"
+      },
+      {
+        "username": "LeafSpringLou",
+        "body": "One thing the original answer didn't mention — make sure your new U-bolt spring seats have the curved/cupped profile for a round tube. Square axle spring seats are flat on top. If you try to reuse the old flat spring seats with a round tube, the axle will rock side to side in the saddle and can actually shift under hard braking or on rough roads. The cupped seats cradle the round tube and keep everything locked in place. Most U-bolt kits come with the correct seat plates but worth double checking.",
+        "role": "correction"
+      },
+      {
+        "username": "CamberCarl",
+        "body": "Did a square-to-round swap on a buddy's old Highlander boat trailer and we made a rookie mistake — kept the old flat spring plates because \"they seemed fine.\" First time we hit a big bump on the highway the axle shifted about a quarter inch in the spring seat. Trailer pulled hard to the left until we stopped and reset it. Don't skip the proper round spring seats. Learned that one the hard way.",
+        "role": "anecdote"
+      },
+      {
+        "username": "GalvanizedGreg",
+        "body": "If you can, get the round axle in hot-dip galvanized instead of painted, especially for a boat trailer. The galvanized coating holds up way better to repeated submersion and salt exposure. It costs a little more but you'll get years more life out of it. Painted axles on boat trailers start rusting within the first season if you're launching in salt water.",
+        "role": "alternative"
+      },
+      {
+        "username": "SpringSeatSteve",
+        "body": "Good call on the round tube swap. Your existing leaf springs will work fine as long as they aren't cracked or sagging. The spring eye dimensions and spring width are the same regardless of whether the axle is square or round. Only the U-bolt kit and spring seat change. If your springs are older than 10 years or have visible cracks at the spring eyes, though, I'd replace them at the same time while you have everything apart. It's cheap insurance.",
+        "role": "confirmation"
+      }
+    ]
+  },
+  {
+    "thread_id": "0bd14beb-51b8-4585-9cd8-82765f2d0159",
+    "new_comments": [
+      {
+        "username": "WeldedPadWes",
+        "body": "What if I already removed the old axle and only have the frame with the spring hangers welded on? Can I still figure out the measurements I need?",
+        "role": "followup_question"
+      },
+      {
+        "username": "IdlerHubIan",
+        "body": "Yes — if your spring hangers are still welded to the frame, measure from the center of one front hanger bolt hole to the center of the same-side front hanger bolt hole on the other side. That gives you the spring center. For hub face, you'll need to know your trailer's overall outside width and work backward, or look up common combinations for your trailer make/model. A lot of standard utility trailers use these combos:\n- 48\"-60\" wide frame: 73\" hub face / 58\" spring center\n- 72\" wide frame: 89\" hub face / 74\" spring center\n- 82\"-83\" wide frame: 95\" hub face / 80\" spring center",
+        "role": "direct_help"
+      },
+      {
+        "username": "MeasureTwiceMike",
+        "body": "I messed this up on my first axle replacement and it was an expensive lesson. Measured what I thought was hub face but I was actually measuring from the outside of the brake drum on each side. Ended up with an axle about 3 inches too long. Hub face is measured from the flat mounting surface of each hub — where the wheel studs stick out — to the same point on the other side. Remove the wheels and tires first so you can see exactly what you're measuring.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TorqueWrenchTom",
+        "body": "Here's my method for accurate spring center measurement: have someone hold one end of the tape measure at the exact center of one spring pad (the welded pad on the axle tube where the spring sits). Pull the tape to the center of the spring pad on the other side. That's your spring center. If you're measuring from the hangers instead, make sure you're going center-to-center on the same hanger position (front-to-front or rear-to-rear) on each side.",
+        "role": "direct_help"
+      },
+      {
+        "username": "OverhangOscar",
+        "body": "People get confused between hub face and backing plate to backing plate — they are NOT the same measurement. On a 7K axle with a 95\" hub face, the backing plate to backing plate measurement is about 86\". That 9\" difference has tripped up a lot of people. Hub face is the wider measurement. If you accidentally give someone the backing plate measurement when they need hub face, you'll end up with an axle that's too short.",
+        "role": "correction"
+      },
+      {
+        "username": "BoltPatternBen",
+        "body": "Don't forget to count your lugs while you're under there. 4-lug is typically 2K axles, 5-lug is 3.5K, 6-lug is 5.2K-7K, and 8-lug is 7K-12K. Getting hub face and spring center right doesn't help if you order an axle with the wrong bolt pattern for your existing wheels. I'd also check whether your studs are 1/2\", 9/16\", or 5/8\" — especially important if you're going from an older axle to a newer one.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TrailerMathMatt",
+        "body": "Pro tip: take photos of everything before you start disassembly. Photograph the spring hangers, the spring pads, the hub face from the front, and put a tape measure in each photo for reference. If you forget a measurement later you can go back to the photos. I also write the measurements on the frame rail with a paint marker so they're right there when I'm ordering.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SpringSeatSteve",
+        "body": "One thing that's bitten me: if your trailer has been in a wreck or was loaded unevenly for years, the spring hangers might not be perfectly symmetrical anymore. Measure from both sides independently and compare. If the left spring center doesn't match the right spring center, you've got a bent frame or shifted hangers. Fix that before ordering a new axle or your new axle won't sit straight.",
+        "role": "anecdote"
+      },
+      {
+        "username": "IdlerHubIan",
+        "body": "Also worth noting — if you have a tandem axle trailer, measure BOTH axles. I've seen trailers where one axle was replaced previously with a slightly different spring center than the original. If you just measure one and order two replacements based on that, one might not line up with the hangers. Always verify each axle independently.",
+        "role": "correction"
+      },
+      {
+        "username": "TorqueWrenchTom",
+        "body": "To add to the original answer — when ordering a replacement axle you should also know: brake type (electric or no brakes), brake size (10\", 12\", or 12-1/4\" — check the diameter of your existing drum), and whether you want over-slung or under-slung spring mounting. Most trailers are over-slung but if you have a low-deck trailer it might be under-slung. The spring center and hub face get you 80% of the way there, but these details matter for getting the complete correct axle.",
+        "role": "confirmation"
+      }
+    ]
+  },
+  {
+    "thread_id": "ca1d935a-ee66-440b-9d1f-cb2c4a1636a9",
+    "new_comments": [
+      {
+        "username": "HubCapHank",
+        "body": "Important clarification on stud sizes: older 7K axles (pre-2015 or so) commonly came with 1/2\" studs. Newer Carter and Dexter 7K axles use 9/16\" studs. Before you spend $800+ on a set of 17.5\" wheels and tires, pull a lug nut off and check your stud diameter. If you have 1/2\" studs, the 17.5\" wheels aren't safe at full load — period.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TandemTony",
+        "body": "Upgraded to 17.5\" wheels on my tandem 7K equipment trailer about 8 months ago. Best upgrade I've done. The tires run noticeably cooler on long highway hauls — I check hub and tire temps with an infrared thermometer at every fuel stop and I'm seeing 15-20 degrees lower temps compared to the old 16\" setup. The larger diameter means the tire rotates fewer times per mile so there's less friction buildup.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SteelWheelStan",
+        "body": "What's the weight difference between a 16\" and 17.5\" wheel and tire combo? I'm hauling an excavator that's right at the limit on my tandem 7K and I don't want to eat into my payload capacity with heavier wheels.",
+        "role": "followup_question"
+      },
+      {
+        "username": "BoatTrailerBob",
+        "body": "Roughly 10-15 lbs more per wheel for the 17.5\" assembly vs a comparable 16\". On a tandem that's about 40-60 lbs total across four wheels. With a 14,000 lb combined capacity on tandem 7K axles, that's negligible. You won't notice it. The ride quality improvement and better load ratings more than make up for the slight weight increase. A typical 17.5\" tire in Load Range H is rated around 4,805 lbs per tire vs about 3,520 lbs for a 16\" Load Range E.",
+        "role": "direct_help"
+      },
+      {
+        "username": "StudSwapStanley",
+        "body": "People keep saying you can't run 17.5\" on 1/2\" studs, and they're right, but here's the thing — you can upgrade the studs. A machine shop or axle shop can press out the 1/2\" studs and press in 9/16\" studs for about $5-8 per stud. On a 6-lug hub that's $30-48 per hub. It's cheaper than buying a whole new axle if your current 7K is otherwise in good shape. Just make sure you get the correct length studs for the 17.5\" wheel — they're slightly longer than 16\" studs to accommodate the thicker wheel barrel.",
+        "role": "alternative"
+      },
+      {
+        "username": "DrumBrakeDennis",
+        "body": "The stud size issue is the tip of the iceberg honestly. Axles with 1/2\" studs usually also have smaller spindles and lighter-duty hub castings designed for the original load rating. Pressing in bigger studs doesn't change the underlying hub strength or the spindle fatigue limit. If your axle is an older 7K with 1/2\" studs, it was probably built to a 6K or even 5.2K standard that's been uprated on paper. I'd be cautious about loading it to full 7K even with new studs.",
+        "role": "correction"
+      },
+      {
+        "username": "TandemTony",
+        "body": "Confirming that Carter 7K with 9/16\" studs is a solid platform for 17.5\" wheels. I'm using the H-range 215/75R17.5 tires on my tandem setup and they've been outstanding. Over 25,000 miles with no uneven wear and the tread is barely showing use. If you're buying new axles anyway, go Carter 7K with 9/16\" studs and 17.5\" wheels — it's the best value setup for a working tandem trailer in the 7K class.",
+        "role": "confirmation"
+      }
+    ]
+  },
+  {
+    "thread_id": "28d2b8e0-1e52-4c35-a808-dfc6828953b8",
+    "new_comments": [
+      {
+        "username": "DexterDave",
+        "body": "Does this include brake assemblies too? I know hubs and drums interchange but I wasn't sure about the actual brake backing plates and shoes. I need to replace just the brakes on my Dexter 7K and Carter brakes are about $30 cheaper per assembly.",
+        "role": "followup_question"
+      },
+      {
+        "username": "BrakeShoeBarry",
+        "body": "Yes, brake assemblies interchange fully between Carter, Dexter, Lippert, and Rockwell for the same capacity class. Same bolt pattern on the backing plate, same shoe size, same magnet. For 7K (and 5.2K/6K) it's all 12\"x2\" brakes. The mounting holes line up perfectly. I've mixed and matched brands for years across my fleet of 6 trailers and never had a fitment problem.",
+        "role": "direct_help"
+      },
+      {
+        "username": "GalvanizedGreg",
+        "body": "I maintain about a dozen trailers for our landscaping company and I buy whatever brand is in stock and cheapest at the time. Running Carter hubs on Dexter axles, Lippert brakes on Carter axles — you name it. For 3.5K through 7K, it's all completely interchangeable. Hubs, drums, brakes, bearings, seals, grease caps. Same inner bearing (25580), same outer bearing (L68149 on 5.2K-7K), same seal, same everything.",
+        "role": "anecdote"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "Here's a quick cheat sheet for common brake sizes by capacity to make sure you're matching correctly:\n- 2K idler: no brakes (hub only)\n- 3.5K: 10\" x 2-1/4\" electric brakes\n- 5.2K/6K/7K: 12\" x 2\" electric brakes\n- 8K (real): 12-1/4\" x 3-3/8\" electric brakes\n- 10K: 12-1/4\" x 3-3/8\" electric brakes\n- 12K: 12-1/4\" x 5\" electric brakes\nAs long as you match the brake size within the same capacity, any brand will bolt up to any other brand's axle.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SpindleSizeSteve",
+        "body": "One exception worth noting: Dexter's Nev-R-Adjust brake assemblies have a proprietary internal adjuster mechanism that's different from standard self-adjusting brakes. They still bolt up to the same backing plate mounting pattern and use the same drum size, so they're physically interchangeable. But if you're replacing just the adjuster or internal components, the Nev-R-Adjust parts are Dexter-specific. For a complete assembly swap though, it doesn't matter — any brand's complete assembly will work.",
+        "role": "correction"
+      },
+      {
+        "username": "RepackRandy",
+        "body": "If you're mixing brands, it's a great opportunity to upgrade your bearings and seals. I always use Timken-brand bearings regardless of what axle I'm putting them on. The generic imported bearings that come with some cheaper hub kits are fine for light duty but I've had a couple fail early under heavy loads. Timken costs maybe $8-10 more per set and they're made to tighter tolerances. Worth it for peace of mind.",
+        "role": "alternative"
+      },
+      {
+        "username": "HubCapHank",
+        "body": "Had a Dexter 7K with a spun inner bearing 400 miles from home on a trip hauling my side-by-side. Found a local trailer shop that had Carter hubs and brakes on the shelf. Bolted the Carter hub drum right onto my Dexter spindle, installed the Carter brake assembly, packed the bearings, and was back on the road in about an hour and a half. Complete drop-in replacement. That day made me a believer in interchangeability.",
+        "role": "anecdote"
+      },
+      {
+        "username": "GalvanizedGreg",
+        "body": "For 10K and above, things are still interchangeable but you need to pay closer attention to bearing numbers. The 10K+ axles use larger bearings and the exact numbers vary between old-style and new-style hubs. For example, a new-style Dexter 10K uses 28682 outer and 3984 inner, while the old-style used different numbers. Just pull the bearing out of your existing hub, read the number off the cone, and order matching bearings. The hub and drum will bolt right up as long as the bearing races match your spindle.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "Confirming what everyone's saying — full interchangeability is the norm across Carter, Dexter, Lippert, and Rockwell/Quality. This also applies to Rockwell American axles which are essentially the same as Quality brand. If you see any of those names on your axle tag, rest assured the parts from any of the other brands will fit. Just match capacity, bearing numbers, and brake size and you're golden.",
+        "role": "confirmation"
+      }
+    ]
+  }
+]

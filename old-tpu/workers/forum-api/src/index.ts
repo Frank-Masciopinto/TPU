@@ -85,6 +85,8 @@ function appendVary(existing: string | null, value: string): string {
   return `${existing}, ${value}`;
 }
 
+const LOCAL_IPS = new Set(["0.0.0.0", "127.0.0.1", "::1", "::ffff:127.0.0.1"]);
+
 function getClientIp(req: Request): string {
   // Cloudflare sets CF-Connecting-IP at the edge.
   const cf = req.headers.get("CF-Connecting-IP");
@@ -92,6 +94,10 @@ function getClientIp(req: Request): string {
   const xff = req.headers.get("X-Forwarded-For");
   if (!xff) return "0.0.0.0";
   return xff.split(",")[0]?.trim() || "0.0.0.0";
+}
+
+function isLocalIp(ip: string): boolean {
+  return LOCAL_IPS.has(ip);
 }
 
 function getBearer(req: Request): string | null {
@@ -1719,6 +1725,107 @@ async function handleAdminThreads(
   }, { status: 200 });
 }
 
+// =============================================================================
+// Admin Quote Search
+// =============================================================================
+
+type QuoteSearchField = "all" | "email" | "quote_number" | "phone";
+
+function parseQuoteSearchField(v: string | null): QuoteSearchField | null {
+  const s = (v || "").toLowerCase();
+  if (s === "all" || s === "email" || s === "quote_number" || s === "phone") return s;
+  return null;
+}
+
+/**
+ * Handle GET /admin/quotes
+ * Search quotes by customer_email, quote_number, or customer_phone (admin only).
+ * Returns quote rows without the items blob to keep payloads small.
+ */
+async function handleAdminQuotes(
+  req: Request,
+  env: Env,
+  authed: Authed,
+): Promise<Response> {
+  await requireAdmin(env, authed);
+
+  const ip = getClientIp(req);
+  await rateLimitOrThrow(env, `${ip}:${authed.userId}:admin-quotes`, 10, 60);
+
+  const url = new URL(req.url);
+  const q = (url.searchParams.get("q") || "").trim();
+
+  if (q.length > 200) throw new HttpError(400, "query_too_long", "q must be under 200 characters");
+
+  // field is only relevant when a query is present; defaults to "all"
+  const rawField = url.searchParams.get("field");
+  const field: QuoteSearchField = q
+    ? (parseQuoteSearchField(rawField) ?? "all")
+    : "all";
+
+  if (q && field !== "all") {
+    // validate named fields
+    const allowed: QuoteSearchField[] = ["email", "quote_number", "phone"];
+    if (!allowed.includes(field)) {
+      throw new HttpError(400, "invalid_field", "field must be one of: all, email, quote_number, phone");
+    }
+  }
+
+  const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
+  const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get("limit") || "20", 10)));
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const svcJwt = await adminServiceJwt(env);
+  const params = new URLSearchParams();
+  params.set(
+    "select",
+    "id,quote_number,customer_email,customer_name,customer_phone,grand_total,expires_at,sent_at,created_at",
+  );
+
+  if (q) {
+    const pattern = `ilike.%${q}%`;
+    if (field === "all") {
+      // search across email, quote_number, and phone simultaneously
+      params.set(
+        "or",
+        `(customer_email.ilike.%${q}%,quote_number.ilike.%${q}%,customer_phone.ilike.%${q}%)`,
+      );
+    } else {
+      const colMap: Record<Exclude<QuoteSearchField, "all">, string> = {
+        email: "customer_email",
+        quote_number: "quote_number",
+        phone: "customer_phone",
+      };
+      params.set(colMap[field as Exclude<QuoteSearchField, "all">], pattern);
+    }
+  }
+  // no q → no filter → browse all quotes
+
+  params.set("order", "created_at.desc");
+
+  const r = await supabaseFetch(env, `quotes?${params.toString()}`, {
+    method: "GET",
+    jwt: svcJwt,
+    preferCount: true,
+    range: { from, to },
+  });
+
+  if (!r.ok) {
+    console.error("[AdminQuotes] Supabase error:", await safeJson(r));
+    return json({ error: "supabase_error" }, { status: 502 });
+  }
+
+  const data = await r.json();
+  const total = getContentRangeCount(r.headers.get("Content-Range")) ?? (Array.isArray(data) ? data.length : 0);
+
+  console.log(
+    `[AdminAudit] action=quote_browse field=${field} q=${q || "(all)"} admin=${asString(authed.claims.email)} results=${Array.isArray(data) ? data.length : 0}`,
+  );
+
+  return json({ data, total, page, limit }, { status: 200 });
+}
+
 async function handlePatchThread(
   req: Request,
   env: Env,
@@ -3216,6 +3323,427 @@ async function sendEmailViaResend(
   return { success: true, messageId: data.id };
 }
 
+// ─── Contact Form Email ───────────────────────────────────────────────────────
+
+async function sendContactEmail(
+  env: Env,
+  to: string,
+  subject: string,
+  html: string,
+  text: string,
+  options?: {
+    replyTo?: string;
+    tags?: { name: string; value: string }[];
+  },
+): Promise<{ success: boolean; messageId?: string }> {
+  if (!env.RESEND_API_KEY) {
+    throw new HttpError(
+      501,
+      "email_not_configured",
+      "RESEND_API_KEY is not set",
+    );
+  }
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "Trailer Parts Unlimited <cart@cartertraileraxles.com>",
+      to: [to],
+      subject,
+      html,
+      text,
+      ...(options?.replyTo ? { reply_to: options.replyTo } : {}),
+      tags: options?.tags ?? [{ name: "type", value: "contact" }],
+    }),
+  });
+  if (!response.ok) return { success: false };
+  const data = (await response.json()) as { id: string };
+  return { success: true, messageId: data.id };
+}
+
+interface ContactFields {
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  order: string;
+  message: string;
+}
+
+function generateContactStaffHtml(f: ContactFields): string {
+  const rows = [
+    ["Name", f.name],
+    ["Email", `<a href="mailto:${f.email}" style="color:#d42020;">${f.email}</a>`],
+    ...(f.phone ? [["Phone", f.phone] as [string, string]] : []),
+    ["Subject", f.subject],
+    ...(f.order ? [["Order #", f.order] as [string, string]] : []),
+    ["Message", `<div style="white-space:pre-wrap;word-break:break-word;">${f.message}</div>`],
+  ] as [string, string][];
+
+  const rowsHtml = rows
+    .map(
+      ([label, value]) => `
+      <tr>
+        <td style="padding:10px 16px;font-size:12px;font-weight:600;color:#8a8a8a;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;vertical-align:top;width:110px;border-bottom:1px solid #ebebeb;">${label}</td>
+        <td style="padding:10px 16px;font-size:14px;color:#333333;vertical-align:top;border-bottom:1px solid #ebebeb;">${value}</td>
+      </tr>`,
+    )
+    .join("");
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Form Submission</title>
+</head>
+<body style="margin:0;padding:0;font-family:Arial,'Helvetica Neue',Helvetica,sans-serif;background-color:#eaeaea;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#eaeaea;">
+    <tr>
+      <td style="padding:32px 16px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin:0 auto;background-color:#ffffff;border:1px solid #d2d2d2;">
+
+          <!-- Top nav bar — matches site header -->
+          <tr>
+            <td style="background-color:#393939;padding:12px 32px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <span style="color:#ffffff;font-size:13px;font-weight:700;letter-spacing:0.3px;">TRAILER PARTS UNLIMITED</span>
+                  </td>
+                  <td style="text-align:right;">
+                    <span style="color:#aaaaaa;font-size:12px;">844-898-8687</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Red accent bar -->
+          <tr>
+            <td style="background-color:#d42020;padding:0;height:4px;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+
+          <!-- Header -->
+          <tr>
+            <td style="padding:28px 32px 20px;border-bottom:1px solid #ebebeb;">
+              <h1 style="margin:0 0 4px;font-size:18px;font-weight:700;color:#1d1d1d;">New Contact Form Submission</h1>
+              <p style="margin:0;font-size:13px;color:#8a8a8a;">Reply directly to this email to respond to the customer.</p>
+            </td>
+          </tr>
+
+          <!-- Subject banner -->
+          <tr>
+            <td style="padding:14px 32px;background-color:#f7f7f7;border-bottom:1px solid #ebebeb;">
+              <span style="font-size:12px;font-weight:700;color:#8a8a8a;text-transform:uppercase;letter-spacing:0.5px;">Subject: </span>
+              <span style="font-size:14px;font-weight:600;color:#d42020;">${f.subject}</span>
+            </td>
+          </tr>
+
+          <!-- Fields table -->
+          <tr>
+            <td style="padding:24px 32px 28px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border:1px solid #ebebeb;">
+                ${rowsHtml}
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td style="padding:0 32px 32px;text-align:center;">
+              <a href="mailto:${f.email}?subject=Re%3A%20${encodeURIComponent(f.subject)}" style="display:inline-block;background-color:#d42020;color:#ffffff;text-decoration:none;padding:12px 28px;font-size:14px;font-weight:700;letter-spacing:0.3px;">REPLY TO ${f.name.toUpperCase()}</a>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:16px 32px;background-color:#393939;text-align:center;">
+              <p style="margin:0;font-size:11px;color:#aaaaaa;">Trailer Parts Unlimited &mdash; 631 State Highway 75 N, Huntsville, TX 77320 &mdash; trailerpartsunlimited.com</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function generateContactStaffText(f: ContactFields): string {
+  const lines = [
+    "NEW CONTACT FORM SUBMISSION — Trailer Parts Unlimited",
+    "------------------------------------------------------",
+    `Name:    ${f.name}`,
+    `Email:   ${f.email}`,
+    ...(f.phone ? [`Phone:   ${f.phone}`] : []),
+    `Subject: ${f.subject}`,
+    ...(f.order ? [`Order #: ${f.order}`] : []),
+    "",
+    "Message:",
+    f.message,
+    "",
+    "------------------------------------------------------",
+    "Reply directly to this email to respond to the customer.",
+  ];
+  return lines.join("\n");
+}
+
+function generateContactAutoReplyHtml(f: {
+  name: string;
+  subject: string;
+}): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>We got your message!</title>
+</head>
+<body style="margin:0;padding:0;font-family:Arial,'Helvetica Neue',Helvetica,sans-serif;background-color:#eaeaea;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#eaeaea;">
+    <tr>
+      <td style="padding:32px 16px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin:0 auto;background-color:#ffffff;border:1px solid #d2d2d2;">
+
+          <!-- Top nav bar — matches site header -->
+          <tr>
+            <td style="background-color:#393939;padding:12px 32px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <span style="color:#ffffff;font-size:13px;font-weight:700;letter-spacing:0.3px;">TRAILER PARTS UNLIMITED</span>
+                  </td>
+                  <td style="text-align:right;">
+                    <a href="tel:+18448988687" style="color:#aaaaaa;font-size:12px;text-decoration:none;">844-898-8687</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Red accent bar -->
+          <tr>
+            <td style="background-color:#d42020;padding:0;height:4px;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+
+          <!-- Greeting -->
+          <tr>
+            <td style="padding:32px 32px 24px;">
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#1d1d1d;">Hi ${f.name},</h1>
+              <p style="margin:0;font-size:14px;color:#6e6e73;">Thanks for contacting Trailer Parts Unlimited.</p>
+            </td>
+          </tr>
+
+          <!-- Message received box -->
+          <tr>
+            <td style="padding:0 32px 24px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f7f7f7;border-left:4px solid #d42020;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#1d1d1d;">We received your message about:</p>
+                    <p style="margin:0;font-size:15px;color:#d42020;font-weight:600;">${f.subject}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Body copy -->
+          <tr>
+            <td style="padding:0 32px 28px;">
+              <p style="margin:0 0 14px;font-size:14px;color:#48484a;line-height:1.6;">Our team will get back to you within <strong style="color:#1d1d1d;">1 business day</strong>. If your question is urgent, call us directly at <a href="tel:+18448988687" style="color:#d42020;text-decoration:none;font-weight:600;">844-898-8687</a> or simply reply to this email.</p>
+              <p style="margin:0;font-size:14px;color:#48484a;line-height:1.6;">In the meantime, feel free to browse our full catalog of trailer parts and axles.</p>
+            </td>
+          </tr>
+
+          <!-- CTA button -->
+          <tr>
+            <td style="padding:0 32px 32px;">
+              <a href="https://www.trailerpartsunlimited.com" style="display:inline-block;background-color:#d42020;color:#ffffff;text-decoration:none;padding:12px 28px;font-size:14px;font-weight:700;letter-spacing:0.3px;">SHOP NOW</a>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 32px;"><hr style="border:none;border-top:1px solid #ebebeb;margin:0;"></td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:16px 32px;background-color:#393939;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <p style="margin:0 0 4px;font-size:12px;color:#ffffff;font-weight:700;">Trailer Parts Unlimited</p>
+                    <p style="margin:0;font-size:11px;color:#aaaaaa;">631 State Highway 75 N, Huntsville, TX 77320</p>
+                  </td>
+                  <td style="text-align:right;vertical-align:top;">
+                    <a href="https://www.trailerpartsunlimited.com" style="font-size:11px;color:#aaaaaa;text-decoration:none;">trailerpartsunlimited.com</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function generateContactAutoReplyText(f: {
+  name: string;
+  subject: string;
+}): string {
+  return [
+    `Hi ${f.name},`,
+    "",
+    `Thanks for reaching out! We've received your message about "${f.subject}" and our team will get back to you within 1 business day.`,
+    "",
+    "In the meantime, feel free to browse our catalog at https://www.trailerpartsunlimited.com",
+    "",
+    "Need urgent help? Reply to this email and we'll prioritize your request.",
+    "",
+    "— Trailer Parts Unlimited",
+  ].join("\n");
+}
+
+/**
+ * Handle POST /contact/send
+ * Saves the submission to Supabase then fires staff notification + user auto-reply
+ * in parallel via Resend.
+ */
+async function handleContactForm(req: Request, env: Env): Promise<Response> {
+  const body = (await req.json().catch(() => null)) as Record<
+    string,
+    unknown
+  > | null;
+  if (!body) throw new HttpError(400, "invalid_json");
+
+  // Honeypot: silently discard bot submissions
+  if (body.website) return json({ success: true });
+
+  // Rate limit: 5 per IP per hour
+  const ip =
+    req.headers.get("CF-Connecting-IP") ??
+    req.headers.get("X-Forwarded-For")?.split(",")[0]?.trim();
+  if (ip && !isLocalIp(ip)) await rateLimitOrThrow(env, `contact:${ip}`, 5, 3600);
+
+  // Validate + sanitize
+  const name = asString(body.name ?? "")
+    .trim()
+    .slice(0, 200);
+  const email = asString(body.email ?? "")
+    .trim()
+    .toLowerCase();
+  const phone = asString(body.phone ?? "")
+    .trim()
+    .slice(0, 50);
+  const subject = asString(body.subject ?? "")
+    .trim()
+    .slice(0, 200);
+  const order = asString(body.order ?? "")
+    .trim()
+    .slice(0, 50);
+  const message = asString(body.message ?? "").trim();
+
+  if (!name) throw new HttpError(400, "missing_name");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    throw new HttpError(400, "invalid_email");
+  if (!subject) throw new HttpError(400, "missing_subject");
+  if (message.length < 10) throw new HttpError(400, "message_too_short");
+  if (message.length > 1000) throw new HttpError(400, "message_too_long");
+
+  // Insert to Supabase FIRST — preserves the lead even if emails fail
+  const insertRes = await supabaseFetch(env, "contact_submissions", {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({
+      name,
+      email,
+      phone: phone || null,
+      subject,
+      order_number: order || null,
+      message,
+      ip_address: ip ?? null,
+      user_agent: req.headers.get("User-Agent")?.slice(0, 500) ?? null,
+    }),
+  });
+  if (!insertRes.ok) {
+    const err = await safeJson(insertRes);
+    console.error("Contact form DB insert failed", err);
+    throw new HttpError(502, "database_error", "Failed to save submission");
+  }
+  const [submission] = (await insertRes.json()) as Array<{ id: string }>;
+
+  const firstName = name.split(" ")[0] ?? name;
+  const fields: ContactFields = { name, email, phone, subject, order, message };
+
+  // Fire both emails in parallel — never block user on delivery failures
+  const [staffResult, replyResult] = await Promise.allSettled([
+    sendContactEmail(
+      env,
+      "Carter@trailerpartsunlimited.com",
+      `[Contact Form] ${subject} — ${name}`,
+      generateContactStaffHtml(fields),
+      generateContactStaffText(fields),
+      { replyTo: email, tags: [{ name: "type", value: "contact-staff" }] },
+    ),
+    sendContactEmail(
+      env,
+      email,
+      `We got your message, ${firstName}!`,
+      generateContactAutoReplyHtml({ name: firstName, subject }),
+      generateContactAutoReplyText({ name: firstName, subject }),
+      { tags: [{ name: "type", value: "contact-reply" }] },
+    ),
+  ]);
+
+  // Update sent timestamps — fire-and-forget, non-critical
+  const now = new Date().toISOString();
+  const patch: Record<string, string> = {};
+  if (staffResult.status === "fulfilled" && staffResult.value.success)
+    patch.staff_sent_at = now;
+  if (replyResult.status === "fulfilled" && replyResult.value.success)
+    patch.reply_sent_at = now;
+  if (Object.keys(patch).length > 0 && submission) {
+    supabaseFetch(env, `contact_submissions?id=eq.${submission.id}`, {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    }).catch((e) => console.error("Contact submission patch failed", e));
+  }
+
+  // Log delivery failures — visible in Cloudflare Worker logs, not surfaced to user
+  if (
+    staffResult.status === "rejected" ||
+    (staffResult.status === "fulfilled" && !staffResult.value.success)
+  ) {
+    console.error("Contact staff email failed", {
+      submissionId: submission?.id,
+      email,
+      subject,
+    });
+  }
+  if (
+    replyResult.status === "rejected" ||
+    (replyResult.status === "fulfilled" && !replyResult.value.success)
+  ) {
+    console.error("Contact auto-reply failed", {
+      submissionId: submission?.id,
+      email,
+    });
+  }
+
+  return json({ success: true });
+}
+
 /**
  * Handle GET /quote/cart/:quoteNumber
  * Looks up a stored quote, creates a fresh BigCommerce cart with the quoted items,
@@ -3892,6 +4420,7 @@ export default {
         "/address/verify",
         "/freight/hubs",
         "/quote/send",
+        "/contact/send",
         "/auth/bc-exchange",
         "/auth/refresh",
       ];
@@ -3911,8 +4440,8 @@ export default {
         // Cache user_id → email mapping for admin badge detection
         ctx.waitUntil(cacheUserEmail(env, authed.userId, asString(authed.claims.email)));
       } else if (isPublicPost) {
-        // Public POST endpoints - rate limit by IP only
-        await rateLimitOrThrow(env, `${ip}:public:write`, 30, 60);
+        // Public POST endpoints - rate limit by IP only (skip for local dev)
+        if (!isLocalIp(ip)) await rateLimitOrThrow(env, `${ip}:public:write`, 30, 60);
       } else {
         // Reads are rate limited by IP + (optional) user id.
         // If a JWT is present, we verify it and key by the user.
@@ -4024,6 +4553,12 @@ export default {
       if (req.method === "GET" && path === "/admin/users") {
         if (!authed) authed = await requireSupabaseJwt(req, env);
         return withCors(req, env, await handleAdminUserLookup(req, env, authed));
+      }
+
+      // Admin: Quote search (GET /admin/quotes)
+      if (req.method === "GET" && path === "/admin/quotes") {
+        if (!authed) authed = await requireSupabaseJwt(req, env);
+        return withCors(req, env, await handleAdminQuotes(req, env, authed));
       }
 
       // Admin: Seed threads (POST /admin/seed-threads)
@@ -4206,6 +4741,11 @@ export default {
       // Freight Hub Lookup (for LTL shipments)
       if (req.method === "POST" && path === "/freight/hubs") {
         return withCors(req, env, await handleFreightHubs(req, env));
+      }
+
+      // Contact Form
+      if (req.method === "POST" && path === "/contact/send") {
+        return withCors(req, env, await handleContactForm(req, env));
       }
 
       // Email Quote System

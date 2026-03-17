@@ -4,7 +4,8 @@
     "category": {},
     "page": {
       "forum.html": "/forum",
-      "forum-thread.html": "/forum/thread"
+      "forum-thread.html": "/forum/thread",
+      "got-questions.html": "/got-questions"
     },
     "product": {}
   },

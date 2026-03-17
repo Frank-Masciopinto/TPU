@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quote Search — TPU Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface-2: #222638;
+      --border: #2e3248;
+      --text: #e8eaf0;
+      --text-muted: #8b8fa8;
+      --accent: #e62223;
+      --accent-2: #f7931e;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --red-bg: rgba(239,68,68,0.08);
+      --amber-bg: rgba(245,158,11,0.12);
+      --radius: 8px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ---- Layout ---- */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .header-badge {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* ---- Auth gate ---- */
+    #auth-gate {
+      max-width: 480px;
+      margin: 80px auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+    }
+
+    #auth-gate h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    #auth-gate p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    /* ---- Form controls ---- */
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 9px 12px;
+      font-size: 14px;
+      font-family: var(--font);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      font-size: 12px;
+      font-family: monospace;
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b8fa8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s, transform 0.1s;
+      font-family: var(--font);
+    }
+
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+
+    .btn-ghost {
+      background: var(--surface-2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--text-muted); }
+
+    /* ---- Search bar ---- */
+    #search-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .search-field-wrap {
+      flex: 0 0 160px;
+    }
+
+    .search-input-wrap {
+      flex: 1;
+    }
+
+    .search-btn-wrap {
+      flex-shrink: 0;
+    }
+
+    /* ---- Token bar ---- */
+    .token-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .token-status {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .token-status span {
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    /* ---- Stats bar ---- */
+    #stats-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      min-height: 24px;
+    }
+
+    .stats-count {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .stats-count strong {
+      color: var(--text);
+    }
+
+    /* ---- Table ---- */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      background: var(--surface);
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody tr:hover { background: var(--surface-2); }
+
+    tbody tr.row-expired { background: var(--red-bg); }
+    tbody tr.row-expired:hover { background: rgba(239,68,68,0.13); }
+
+    tbody td {
+      padding: 11px 14px;
+      vertical-align: middle;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .cell-muted { color: var(--text-muted); }
+
+    .cell-amber {
+      color: var(--amber);
+      font-weight: 500;
+    }
+
+    .cell-green {
+      color: var(--green);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-expired {
+      background: rgba(239,68,68,0.15);
+      color: var(--red);
+    }
+
+    .badge-active {
+      background: rgba(34,197,94,0.12);
+      color: var(--green);
+    }
+
+    .quote-number {
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .link {
+      color: var(--accent-2);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 12px;
+    }
+
+    .link:hover { text-decoration: underline; }
+
+    /* ---- Pagination ---- */
+    #pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .page-info {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ---- States ---- */
+    #empty-state, #error-state, #loading-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-muted);
+    }
+
+    #error-state { color: var(--red); }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-bottom: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .form-row { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">T</div>
+  <h1>Quote Search</h1>
+  <span class="header-badge">Admin</span>
+</div>
+
+<!-- Auth Gate -->
+<div id="auth-gate" style="display:none;">
+  <h2>Sign In Required</h2>
+  <p>Paste your Supabase access token to access the quote admin panel. You can find it in your browser's localStorage after logging into the forum.</p>
+  <div class="form-row">
+    <label for="token-input">Access Token</label>
+    <textarea id="token-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="saveToken()">Save &amp; Continue</button>
+  <div id="token-error" style="color:var(--red);font-size:12px;margin-top:10px;display:none;"></div>
+</div>
+
+<!-- Main App -->
+<div id="app" style="display:none;">
+  <div class="main">
+
+    <!-- Search Section -->
+    <div id="search-section">
+      <div class="search-row">
+        <div class="search-field-wrap">
+          <label for="field-select">Search by</label>
+          <select id="field-select">
+            <option value="email">Email</option>
+            <option value="quote_number">Quote #</option>
+            <option value="phone">Phone</option>
+          </select>
+        </div>
+        <div class="search-input-wrap">
+          <label for="search-input">Query</label>
+          <input
+            id="search-input"
+            type="text"
+            placeholder="e.g. customer@example.com"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        <div class="search-btn-wrap">
+          <button id="search-btn" class="btn btn-primary" onclick="doSearch(1)">Search</button>
+        </div>
+      </div>
+      <div class="token-bar">
+        <div class="token-status">Authenticated as <span id="token-label">admin</span></div>
+        <button class="btn btn-ghost" style="padding:4px 12px;font-size:12px;margin-left:auto;" onclick="clearToken()">Change Token</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results-container" style="display:none;">
+      <div id="stats-bar">
+        <div class="stats-count" id="stats-text"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quote #</th>
+              <th>Customer</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Total</th>
+              <th>Created</th>
+              <th>Expires</th>
+              <th>Email Sent</th>
+              <th>Cart</th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+
+      <div id="pagination"></div>
+    </div>
+
+    <div id="empty-state" style="display:none;">
+      <div>No quotes found for that search.</div>
+    </div>
+
+    <div id="error-state" style="display:none;"></div>
+
+    <div id="loading-state" style="display:none;">
+      <div class="spinner"></div>
+      <div>Searching...</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const WORKER_ORIGIN = 'https://cartertraileraxles.com';
+  const SUPABASE_LS_KEY = 'sb-jvdcfxmafgjlsrnnvcdy-auth-token';
+  const LEGACY_KEYS = ['tpu_forum_token', 'tpuForumToken', 'forumToken'];
+  const MANUAL_KEY = 'tpu_admin_token';
+
+  let currentPage = 1;
+  let currentTotal = 0;
+  let currentLimit = 20;
+
+  // ---- Auth ----------------------------------------------------------------
+
+  function getToken() {
+    // 1. Manual override stored by this page
+    const manual = localStorage.getItem(MANUAL_KEY);
+    if (manual) return manual;
+
+    // 2. Supabase session (same pattern as forumApi.js getAuth)
+    try {
+      const supabaseKey = Object.keys(localStorage).find(
+        k => k.startsWith('sb-') && k.endsWith('-auth-token')
+      );
+      if (supabaseKey) {
+        const raw = localStorage.getItem(supabaseKey);
+        if (raw) {
+          const session = JSON.parse(raw);
+          if (session?.access_token) return session.access_token;
+        }
+      }
+    } catch {}
+
+    // 3. Legacy forum token keys
+    for (const key of LEGACY_KEYS) {
+      const v = localStorage.getItem(key);
+      if (v) return v;
+    }
+
+    return null;
+  }
+
+  function tokenPreview(token) {
+    if (!token || token.length < 20) return 'unknown';
+    return token.slice(0, 12) + '…' + token.slice(-6);
+  }
+
+  function saveToken() {
+    const val = document.getElementById('token-input').value.trim();
+    if (!val || val.length < 20) {
+      showTokenError('Token looks invalid — it should be a long JWT string.');
+      return;
+    }
+    localStorage.setItem(MANUAL_KEY, val);
+    init();
+  }
+
+  function clearToken() {
+    localStorage.removeItem(MANUAL_KEY);
+    init();
+  }
+
+  function showTokenError(msg) {
+    const el = document.getElementById('token-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  // ---- Init ----------------------------------------------------------------
+
+  function init() {
+    const token = getToken();
+    if (!token) {
+      document.getElementById('auth-gate').style.display = 'block';
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('token-error').style.display = 'none';
+    } else {
+      document.getElementById('auth-gate').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('token-label').textContent = tokenPreview(token);
+    }
+  }
+
+  // ---- Search --------------------------------------------------------------
+
+  function getFieldPlaceholder(field) {
+    if (field === 'email') return 'e.g. customer@example.com';
+    if (field === 'quote_number') return 'e.g. TPU-2024-0001';
+    if (field === 'phone') return 'e.g. 5551234';
+    return '';
+  }
+
+  document.getElementById('field-select').addEventListener('change', function () {
+    document.getElementById('search-input').placeholder = getFieldPlaceholder(this.value);
+  });
+
+  document.getElementById('search-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') doSearch(1);
+  });
+
+  async function doSearch(page) {
+    const field = document.getElementById('field-select').value;
+    const q = document.getElementById('search-input').value.trim();
+
+    if (!q) {
+      document.getElementById('search-input').focus();
+      return;
+    }
+
+    if (q.length < 2) {
+      showError('Please enter at least 2 characters.');
+      return;
+    }
+
+    const token = getToken();
+    if (!token) { init(); return; }
+
+    currentPage = page;
+
+    setLoading(true);
+    clearStates();
+
+    try {
+      const params = new URLSearchParams({
+        field,
+        q,
+        page: String(page),
+        limit: String(currentLimit),
+      });
+
+      const res = await fetch(`${WORKER_ORIGIN}/admin/quotes?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        setLoading(false);
+        const msg = res.status === 403
+          ? 'Access denied — your account does not have admin privileges.'
+          : 'Your session has expired. Please sign in again.';
+        if (res.status === 401) { localStorage.removeItem(MANUAL_KEY); init(); return; }
+        showError(msg);
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setLoading(false);
+        showError(`Error ${res.status}: ${data.error || 'Unknown error'}`);
+        return;
+      }
+
+      const data = await res.json();
+      setLoading(false);
+      renderResults(data);
+    } catch (err) {
+      setLoading(false);
+      showError('Network error — could not reach the server.');
+      console.error(err);
+    }
+  }
+
+  // ---- Render --------------------------------------------------------------
+
+  function renderResults({ data, total, page, limit }) {
+    currentTotal = total;
+    currentLimit = limit;
+
+    if (!data || data.length === 0) {
+      document.getElementById('empty-state').style.display = 'block';
+      return;
+    }
+
+    const now = new Date();
+    const tbody = document.getElementById('results-body');
+    tbody.innerHTML = '';
+
+    for (const row of data) {
+      const expiresAt = new Date(row.expires_at);
+      const isExpired = expiresAt < now;
+
+      const tr = document.createElement('tr');
+      if (isExpired) tr.classList.add('row-expired');
+
+      tr.innerHTML = `
+        <td><span class="quote-number">${esc(row.quote_number)}</span></td>
+        <td>${esc(row.customer_name || '—')}</td>
+        <td class="cell-muted">${esc(row.customer_email || '—')}</td>
+        <td class="cell-muted">${esc(row.customer_phone || '—')}</td>
+        <td>${formatMoney(row.grand_total)}</td>
+        <td class="cell-muted">${formatDate(row.created_at)}</td>
+        <td>${renderExpiry(row.expires_at, isExpired)}</td>
+        <td>${renderSentAt(row.sent_at)}</td>
+        <td>
+          <a class="link" href="https://cartertraileraxles.com/quote/cart/${esc(row.quote_number)}" target="_blank" rel="noopener">
+            Load Cart ↗
+          </a>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    }
+
+    document.getElementById('results-container').style.display = 'block';
+
+    // Stats
+    const from = (page - 1) * limit + 1;
+    const to = Math.min(from + data.length - 1, total);
+    document.getElementById('stats-text').innerHTML =
+      `Showing <strong>${from}–${to}</strong> of <strong>${total}</strong> quote${total !== 1 ? 's' : ''}`;
+
+    // Pagination
+    renderPagination(page, limit, total);
+  }
+
+  function renderExpiry(expiresAt, isExpired) {
+    const formatted = formatDate(expiresAt);
+    if (isExpired) {
+      return `<span class="badge badge-expired">Expired</span> <span class="cell-muted" style="font-size:11px;">${formatted}</span>`;
+    }
+    return `<span class="badge badge-active">Active</span> <span class="cell-muted" style="font-size:11px;">${formatted}</span>`;
+  }
+
+  function renderSentAt(sentAt) {
+    if (!sentAt) return '<span class="cell-amber">Not sent</span>';
+    return `<span class="cell-green">${formatDateTime(sentAt)}</span>`;
+  }
+
+  function renderPagination(page, limit, total) {
+    const totalPages = Math.ceil(total / limit);
+    const el = document.getElementById('pagination');
+
+    if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+    el.innerHTML = `
+      <button class="btn btn-ghost" onclick="doSearch(${page - 1})" ${page <= 1 ? 'disabled' : ''}>← Prev</button>
+      <span class="page-info">Page <strong>${page}</strong> of <strong>${totalPages}</strong></span>
+      <button class="btn btn-ghost" onclick="doSearch(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>Next →</button>
+    `;
+  }
+
+  // ---- State helpers -------------------------------------------------------
+
+  function setLoading(on) {
+    document.getElementById('loading-state').style.display = on ? 'block' : 'none';
+    document.getElementById('search-btn').disabled = on;
+  }
+
+  function clearStates() {
+    document.getElementById('results-container').style.display = 'none';
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('error-state').style.display = 'none';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-state');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  // ---- Formatters ----------------------------------------------------------
+
+  function esc(s) {
+    if (!s) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function formatMoney(v) {
+    if (v == null) return '—';
+    return '$' + Number(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    try {
+      return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch { return iso; }
+  }
+
+  function formatDateTime(iso) {
+    if (!iso) return '—';
+    try {
+      return new Date(iso).toLocaleString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+        hour: 'numeric', minute: '2-digit',
+      });
+    } catch { return iso; }
+  }
+
+  // ---- Boot ----------------------------------------------------------------
+  init();
+</script>
+</body>
+</html>

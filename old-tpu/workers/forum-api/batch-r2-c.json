@@ -1,0 +1,387 @@
+[
+  {
+    "thread_id": "76588f2d-268c-4780-8ce5-27ed5466899f",
+    "new_comments": [
+      {
+        "username": "AxleShopAndy",
+        "body": "Can confirm — both 7K and 8K axles use the 8-on-6.5\" bolt pattern. Your existing wheels bolt right on. The real thing to check is the tire load range. Most 7K setups come with Load Range D tires which are rated around 2,500 lb each. If you're actually loading to 8K capacity you'll want Load Range E or better, otherwise the tires become your weak link.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DualAxleDan",
+        "body": "Did this exact swap on my 14K tandem dump trailer last spring. Pulled the old 7K Dexter axles and dropped in 8K replacements. Kept my 16\" wheels and ST235/80R16 Load Range E tires — everything lined up perfectly. Only hiccup was I had to get longer U-bolts because the 8K axle tube is a slightly larger diameter (3\" round vs 2-3/8\" on the 7K). Don't forget that part.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SpringShackleSteve",
+        "body": "Quick note that most people overlook: if you're upgrading from 7K to 8K, double check your leaf springs and hangers too. The springs need to match the axle capacity or you'll sag under load. 8K axles typically pair with heavier double-eye springs rated for 4,000 lb each on a tandem setup. Your old 7K springs probably aren't rated high enough.",
+        "role": "correction"
+      },
+      {
+        "username": "LugNutLarry",
+        "body": "Just to add to what's been said — the hub bore on 7K and 8K wheels is the same, so the wheel centers correctly on the hub either way. No adapter plates, no new lug nuts, nothing. Biggest mistake I see people make is upgrading the axle but keeping the old Load Range D tires. At highway speed with a full load that's asking for a blowout.",
+        "role": "confirmation"
+      },
+      {
+        "username": "TorqueWrenchTom",
+        "body": "Something nobody mentioned yet: when you go to 8K axles make sure your brake controller can handle the extra braking force if you're running electric brakes. The 8K brake magnets are larger and pull more amperage. Shouldn't be an issue with a decent proportional controller, but if you're running an old time-delay unit you might need to bump the gain up.",
+        "role": "alternative"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "I had a buddy who upgraded his axles but forgot that his tires were only rated for 2,540 lb each. Loaded the trailer up, made it about 80 miles on the highway before a tire let go. The sidewall just gave out. Lesson learned — your setup is only as strong as the weakest part, and tires are usually it.",
+        "role": "anecdote"
+      },
+      {
+        "username": "GVWRGary",
+        "body": "One more thing to consider: if your trailer was originally rated for 14K GVWR with two 7K axles, simply bolting on 8K axles doesn't automatically make it a 16K trailer. The frame, coupler, and safety chains also have ratings. Check with the manufacturer before loading above the original GVWR.",
+        "role": "correction"
+      },
+      {
+        "username": "HighwayHaulerHal",
+        "body": "Worth considering 17.5\" wheels if you're upgrading anyway. The larger diameter tire runs cooler at highway speed and typically has a higher load rating. I run 215/75R17.5 Load Range H on my 8K tandem equipment trailer and they handle the weight beautifully, even in Texas summer heat.",
+        "role": "alternative"
+      }
+    ]
+  },
+  {
+    "thread_id": "83751c48-ac74-4bd7-87df-f89cd1096714",
+    "new_comments": [
+      {
+        "username": "DeckOverDave",
+        "body": "Depends on what you're hauling. If it's just regular sedans and small SUVs, a pair of 5.2K axles on a tandem gives you 10,400 lb GVWR which is plenty. If you're looking to haul full-size trucks or bigger SUVs, go 7K tandem (14K GVWR). I built my car hauler with 5.2K Dexter axles and I've hauled everything from Civics to F-150s without any issues.",
+        "role": "direct_help"
+      },
+      {
+        "username": "EquipHaulerEli",
+        "body": "Built mine two years ago. 82\" wide C-channel frame, 20 feet deck length with a 2-foot dovetail and slide-in ramps. Running tandem 7K axles with electric brakes on both axles. Here's my advice: go wider than you think on the ramp width. I did 16\" wide ramps and wish I'd gone 18\". Also go with at least 7K if you ever plan to haul anything besides compact cars. The weight adds up quick — the trailer itself will be 2,500-3,000 lb empty.",
+        "role": "anecdote"
+      },
+      {
+        "username": "WeldShopWes",
+        "body": "On the frame width — 82\" between the fenders is pretty standard for a car hauler. That gives you roughly 84\" between the tires which is enough to fit any passenger car. For the crossmembers, 3\" channel on 16\" centers works well. Some guys go 12\" centers on the ramp area since that's where you get the most stress from loading.",
+        "role": "direct_help"
+      },
+      {
+        "username": "BrakeJobBrad",
+        "body": "Make sure you put electric brakes on both axles, not just one. I've seen people try to save $150 by only braking the rear axle on a car hauler and it's not enough stopping power when you've got a 4,000 lb vehicle sitting on the deck. Both axles with brakes, and a good proportional brake controller in the tow vehicle.",
+        "role": "correction"
+      },
+      {
+        "username": "RampGateRick",
+        "body": "What kind of ramps are you planning? Fixed dovetail, slide-in ramps, tilt deck, or hydraulic? That decision affects your axle placement and tongue weight calculation. Tilt decks need the axles positioned further back than a standard dovetail. Just something to think about early in the build.",
+        "role": "followup_question"
+      },
+      {
+        "username": "TandemTim",
+        "body": "For axle spacing on a tandem car hauler, 42\" center-to-center is typical. Make sure you set them so you get roughly 10-12% tongue weight. On a 20-foot deck trailer the axles usually end up centered around 13-14 feet back from the coupler. If your tongue weight is too low the trailer will sway; too high and you overload the hitch.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SaddleMountSam",
+        "body": "I went with 3.5K axles on my first car hauler because I thought I'd only be hauling small stuff. Within a year I was trying to load a crew cab Silverado and was way over capacity. Sold that trailer at a loss and built a 7K tandem. Moral of the story: go bigger than you think you need. The price difference between 3.5K and 5.2K axles is minimal and you'll appreciate the headroom.",
+        "role": "anecdote"
+      },
+      {
+        "username": "DropAxleDennis",
+        "body": "Consider drop axles if deck height matters to you. A standard straight 5.2K axle with 15\" tires puts your deck around 22-24\" high. Drop axles bring it down to about 18-20\", which makes loading easier and gives the vehicle a lower center of gravity during transport. Tradeoff is they cost a bit more and you lose some ground clearance.",
+        "role": "alternative"
+      },
+      {
+        "username": "FenderFlareFreda",
+        "body": "Don't forget about the fenders! With 95\" hub face axles on an 82\" wide frame, your tires will sit outside the frame. You'll need fenders or you'll be spraying rocks and mud everywhere. I like the diamond plate bolt-on fenders — they look good and protect the car you're hauling from road debris.",
+        "role": "direct_help"
+      },
+      {
+        "username": "CouplerKing",
+        "body": "One more thing — match your coupler to your GVWR. If you're running tandem 7K axles (14K GVWR), you need a 2-5/16\" ball coupler rated for at least 14K. A 2\" ball coupler is only good for about 3,500 lb. I know it sounds obvious but I've seen it done wrong more times than I'd like to admit.",
+        "role": "correction"
+      }
+    ]
+  },
+  {
+    "thread_id": "bc3db44b-ca6b-4e18-91e1-10156f32189b",
+    "new_comments": [
+      {
+        "username": "BrakeJobBrad",
+        "body": "Another quick check besides the wire direction: look at the brake adjuster star wheel through the slot on the backing plate. On most Dexter and Lippert brake assemblies, the adjuster should be at the bottom of the backing plate and the star wheel should face toward the front of the trailer. If the star wheel is at the top or facing rearward, the axle is flipped.",
+        "role": "direct_help"
+      },
+      {
+        "username": "PackingNutPete",
+        "body": "I installed my first brake axle backwards and didn't realize it until the brakes barely worked. The trailer would pull to one side under braking and the drums got super hot. Pulled it out, flipped it 180 degrees so the wires pointed to the rear, and everything worked perfectly after that. Felt dumb but it's an easy mistake.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TorqueWrenchTom",
+        "body": "If you've already got it bolted down and you're not sure, here's the simplest test: jack up one side so the wheel is off the ground, connect the brake controller, and have someone apply the brakes. Try to spin the wheel by hand. It should lock up or drag heavily. Then check the other side the same way. If one side locks and the other barely drags, something's wrong — either the axle is backward or the magnets need adjusting.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SafetyChainSue",
+        "body": "What actually happens if it's installed backwards? Do the brakes not work at all, or do they just work poorly? Asking because I'm about to install mine and I want to know what to look for.",
+        "role": "followup_question"
+      },
+      {
+        "username": "AxleShopAndy",
+        "body": "To answer Sue's question — they'll still work, just not well. The brake shoes are designed to be self-energizing in the forward direction. When the axle is backward, the shoes fight against the drum rotation instead of grabbing with it. You get maybe 40-50% braking effectiveness, uneven wear on the shoes, and excessive heat. Not a safety situation you want on the highway.",
+        "role": "direct_help"
+      },
+      {
+        "username": "HubCapHank",
+        "body": "I always mark mine with a paint pen before installation. Quick arrow on the axle tube pointing toward the rear of the trailer. Takes two seconds and saves a lot of headaches down the road, especially if you ever have to pull the axle for service and reinstall it.",
+        "role": "confirmation"
+      },
+      {
+        "username": "LandscaperLuke",
+        "body": "One thing that tripped me up: on some newer Dexter axles the wire exits are on the top of the backing plate instead of the bottom. The wires still need to face rearward, but the exit position looked different from the YouTube videos I was watching. Don't go by wire position on the plate — go by wire direction relative to the trailer. Rear = correct.",
+        "role": "correction"
+      }
+    ]
+  },
+  {
+    "thread_id": "66170903-c32a-46b2-96d0-afe1ba1308bc",
+    "new_comments": [
+      {
+        "username": "WeldShopWes",
+        "body": "Basically the spring pads are the little flat brackets that get welded onto the axle tube — they're what the leaf springs sit on. \"Loose\" means they ship unattached so you position them yourself. You measure your trailer's spring hanger spacing, mark the axle tube, and weld the pads in place. It's a pretty straightforward job if you can stick weld or MIG weld.",
+        "role": "direct_help"
+      },
+      {
+        "username": "IBeamIrv",
+        "body": "Ordered pads loose on a 6K axle for a custom flatbed I was building. My spring hanger spacing was 31\" which isn't a standard width anybody stocks. Having the pads loose let me set them exactly where I needed them. Just measure from center of pad to center of pad, double check it matches your spring hanger centers, and weld them on. Used a framing square to keep them aligned straight.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TandemTim",
+        "body": "How thick of a weld do you need on the spring pads? I've got a 110V flux core welder. Is that enough or do I need something bigger?",
+        "role": "followup_question"
+      },
+      {
+        "username": "AxleShopAndy",
+        "body": "Tim — a 110V flux core will work for 3.5K and 5.2K axles. For 7K and 8K axles I'd recommend at least a 220V MIG or stick welder. The pads on heavy axles are thicker steel and you want full penetration on the weld. A good 3/16\" fillet weld all the way around the pad is what you're aiming for. If you're not confident in your welds, pay the extra to have them pre-welded — it's worth the peace of mind.",
+        "role": "direct_help"
+      },
+      {
+        "username": "CrossmemberChris",
+        "body": "Important detail: measure from the CENTER of the axle tube outward to each pad, not from end to end. The spring center dimension is always measured center-to-center. If your trailer has a 33\" spring center, each pad gets welded 16.5\" out from center in both directions. Sounds obvious but I've seen guys measure from one pad to the other and end up off by the width of a pad.",
+        "role": "correction"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "If your trailer width is anything close to standard — 60\", 65\", 72\", 80\" spring center — honestly just order them pre-welded and save yourself the hassle. Pads loose is really for custom builds or oddball widths. The few bucks extra for pre-welded is worth not having to worry about alignment and weld quality.",
+        "role": "alternative"
+      },
+      {
+        "username": "DualAxleDan",
+        "body": "Also make sure you orient the pads correctly on the tube. The pads have a curved side that matches the round axle tube and a flat side where the spring sits. Might seem obvious but if you flip one upside down the spring won't seat flat and you'll get a weird ride. Dry fit everything before you strike an arc.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "24fdad61-4022-4d8c-9818-83bea986705f",
+    "new_comments": [
+      {
+        "username": "SaddleMountSam",
+        "body": "Totally normal. Most trailer axles come with a slight upward bow built in from the factory — that's the camber. On a typical 3.5K to 7K axle it's usually about 1 to 1.5 inches of rise at the center. It looks wrong when it's sitting on the ground with no weight, but once you load the trailer the axle flattens out and the tires sit perfectly perpendicular to the road.",
+        "role": "direct_help"
+      },
+      {
+        "username": "LandscaperLuke",
+        "body": "Ha, I panicked when my first axle showed up and called the supplier thinking they sent me a damaged one. They walked me through it — it's supposed to be like that. Once I bolted everything up and set the trailer on the ground, the tires looked perfectly straight. Put a couple thousand pounds of mulch on it and the axle was dead flat.",
+        "role": "anecdote"
+      },
+      {
+        "username": "HubCapHank",
+        "body": "You mentioned a rim that doesn't look straight — can you clarify? If the tires have a slight negative camber (tops lean inward) with no load, that's the axle camber doing its job. But if one wheel leans significantly more than the other, or if it wobbles when you spin it, that could be a different issue like a bent spindle or improperly seated bearing.",
+        "role": "followup_question"
+      },
+      {
+        "username": "GVWRGary",
+        "body": "One way to check if you have normal camber vs an actually bent axle: measure from the bottom of the axle tube at center to the ground, then measure at each end near the spring pads. They should be roughly equal on both sides. If one side is noticeably higher than the other, you may have a bend that isn't factory camber. Factory camber is always symmetrical.",
+        "role": "direct_help"
+      },
+      {
+        "username": "OverloadOllie",
+        "body": "Important thing to know: if you consistently overload a cambered axle beyond its rating, the camber can reverse over time and the axle develops a permanent downward sag. At that point the tires will toe out and wear on the inside edges really fast. I've seen this on landscaping trailers that guys load way beyond the rated capacity. If the center of the axle droops below the ends, it's time for a new axle.",
+        "role": "correction"
+      },
+      {
+        "username": "TiltDeckTerry",
+        "body": "Not all axles are cambered though. Torsion axles are typically straight since the suspension is built into the arm. And some lighter duty straight tube axles come without camber. If you're comparing a cambered spring axle to a friend's torsion axle and wondering why yours looks bent, that's probably why.",
+        "role": "alternative"
+      },
+      {
+        "username": "BearingBobby",
+        "body": "The camber also helps with tire life as mentioned. Without it, when you load the trailer the axle bows downward and the tires develop a positive camber — tops lean outward. That puts all the wear on the outside edge of the tread. With factory camber built in, loaded weight straightens the axle and the tires wear evenly. I've gotten 30,000+ miles on a set of ST225/75R15s on my cambered 6K axle hauling equipment.",
+        "role": "confirmation"
+      },
+      {
+        "username": "SpringShackleSteve",
+        "body": "To the OP — if you just installed it and haven't loaded it yet, put the trailer on the ground and load it to about 50-75% capacity. Then get down and eyeball the tires from behind. They should look straight up and down or very close to it. If they still lean in or out significantly under load, then you might have a problem. But I'd bet you're fine — this question comes up all the time.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "f779967c-aaf5-4895-93d5-c1c8d38057ce",
+    "new_comments": [
+      {
+        "username": "BearingBobby",
+        "body": "Start with the cheapest and most common fix first: tires. If the trailer has been sitting for more than a few months, the tires can develop flat spots that cause vibration at highway speed. Spin each tire by hand and look at the tread — if it's flat on one section or the tread has a wavy pattern, the tire is toast. Also check the date code on the sidewall. Trailer tires older than 5-6 years should be replaced regardless of tread depth.",
+        "role": "direct_help"
+      },
+      {
+        "username": "HighwayHaulerHal",
+        "body": "Had the exact same problem on my enclosed cargo trailer. Drove me crazy for weeks — vibration kicked in right around 55 and got worse up to about 65. Turned out one of the tires had a separated belt. Looked perfectly fine on the outside, tread was good, no visible damage. But when I took it to a tire shop they could feel the bulge by running their hand along the tread. Replaced both tires on that axle and it was smooth as glass.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TorqueWrenchTom",
+        "body": "Before you start replacing parts, jack up each wheel and check for play. Grab the tire at 12 and 6 o'clock and try to rock it — any clunking or movement means your bearings are loose or worn. Then grab at 3 and 9 o'clock and do the same — that checks for spindle wear. Also spin the wheel and listen. Grinding or rumbling means the bearings need to be repacked or replaced. On Dexter axles the inner bearing is a L68149 and outer is a L44649 on most 3.5K setups.",
+        "role": "direct_help"
+      },
+      {
+        "username": "PackingNutPete",
+        "body": "How long has the trailer been sitting? And is it loaded or empty when you feel the vibration? A lot of times vibration at 55 mph on an empty trailer is just harmonic resonance from the tires and it goes away under load. If it vibrates loaded too, that's a different story.",
+        "role": "followup_question"
+      },
+      {
+        "username": "DualAxleDan",
+        "body": "People forget that trailer tires need to be balanced just like car tires. Most tire shops won't balance trailer tires unless you ask, and most trailer manufacturers ship them unbalanced from the factory. I've fixed 55 mph vibration on three different trailers just by getting the tires balanced. It's a $15/tire fix — try it before you tear into bearings and axles.",
+        "role": "correction"
+      },
+      {
+        "username": "WheelNutWill",
+        "body": "Had a vibration that drove me nuts. Turned out to be loose U-bolts. The axle had shifted slightly in the spring perch and was sitting crooked. Torqued the U-bolts back down to spec — 45 ft-lbs for 7/16\" and 65 ft-lbs for 1/2\" U-bolts on leaf spring axles — and the vibration went away. U-bolts can loosen up after the first few hundred miles, especially on a new trailer. They should be re-torqued after the first trip.",
+        "role": "anecdote"
+      },
+      {
+        "username": "LugNutLarry",
+        "body": "Also check your lug nuts. Loose lugs will cause a wobble that feels exactly like a balance issue. Torque spec for most trailer wheels is 90-120 ft-lbs depending on the lug size. 1/2\"-20 lugs get 90 ft-lbs, 9/16\"-18 lugs get 120 ft-lbs. Re-torque after the first 50 miles on new wheels and then periodically after that.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "If you've got a tandem axle trailer, try swapping the tires from one axle to the other to isolate which one is causing the vibration. If the vibration changes character or goes away, you know it's a tire/wheel issue on that specific axle. Process of elimination saves a lot of guessing.",
+        "role": "alternative"
+      },
+      {
+        "username": "AxleShopAndy",
+        "body": "One thing that's often misdiagnosed: the vibration at a specific speed (like 55 mph) that goes away above and below that speed is almost always a balance or tire issue. A bearing problem usually gets progressively worse with speed and doesn't go away at higher speed. A bent axle causes vibration that increases steadily with speed. Knowing this narrows your troubleshooting.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TiltDeckTerry",
+        "body": "Embarrassing confession: spent two days chasing a vibration on my utility trailer. Replaced bearings, had tires balanced, checked everything. It was the spare tire mounted under the tongue. The bracket had loosened and the spare was bouncing around at highway speed. Check the obvious stuff first.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SafetyChainSue",
+        "body": "Don't overlook load distribution either. If all the weight is at the back of the trailer and the tongue is light, the trailer will sway and vibrate at speed. Rule of thumb is 10-15% of the total loaded weight should be on the tongue. I've seen people load a trailer tail-heavy and blame the axles when it was really just bad weight distribution.",
+        "role": "correction"
+      },
+      {
+        "username": "SpringShackleSteve",
+        "body": "I had the same symptom — vibration starting at 55 mph. Wound up being worn leaf spring bushings. The rubber in the eye bushings was completely gone and the spring bolts were just metal-on-metal in the hangers. New bushing kit was about $25 and fixed it. Worth checking if the trailer has some miles on it.",
+        "role": "anecdote"
+      }
+    ]
+  },
+  {
+    "thread_id": "6c8b249f-96a1-42ab-8818-090435a9f84e",
+    "new_comments": [
+      {
+        "username": "HubCapHank",
+        "body": "Here's my breakdown after running both types:\n\nOil bath pros: continuous lubrication, runs cooler, easy to inspect (sight glass shows oil level and condition), better for high-speed long-distance highway use. Cons: can leak if seals are worn, messier if you have to pull the hub, need to check oil level periodically.\n\nGrease (EZ-lube) pros: simpler setup, less messy day-to-day, easier for most DIY guys to service with a grease gun, widely available bearing grease at any auto parts store. Cons: grease breaks down with heat over time, harder to tell when bearings need service, requires periodic repacking.\n\nFor highway trailers I go oil bath every time. For around-town utility trailers, grease is fine.",
+        "role": "direct_help"
+      },
+      {
+        "username": "HighwayHaulerHal",
+        "body": "I've been running oil bath hubs on my enclosed car hauler for about 60,000 miles. Check the sight glass every trip, top off the oil once a year, and the bearings still look brand new when I pull them for inspection. The oil keeps them cool on long hauls through the desert — I regularly tow Phoenix to LA and back. Wouldn't switch to grease for highway work.",
+        "role": "anecdote"
+      },
+      {
+        "username": "LandscaperLuke",
+        "body": "How often do you actually need to service each type? I use my trailer almost every day but it's all local runs, never more than 30-40 miles. Trying to figure out which one is less maintenance hassle for my situation.",
+        "role": "followup_question"
+      },
+      {
+        "username": "AxleShopAndy",
+        "body": "Luke — for local use like yours, EZ-lube grease hubs are honestly the easier choice. Hit the zerk fitting with a grease gun every 6 months or 6,000 miles and you're good. Oil bath needs the oil level checked more frequently and if a seal starts weeping (which they eventually do) it'll make a mess on your wheels and brakes. Oil bath really shines when you're doing sustained 65+ mph for hours.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DeckOverDave",
+        "body": "One big thing with oil bath: do NOT submerge them in water. If you're running a boat trailer and backing into the lake, the hubs cool down quickly and create a vacuum that sucks water past the seals. Water in the oil destroys bearings fast. For boat trailers, grease hubs with Bearing Buddy caps are the way to go. The positive pressure from the spring-loaded cap keeps water out.",
+        "role": "correction"
+      },
+      {
+        "username": "BearingBobby",
+        "body": "The sight glass on oil bath hubs is a huge advantage people don't talk about enough. You can literally see the oil condition at a glance — if it's milky, you've got water contamination. If it's dark and gritty, the bearings are wearing. With grease hubs you have no idea what's happening inside until you pull the hub apart. I've caught two bad seals early just by checking the sight glass at fuel stops.",
+        "role": "confirmation"
+      },
+      {
+        "username": "PackingNutPete",
+        "body": "Had grease hubs fail on me once during a 900-mile trip. The inner seal let go somewhere around mile 400 and I didn't know until I smelled burning grease at a rest stop. Hub was scorching hot, bearings were trashed. Had to get towed to the nearest shop. Since then I switched everything to oil bath — at least I can see the oil level and catch problems before they strand me.",
+        "role": "anecdote"
+      },
+      {
+        "username": "WheelNutWill",
+        "body": "One thing to be aware of: if you're switching from oil bath to grease on a used axle, make sure you get ALL the old oil out before packing with grease. Oil and grease don't mix well — the oil will thin out the grease and it'll run right out of the bearings. Flush with brake cleaner, let it dry completely, then pack with fresh grease. Same goes the other direction — don't just dump oil into a hub that still has old grease in it.",
+        "role": "correction"
+      },
+      {
+        "username": "TandemTim",
+        "body": "For what it's worth, the original post mentions 10K and 12K axles for switching from oil to grease. On lighter axles (3.5K, 5.2K, 6K) the seal types might be different between oil and grease configurations, so it's not always a straight swap. Check with the axle manufacturer before switching on the smaller stuff. On the heavier axles the seals are typically the same and it's a simple swap.",
+        "role": "direct_help"
+      },
+      {
+        "username": "EquipHaulerEli",
+        "body": "I run a mix on my fleet — oil bath on the highway trailers and EZ-lube grease on the dump trailers that stay local. Both work fine for their intended use. The guys who have problems are usually the ones who never service either type. Whether it's oil or grease, it still needs periodic attention. Bearings don't care what lubricant you use as long as it's fresh and adequate.",
+        "role": "alternative"
+      }
+    ]
+  },
+  {
+    "thread_id": "ca187ade-ee22-4ae4-a473-e30f461f73d6",
+    "new_comments": [
+      {
+        "username": "BrakeJobBrad",
+        "body": "Yep, no polarity is correct — the electric brake magnets work on AC from the brake controller, so it doesn't matter which wire goes where. Just connect the two wires from the axle to the brake feed wire and ground wire from your trailer harness. The white wire from the axle backing plate leads are typically connected to the blue (brake) wire on a standard 7-pin trailer plug.",
+        "role": "confirmation"
+      },
+      {
+        "username": "DualAxleDan",
+        "body": "First time I wired trailer brakes I spent way too long trying to figure out which wire was positive and which was negative. Glad someone told me it doesn't matter. Here's what I did: ran a 12-gauge wire from the 7-pin connector's brake pin (blue wire) down the frame to each axle, then spliced into each brake wire with weatherproof butt connectors. Ground wire goes to the trailer frame or the ground pin on the connector. Took about an hour total for a tandem.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SafetyChainSue",
+        "body": "After you get it all wired up, how do you test that the brakes are actually working before you hit the road? Is there a way to check without a brake controller?",
+        "role": "followup_question"
+      },
+      {
+        "username": "TorqueWrenchTom",
+        "body": "Sue — easiest test is to jack up one wheel at a time, hook up 12V to the brake wire and ground (even a car battery with jumper wires works), and try to spin the wheel by hand. It should lock up or drag heavily. If it spins freely, you've got a wiring issue or the magnets aren't making contact with the drum. Once you hook up the brake controller, you can adjust the gain while watching the brake controller's built-in ammeter. Most 10\" brakes on a 3.5K axle pull about 3 amps each.",
+        "role": "direct_help"
+      },
+      {
+        "username": "OverloadOllie",
+        "body": "Couple things that'll save you headaches: use at least 12-gauge wire for the brake circuit, 10-gauge if you're running a tandem with brakes on all four wheels. The voltage drop over a long wire run can weaken your braking significantly. And make sure every splice is sealed — exposed copper on the underside of a trailer corrodes fast. I use adhesive-lined heat shrink butt connectors on everything. Regular crimp connectors will green up and fail within a year or two.",
+        "role": "direct_help"
+      },
+      {
+        "username": "HubCapHank",
+        "body": "Quick correction: while the brake magnets themselves aren't polarity-sensitive, your brake controller's ground connection absolutely matters. Make sure you have a solid ground from the brake controller in the tow vehicle to the truck frame, and a solid ground from the trailer plug to the trailer frame. A bad ground is the number one cause of weak or intermittent trailer brakes. I sanded the frame paint off and bolted a ring terminal directly to bare metal on both the truck and trailer side.",
+        "role": "correction"
+      },
+      {
+        "username": "WeldShopWes",
+        "body": "Something nobody mentioned yet — put a dab of dielectric grease on every connector and splice before you seal it up. It keeps moisture out and prevents corrosion. Especially important if you're anywhere with salt on the roads or near the coast. Costs about $4 for a tube at any auto parts store and it'll make your wiring last way longer.",
+        "role": "direct_help"
+      }
+    ]
+  }
+]

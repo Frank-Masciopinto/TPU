@@ -1,0 +1,170 @@
+{{#partial "page"}}
+
+<div class="tpu-cf">
+
+  {{!-- Hero --}}
+  <section class="tpu-cf__hero">
+    <h1>Got <span>Questions?</span></h1>
+    <p>Our team typically responds within 1 business day. Fill out the form below and we'll get right back to you.</p>
+  </section>
+
+  {{!-- Quick-contact cards --}}
+  <div class="tpu-cf__cards">
+    <div class="tpu-cf__card">
+      <span class="tpu-cf__card-icon">📞</span>
+      <span class="tpu-cf__card-label">Call Us</span>
+      <span class="tpu-cf__card-value"><a href="tel:+18448988687">844-898-8687</a></span>
+    </div>
+    <div class="tpu-cf__card">
+      <span class="tpu-cf__card-icon">✉</span>
+      <span class="tpu-cf__card-label">Email Us</span>
+      <span class="tpu-cf__card-value"><a href="mailto:carter@trailerpartsunlimited.com">carter@trailerpartsunlimited.com</a></span>
+    </div>
+    <div class="tpu-cf__card">
+      <span class="tpu-cf__card-icon">⏰</span>
+      <span class="tpu-cf__card-label">Business Hours</span>
+      <span class="tpu-cf__card-value">Mon–Fri, 8am–5pm CST</span>
+    </div>
+  </div>
+
+  {{!-- Section heading --}}
+  <h2 class="tpu-cf__section-heading">Send Us a Message</h2>
+
+  {{!-- Contact Form --}}
+  <form data-contact-form class="tpu-cf__form" novalidate>
+
+    <div class="tpu-cf__grid">
+
+      <div class="tpu-cf__field">
+        <label class="tpu-cf__label" for="cf-name">
+          Full Name <span aria-hidden="true">*</span>
+        </label>
+        <input
+          class="tpu-cf__input"
+          id="cf-name"
+          name="name"
+          type="text"
+          required
+          autocomplete="name"
+          placeholder="Jane Smith"
+        >
+      </div>
+
+      <div class="tpu-cf__field">
+        <label class="tpu-cf__label" for="cf-email">
+          Email Address <span aria-hidden="true">*</span>
+        </label>
+        <input
+          class="tpu-cf__input"
+          id="cf-email"
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+          placeholder="jane@example.com"
+        >
+      </div>
+
+      <div class="tpu-cf__field">
+        <label class="tpu-cf__label" for="cf-phone">
+          Phone <small>(optional)</small>
+        </label>
+        <input
+          class="tpu-cf__input"
+          id="cf-phone"
+          name="phone"
+          type="tel"
+          autocomplete="tel"
+          placeholder="(555) 000-0000"
+        >
+      </div>
+
+      <div class="tpu-cf__field">
+        <label class="tpu-cf__label" for="cf-subject">
+          Subject <span aria-hidden="true">*</span>
+        </label>
+        <select
+          class="tpu-cf__input"
+          id="cf-subject"
+          name="subject"
+          required
+        >
+          <option value="">Select a topic...</option>
+          <option value="General Question">General Question</option>
+          <option value="Order Status">Order Status</option>
+          <option value="Part Compatibility">Part Compatibility</option>
+          <option value="Shipping &amp; Returns">Shipping &amp; Returns</option>
+          <option value="Wholesale / Trade">Wholesale / Trade</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="tpu-cf__field">
+        <label class="tpu-cf__label" for="cf-order">
+          Order # <small>(optional)</small>
+        </label>
+        <input
+          class="tpu-cf__input"
+          id="cf-order"
+          name="order"
+          type="text"
+          placeholder="e.g. 100123456"
+        >
+        <p class="tpu-cf__hint" data-subject-hint></p>
+      </div>
+
+    </div>
+
+    <div class="tpu-cf__field">
+      <label class="tpu-cf__label" for="cf-message">
+        Message <span aria-hidden="true">*</span>
+      </label>
+      <textarea
+        class="tpu-cf__textarea"
+        id="cf-message"
+        name="message"
+        rows="6"
+        required
+        maxlength="1000"
+        placeholder="Tell us how we can help..."
+      ></textarea>
+      <span class="tpu-cf__counter" data-char-counter>0 / 1000</span>
+    </div>
+
+    {{!-- Honeypot: must stay empty. Bots fill it; real users never see it. --}}
+    <div aria-hidden="true" style="display:none;position:absolute;left:-9999px;">
+      <label for="cf-website">Website</label>
+      <input type="text" id="cf-website" name="website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <p class="tpu-cf__error" data-contact-error hidden></p>
+
+    <div class="tpu-cf__submit">
+      <button class="button button--primary" type="submit" data-submit-btn>
+        Send Message
+      </button>
+    </div>
+
+  </form>
+
+  {{!-- Success state — hidden until JS shows it --}}
+  <div class="tpu-cf__success" data-contact-success hidden>
+    <div class="tpu-cf__success-icon">✅</div>
+    <h2>Message Received!</h2>
+    <p>We'll reply to <strong data-success-email></strong> within 1 business day.</p>
+    <p>
+      For urgent matters, call us at
+      <a href="tel:+18448988687">844-898-8687</a>
+      or email
+      <a href="mailto:carter@trailerpartsunlimited.com">carter@trailerpartsunlimited.com</a>.
+    </p>
+    <button class="button button--outline" type="button" data-reset-form>
+      Send Another Message
+    </button>
+  </div>
+
+</div>
+
+{{/partial}}
+
+{{> layout/base}}

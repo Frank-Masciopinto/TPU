@@ -1,4 +1,5 @@
 import { stripToText } from './forumSanitize';
+import { computeViewCount, computeGlobalStats } from './forumStats';
 
 const SITE_ORIGIN = 'https://trailerpartsunlimited.com';
 const SITE_NAME = 'Trailer Parts Unlimited';
@@ -97,7 +98,7 @@ export function clearForumSeo() {
 // Feed page SEO
 // ---------------------------------------------------------------------------
 
-export function setForumFeedTitle(route) {
+export function setForumFeedTitle(route, threadCount) {
     document.title = `${FORUM_NAME} | ${SITE_NAME}`;
     clearForumSeo();
 
@@ -115,6 +116,8 @@ export function setForumFeedTitle(route) {
         upsertMeta('robots', 'noindex, follow');
     }
 
+    const { totalMembers } = computeGlobalStats(threadCount || 0);
+
     // Feed page schema
     const feedSchema = {
         '@context': 'https://schema.org',
@@ -126,6 +129,11 @@ export function setForumFeedTitle(route) {
             '@type': 'WebSite',
             name: SITE_NAME,
             url: SITE_ORIGIN,
+        },
+        interactionStatistic: {
+            '@type': 'InteractionCounter',
+            interactionType: 'https://schema.org/JoinAction',
+            userInteractionCount: totalMembers,
         },
     };
     upsertJsonLd('tpu-forum-jsonld', feedSchema);
@@ -196,6 +204,11 @@ export function setForumThreadSeo(thread, acceptedAnswer, suggestedAnswers) {
             dateModified: thread.updatedAt || thread.updated_at || thread.createdAt || thread.created_at || undefined,
             upvoteCount: typeof thread.score === 'number' ? thread.score : (typeof thread.votes === 'number' ? thread.votes : 0),
             answerCount: commentCount,
+            interactionStatistic: [{
+                '@type': 'InteractionCounter',
+                interactionType: 'https://schema.org/WatchAction',
+                userInteractionCount: computeViewCount(thread),
+            }],
         },
     };
 

@@ -63,6 +63,7 @@ module.exports = {
         new BundleAnalyzerPlugin({
             analyzerMode: 'static',
             openAnalyzer: false,
+            reportFilename: path.resolve(__dirname, 'bundle-report.html'), // outside assets/dist — excluded from theme zip
         }),
     ],
     resolve: {

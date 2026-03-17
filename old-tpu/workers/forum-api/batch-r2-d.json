@@ -1,0 +1,397 @@
+[
+  {
+    "thread_id": "45f6cb19-f7f4-4508-b53b-3a7f5ed86332",
+    "new_comments": [
+      {
+        "username": "WeldRodWayne",
+        "body": "Done this on two axles myself. The trick is cutting the old pads off clean with a grinder, not a torch. Torch warps the tube if you linger too long. Then I wire-wheel the area, tack the new position, measure diagonally corner to corner on the frame to make sure you're square, and then finish the weld. Used 6013 rods at about 90 amps on a 2-3/8\" round tube and it came out solid.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SpringSeatSally",
+        "body": "Just a heads up — if you're moving them more than a couple inches from the original location, double check that your new spring center still falls within the manufacturer's recommended range relative to the hub face. There's a minimum distance from the hub (usually around 11\") before you start de-rating the axle capacity. I've seen guys move pads too close to the hubs and not realize they've turned a 3500lb axle into something closer to a 2500lb rated setup.",
+        "role": "correction"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "I moved spring pads on a 6000lb Dexter axle last year when I was widening my trailer frame by 4 inches. Bought the pads loose from TPU and welded them at 62\" spring center instead of the factory 58\". Worked fine, just make sure you measure from the center of each pad to the hub face on both sides so it's symmetrical. If one side is off even half an inch your trailer will pull to one side going down the road.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TackWeldTony",
+        "body": "What kind of welder do you have? If you're running a flux core or MIG that changes the approach a bit. Stick is honestly the easiest for this job since you're outside and wind won't mess with your shielding gas. Either way just make sure you get full penetration around the pad — it's a load-bearing weld.",
+        "role": "followup_question"
+      },
+      {
+        "username": "StraightLineStanley",
+        "body": "One thing nobody ever mentions: once you cut the old pads off, roll the bare axle on a flat surface before welding the new ones on. I've had axles that looked straight but had a slight bend from years of overloading. Better to find that out before you spend time repositioning pads on a bent tube. If it wobbles more than about 1/8\" you might be better off starting with a fresh axle.",
+        "role": "alternative"
+      },
+      {
+        "username": "LugNutLeo",
+        "body": "Had mine done at a local welding shop for $75 per axle since I don't have a welder. Took the guy about 30 minutes each. Brought my own spring pads and just had him tack, measure, tack, measure again, then full weld. If you're not confident in your welding this is the kind of joint where I wouldn't wing it — these pads hold your trailer's entire suspension load.",
+        "role": "direct_help"
+      },
+      {
+        "username": "GrinderGus",
+        "body": "Also worth noting if you're buying the loose spring pads, they come in different widths. Standard slipper spring pads are typically 1-3/4\" or 2\" wide to match your leaf spring width. Make sure you order the right size or the spring will sit cockeyed in the pad and wear unevenly.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "6f9e9b4b-e131-46d5-8f9f-d578ab2b1f4f",
+    "new_comments": [
+      {
+        "username": "ClearanceCraig",
+        "body": "The biggest practical difference is ride height and ground clearance. Under-slung drops your trailer deck about 3-4 inches lower than over-slung on the same axle. That's why you see it a lot on car haulers and equipment trailers where you want the deck as low as possible for loading. The tradeoff is you lose ground clearance under the axle, which can be a problem on rough terrain or steep driveways.",
+        "role": "direct_help"
+      },
+      {
+        "username": "BoatTrailerBob",
+        "body": "Most boat trailers run under-slung because you want the hull sitting low on the bunks for better stability during towing. My 21-foot bowrider is on under-slung 3500lb Dexter axles and the keel sits maybe 18 inches off the ground which makes for a real steady ride even at highway speed. Wouldn't want it any higher.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SpringSeatSally",
+        "body": "One thing to watch out for with under-slung: your U-bolts and spring mounting hardware are different. Under-slung spring seats are shaped so the spring hangs below the axle tube, and the U-bolts wrap from underneath. If you're converting from over to under-slung you need the correct spring seats, longer U-bolts, and new tie plates. Don't try to reuse the over-slung hardware.",
+        "role": "correction"
+      },
+      {
+        "username": "DeckHeightDave",
+        "body": "Quick visual way to remember it: over-slung = springs ride on top of the axle like a saddle. Under-slung = springs hang below the axle like a hammock. Over-slung is probably 80-90% of utility and cargo trailers you'll see on the road.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "I switched my flatbed from over-slung to under-slung to get the deck lower for loading my mini excavator. Dropped it about 3.5 inches which made a huge difference on the ramp angle. But I had to add new fenders because the tires sat higher relative to the frame. Just something to think about if you're considering a conversion.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TorsionBarTed",
+        "body": "Also worth mentioning that torsion axles are a third option that avoids the over/under question entirely. They use internal rubber cords inside the axle tube instead of leaf springs. You lose the adjustability of spring suspension but gain independent wheel movement and no spring maintenance. Common on smaller enclosed trailers and boat trailers under 5000 lbs.",
+        "role": "alternative"
+      },
+      {
+        "username": "AxleAlignAl",
+        "body": "Don't forget that going under-slung also changes your tongue weight distribution slightly since you're lowering the load relative to the axle centerline. On a tandem it's usually not a big deal but on a single axle trailer with heavy loads it can make the trailer more sensitive to weight balance. Just keep that in the back of your mind.",
+        "role": "direct_help"
+      },
+      {
+        "username": "WeldRodWayne",
+        "body": "Something I learned the hard way — if you're ordering a replacement axle and you currently have under-slung, make sure you specify that when ordering. The spring seats are welded in a different orientation. I ordered a \"standard\" axle once not thinking about it and the spring pads were set up for over-slung. Had to cut them off and re-weld. Easy enough fix but annoying when you're trying to get a trailer back on the road.",
+        "role": "anecdote"
+      }
+    ]
+  },
+  {
+    "thread_id": "9e7f74dc-3e91-49b2-9016-f0560d6d59c8",
+    "new_comments": [
+      {
+        "username": "LoadRatingLarry",
+        "body": "To put some numbers on why this matters: a 3500lb axle with a 95\" hub face is engineered so the bending moment at the spring seat is within the tube's yield strength. If you move the spring pads inward to 74\" spring center, you're increasing the unsupported cantilever length from the pad to the hub by roughly 10 inches on each side. That extra leverage multiplies the stress on the axle tube significantly. You might not see a problem right away but under a full load, especially hitting a pothole, you could fatigue-crack the tube near the spring seat.",
+        "role": "direct_help"
+      },
+      {
+        "username": "StructuralSteve",
+        "body": "This is actually the number one thing I warn people about when they're building custom trailers. Everyone wants to adjust spring centers to fit their frame width, but you have to start with the right hub face dimension for your frame. The 11\" to 18\" rule from the hub that the previous answer mentioned is there because the engineers tested where the tube can handle the bending loads. Go outside that window and you're basically voiding the axle's rating.",
+        "role": "confirmation"
+      },
+      {
+        "username": "FlatbedFrank",
+        "body": "Had a buddy who did exactly this on a 7000lb axle — moved the pads inboard about 8 inches past what they should've been. Looked fine for about six months then he noticed his tires wearing unevenly. Turned out the axle tube had a slight permanent bend right at the spring pad from the extra stress. Ended up replacing the whole axle anyway, which cost way more than just ordering the right hub face length to begin with.",
+        "role": "anecdote"
+      },
+      {
+        "username": "GrinderGus",
+        "body": "So just to make sure I understand the math here — on a 95\" hub face axle, the hub-to-hub distance is 95 inches. If you put spring pads at 74\" spring center, each pad is about 10.5 inches from the hub. That's right at the lower limit of that 11\" minimum. So technically you're borderline, which probably means under real-world loading conditions you'd be over the limit. Better to go with the 89\" hub face where 74\" spring center puts you at 7.5 inches of cantilever... wait, that's less than 11\". Am I thinking about this wrong?",
+        "role": "followup_question"
+      },
+      {
+        "username": "EngineerEd",
+        "body": "Gus — spring center is the distance between the two spring pads, not the distance from pad to hub. On a 95\" hub face with 74\" spring center, each pad is (95 - 74) / 2 = 10.5\" from the hub face. That's just barely under the 11\" minimum. On an 89\" hub face at 74\" spring center it would be (89 - 74) / 2 = 7.5\" from the hub face to the pad, which is actually worse, not better. The correct move would be an 89\" hub face at roughly 60-65\" spring center to stay within the 11-18\" range. Or just buy the right axle for whatever spring center your frame needs.",
+        "role": "correction"
+      },
+      {
+        "username": "WeldRodWayne",
+        "body": "The real question is why do you need 74\" spring centers? Is that what your trailer frame is set up for? If so, you want roughly a 96-110\" hub face axle depending on your tire/wheel combo and fender clearance. That keeps you in the safe zone. What's your frame width and what tires are you running?",
+        "role": "followup_question"
+      },
+      {
+        "username": "SafetyFirstSam",
+        "body": "Just to add one more point — de-rating isn't just about structural failure. Your insurance and liability exposure changes too. If that axle fails and it turns out the spring pads were placed outside the manufacturer's spec, you could have trouble with any claim. Probably an unlikely scenario but when you're talking about a $150-200 axle, just getting the right one seems like cheap insurance.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TackWeldTony",
+        "body": "I always tell people to call the axle supplier with their frame width, desired tire size, and load rating before ordering. They can calculate the correct hub face measurement for you. It takes five minutes and saves you from exactly this kind of headache.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "69507b60-fed0-43f0-9e05-7d0a0e1bdd22",
+    "new_comments": [
+      {
+        "username": "BearingBill",
+        "body": "Running the Carter replacement on my 8K cattle trailer for about two years now. Fit was perfect — same bolt pattern, same bearing sizes (inner 25580 / outer 14125A), same brake drum diameter. The oil bath cap is actually a nice upgrade over the old Dexter grease cap in my opinion. I can see the oil level through the cap and it runs cooler on long hauls.",
+        "role": "anecdote"
+      },
+      {
+        "username": "CrossRefCarla",
+        "body": "For anyone searching, the Dexter 8-285 cross references to a few different part numbers depending on the year. The Carter equivalent works for all of them as long as you verify it's the 8K version with 12-1/4\" x 3-3/8\" brakes. There's also an 8-285 in a 7K configuration with smaller brakes — make sure you're not mixing those up. Easiest way to confirm is measure your brake drum diameter.",
+        "role": "direct_help"
+      },
+      {
+        "username": "OilBathOllie",
+        "body": "One thing I'll mention about the oil vs grease question — if you switch to the oil bath cap on the Carter hub you'll want to use a lightweight gear oil, usually 75W-90 or whatever the cap manufacturer recommends. Fill to the line on the cap, not to the brim. And check it every few thousand miles because they can seep a little around the seal until everything seats in. After the first 500 miles I topped mine off and they've been rock solid since.",
+        "role": "direct_help"
+      },
+      {
+        "username": "LugNutLeo",
+        "body": "Just curious — are the studs the exact same length on the Carter as the Dexter? I had an issue once with aftermarket hub drums where the studs were about 1/4\" shorter and my lug nuts weren't getting full thread engagement. Probably fine but I want to know before I order.",
+        "role": "followup_question"
+      },
+      {
+        "username": "HubSwapHank",
+        "body": "I've replaced three Dexter 8-285 hubs with Carter units across two different trailers. Stud length was identical on all of them — 5/8\"-18 x 2\" studs. Full thread engagement with standard 5/8\" cone-seat lug nuts. No issues. The castings look just as good as the Dexter originals, honestly I think they might come from the same foundry.",
+        "role": "confirmation"
+      },
+      {
+        "username": "SealSwapSteve",
+        "body": "When you swap the hub drum, do yourself a favor and replace the inner grease seal and bearings at the same time even if they look okay. A new set of Timken or National bearings plus seals is like $25-30 per hub and you already have everything apart. No sense putting a brand new hub on old bearings.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TorqueSpecTom",
+        "body": "Don't forget to torque your lug nuts properly after the swap. For 5/8\" studs on an 8K hub drum the spec is typically 120-140 ft-lbs. And re-torque after the first 25-50 miles. I use a torque wrench every time, not an impact gun for the final tightening. Seen too many warped drums from overtightened lugs.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "1071c081-fea4-40bd-af2c-5f37a0c0d3d2",
+    "new_comments": [
+      {
+        "username": "MeasureTwiceMike",
+        "body": "The 3500lb / 73\" hub face guess is probably right for most 5x8 trailers but please actually measure before ordering. I've seen 5x8s with anywhere from a 2000lb idler axle up to a 3500lb braked axle depending on what the builder spec'd. Measure spring center to spring center (center of one spring pad to center of the other) and hub face to hub face (inside of one hub flange to inside of the other). Those two numbers are what you need to order the correct axle.",
+        "role": "direct_help"
+      },
+      {
+        "username": "IdlerAxleIrene",
+        "body": "A lot of the smaller 5x8 utility trailers come with a 2000lb idler axle, not a 3500. If you're mostly hauling lawn clippings, mulch, or light loads a 2000lb is plenty and they're cheaper. But if you're loading it up with gravel, concrete blocks, or anything heavy, the 3500 is the way to go. What are you planning to haul?",
+        "role": "followup_question"
+      },
+      {
+        "username": "BoltPatternBruce",
+        "body": "Also make sure you know your bolt pattern before ordering. Most 5x8 trailers with 3500lb axles run a 5 on 4.5\" bolt pattern, but some of the lighter 2000lb setups use a 4 on 4\" pattern. Count the number of lug studs on your hub and measure between them. If it's 5 lugs on 4.5\" centers, that confirms the 3500lb class axle.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DropAxleDennis",
+        "body": "Something to consider — do you want a straight axle or a drop axle? A lot of 5x8 utility trailers use a drop axle to get the deck height lower for easier loading. The drop is typically 4 inches. If your current axle has a bend in it near the spring pads (looks like a shallow Z shape), that's a drop axle and you'll want to match that when you order the replacement.",
+        "role": "alternative"
+      },
+      {
+        "username": "SpringSeatSally",
+        "body": "I'd add that on a 5x8, your spring length matters too. Most 3500lb single-axle setups use 25-1/4\" double-eye springs or slipper springs. If you're replacing just the axle and reusing your existing springs, make sure the new axle's spring pads match your spring width — usually 1-3/4\" wide for that size trailer.",
+        "role": "direct_help"
+      },
+      {
+        "username": "RadialRiderRuss",
+        "body": "When I replaced the axle on my 5x8, I went ahead and upgraded from a 2000lb idler to a 3500lb with electric brakes. Best decision I ever made. The trailer stops so much better now, especially loaded. Cost me about $180 for the axle and another $200 for brake assemblies and a controller. If your trailer doesn't have brakes and you ever tow on hills or in traffic, seriously consider the upgrade while you have it apart.",
+        "role": "anecdote"
+      }
+    ]
+  },
+  {
+    "thread_id": "b2f2282d-f643-46ac-b46d-c07ad4dacba6",
+    "new_comments": [
+      {
+        "username": "VINLookupVictor",
+        "body": "Yeah unfortunately trailers aren't like cars where you can punch a VIN into a database and get every spec. Trailer manufacturers don't have a standardized VIN decoding system that includes axle specs. The VIN will tell you the manufacturer, year, and maybe the GVWR, but nothing about hub face, spring center, bolt pattern, or axle diameter. You really do have to get under there with a tape measure.",
+        "role": "direct_help"
+      },
+      {
+        "username": "MeasureTwiceMike",
+        "body": "Here's exactly what to measure and how:\n\n1. Spring center to spring center — measure from the center of one spring pad to the center of the other, along the axle tube.\n2. Hub face to hub face — measure from the inside face of one hub mounting flange to the other.\n3. Axle tube diameter — use calipers or wrap a string around the tube and divide by 3.14. Common sizes are 2\" round, 2-3/8\" round, or 3\" round.\n4. Bolt pattern — count the lugs and measure the bolt circle diameter.\n\nWith those four numbers any axle supplier can get you the right replacement.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TitleSearchTina",
+        "body": "The one thing a VIN can sometimes help with is figuring out your trailer's GVWR if the sticker has worn off. You can contact the manufacturer with the VIN and they might be able to tell you the original gross vehicle weight rating. That at least narrows down whether you have a 3500lb, 5200lb, or 7000lb axle. But you'll still need physical measurements to order the right replacement.",
+        "role": "direct_help"
+      },
+      {
+        "username": "AxleAlignAl",
+        "body": "I wish the industry would standardize this. Car guys have it so easy — plug in a VIN and you know every bolt on the vehicle. Trailer world is the wild west. Every manufacturer seems to use whatever axle length and spring center they feel like, even on the same model from year to year. Measuring is the only sure way.",
+        "role": "anecdote"
+      },
+      {
+        "username": "BoltPatternBruce",
+        "body": "Pro tip: while you're under there measuring, snap a few photos of the axle tag if there is one. Some axles (Dexter, Lippert, etc.) have a stamped metal tag on the tube with the capacity, hub face, and spring center printed right on it. If yours still has a readable tag you might not even need to measure — just read off the numbers. They're usually spot-welded near one of the spring pads.",
+        "role": "alternative"
+      },
+      {
+        "username": "DataPlateDoug",
+        "body": "Another thing — if your trailer has a data plate (usually riveted to the tongue or frame near the coupler), it sometimes lists the axle capacity and brand. Not the detailed measurements, but at least the weight class. Between the data plate and your own measurements you should have everything you need to order.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DualAxleDan",
+        "body": "I've been down this road. Called three trailer dealers with my VIN and none of them could tell me my axle specs. One of them said \"that's not how trailers work\" which was frustrating but accurate. Spent 10 minutes under the trailer with a tape measure and had all the numbers I needed. It's really not that hard once you know what to measure.",
+        "role": "anecdote"
+      }
+    ]
+  },
+  {
+    "thread_id": "da1533bf-d44b-4f80-9a12-ac8858cc6ff2",
+    "new_comments": [
+      {
+        "username": "LugLayoutLuke",
+        "body": "Easiest way to check your bolt pattern at home: count the lug studs, then measure from the center of one stud straight across to the center of the opposite stud (or on a 5-lug, from the center of one stud to the far edge of the stud two positions away). For a 5 on 4.5\" pattern the center-to-center measurement across is about 4.5 inches. If you have a bolt pattern gauge tool it takes five seconds but the tape measure method works fine.",
+        "role": "direct_help"
+      },
+      {
+        "username": "RadialRiderRuss",
+        "body": "The previous answer is right that 14\" trailer wheels are almost always 5 on 4.5\", but I'll throw this out there — I have a vintage 1980s boat trailer with 14\" wheels that has a 5 on 4.75\" bolt pattern (same as old GM cars). It's rare but it does exist on some older trailers. The difference between 4.5\" and 4.75\" is small enough that the wheels look like they should fit but the bolt holes won't quite line up. If your trailer is older, double check.",
+        "role": "correction"
+      },
+      {
+        "username": "TireSwapTim",
+        "body": "I got burned by this once. Ordered a set of 14\" trailer wheels online assuming 5 on 4.5\" because \"that's what all 14 inch trailer wheels are.\" Turns out my little Harbor Freight trailer had a 5 on 4.5\" hub but the center bore on the new wheels was too small. The bolt pattern matched but the hub cap stuck out too far and the wheel wouldn't seat flat. Make sure you check center bore too, not just bolt pattern.",
+        "role": "anecdote"
+      },
+      {
+        "username": "LugNutLeo",
+        "body": "While you're at it, check whether your lug studs are 1/2\"-20 or 1/2\"-13 thread. Most 14\" trailer hubs use 1/2\"-20 fine thread lug nuts. If you try to put coarse thread nuts on fine thread studs you'll cross-thread them instantly. Easy mistake if you're buying new lug nuts.",
+        "role": "direct_help"
+      },
+      {
+        "username": "WheelWiseWendy",
+        "body": "Here's the quick cheat sheet for common trailer bolt patterns by wheel size:\n- 8\" wheel: 4 on 4\" or 5 on 4.5\"\n- 12\" wheel: 4 on 4\" or 5 on 4.5\"\n- 13\" wheel: 5 on 4.5\"\n- 14\" wheel: 5 on 4.5\" (almost always)\n- 15\" wheel: 5 on 4.5\", 5 on 5\", 5 on 5.5\", or 6 on 5.5\"\n- 16\" wheel: 8 on 6.5\" (mostly 8K and up)\n\nSo yeah, 15\" is the one where you really need to measure because there are four common patterns.",
+        "role": "direct_help"
+      },
+      {
+        "username": "MeasureTwiceMike",
+        "body": "If you don't have a ruler handy, another old-school trick is to pull one wheel off and lay it face-down on a piece of cardboard. Trace the bolt holes with a pencil. Then you can measure the pattern at your workbench without crawling under the trailer. Also makes it easy to bring the cardboard template to the parts store.",
+        "role": "alternative"
+      },
+      {
+        "username": "TorqueSpecTom",
+        "body": "Once you've confirmed the bolt pattern and have the right wheels, don't forget proper torque on the lug nuts. For 1/2\" studs on a 14\" trailer wheel, torque spec is typically 90-100 ft-lbs. And re-torque after the first 25 miles, then again at 50 miles. I know it sounds excessive but trailer wheels loosen more than car wheels because of the road vibration and the way the bearings load differently.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "3bfe834c-b589-40ef-bfe8-5339c48b61c0",
+    "new_comments": [
+      {
+        "username": "TireSwapTim",
+        "body": "I've run both sizes on different trailers. The ST225/75R15 has a slightly smaller overall diameter — about 28.3\" vs roughly 28.9\" for the 235/75R15. In practice that difference is barely noticeable, maybe a quarter inch of ride height on each side. Where you really want to pay attention is the load rating. Make sure the ST225/75R15 you're buying has at least the same load capacity as the 235 you're replacing. Load range D and E are common in both sizes but double check the sidewall markings.",
+        "role": "direct_help"
+      },
+      {
+        "username": "LoadRatingLarry",
+        "body": "This is the part people overlook. An ST225/75R15 Load Range D is rated for 2540 lbs at 65 psi, while a 235/75R15 (if it's a P-rated passenger tire) might only be rated for 1984 lbs at 35 psi. So actually the ST tire could be an upgrade in terms of capacity even though it's narrower. BUT if the 235 is also an ST-rated tire, check the specific load ratings because they can vary by brand.",
+        "role": "correction"
+      },
+      {
+        "username": "RadialRiderRuss",
+        "body": "Made this exact swap on my enclosed cargo trailer about a year ago. 235/75R15 tires were getting hard to find locally in ST ratings, but the ST225/75R15 was in stock everywhere. Bolt on, no rubbing, no clearance issues. Been towing about 8,000 miles since then with zero problems. They ride the same as far as I can tell.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SidewallSue",
+        "body": "One thing to watch for — make sure you're comparing ST (Special Trailer) to ST. I've seen people run a P-metric 235/75R15 on a trailer because it was cheaper, but P-rated tires aren't designed for trailer duty. They have different sidewall construction and tend to overheat at highway speeds under trailer loads. Always run ST-rated tires on a trailer if possible.",
+        "role": "correction"
+      },
+      {
+        "username": "BoltPatternBruce",
+        "body": "Both of those tires fit a standard 15x6 wheel with no issue. The 225 actually sits a tiny bit narrower on the rim which can give you slightly more fender clearance if that's tight on your trailer. I've seen fender rub with 235s on some boat trailers where the bunks flex — the 225 fixed it without needing to modify the fender.",
+        "role": "alternative"
+      },
+      {
+        "username": "PSI_Pete",
+        "body": "Don't forget to adjust your tire pressure when switching sizes. The correct pressure is whatever is stamped on the tire's sidewall for max load, not what was on the old tire. ST225/75R15 Load Range D is usually 65 psi max. If you were running the 235 at a lower pressure you'll want to bump it up to match the new tire's spec. Low pressure on trailer tires is the number one cause of blowouts.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SpeedometerSkip",
+        "body": "Since the overall diameters are slightly different, if your trailer has a GPS-based speed sensor or an odometer (some larger enclosed trailers do), the reading will be off by about 2%. Probably doesn't matter for most people but I figured I'd mention it. For standard utility and cargo trailers with no electronics on the axle it's a non-issue.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DumpTrailerDerek",
+        "body": "I run ST225/75R15 Load Range E on my tandem dump trailer. They're rated for 2830 lbs each at 80 psi. Rock solid and I actually prefer the slightly narrower profile — seems to track a little better in crosswinds compared to the wider 235s I had before. Could be my imagination but that's my experience over about 15,000 miles.",
+        "role": "anecdote"
+      }
+    ]
+  },
+  {
+    "thread_id": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
+    "new_comments": [
+      {
+        "username": "BrakeBleedBenny",
+        "body": "Just to add to the Dexter 23-105 recommendation — when you install the backing plates, make sure the adjuster star wheel is at the bottom on each side. The adjusters are side-specific (left and right) and if you put them on the wrong side the self-adjusting mechanism won't work. The left side adjusts when you back up and the right side... well, both adjust when reversing, but only if the star wheel is oriented correctly. Check the Dexter installation diagram that comes in the box.",
+        "role": "direct_help"
+      },
+      {
+        "username": "MagnetManMark",
+        "body": "One thing I'd recommend is upgrading the brake magnets from the stock ones to the ceramic magnets. The stock magnets in most kits are fine for normal use but if you're hauling landscaping materials and equipment regularly, the ceramic magnets give you noticeably stronger braking force. They cost about $15 more per pair and they last longer too. On a 3500lb tandem fully loaded you'll appreciate the extra stopping power.",
+        "role": "alternative"
+      },
+      {
+        "username": "WiringWizWalt",
+        "body": "Since your trailer currently has no brakes, you'll also need to run the wiring. Here's what worked for me on a similar setup:\n\n- 12 gauge wire from the 7-way connector to a junction near the first axle\n- Split to each brake assembly from there\n- Use the trailer frame as ground but add a dedicated ground wire anyway as backup — frame-only grounds corrode over time and you'll get weak brakes\n- Run all wires inside split loom and zip tie to the frame every 18 inches or so\n\nDon't cheap out on the wiring or connections. Crimped and heat-shrunk connectors, no scotch locks.",
+        "role": "direct_help"
+      },
+      {
+        "username": "ControllerCarl",
+        "body": "On brake controllers — the Tekonsha P3 is great but it's about $120-150. If you want to save some money, the Tekonsha Voyager is a solid proportional controller for about $50-60 and works perfectly fine for a 3500lb tandem. Proportional controllers (both the P3 and Voyager) apply braking force based on how hard you brake in the tow vehicle, which is way better than a time-delay controller. The P3 has a nicer display and more adjustments but the Voyager gets the job done.",
+        "role": "alternative"
+      },
+      {
+        "username": "BreakawayBrenda",
+        "body": "Don't forget you'll need a breakaway kit too. It's required by law in most states for any trailer with brakes. It's a small battery box that mounts on the tongue with a cable that attaches to your tow vehicle. If the trailer ever separates from the truck, the cable pulls a pin that activates the brakes. Runs about $40-60 and it's cheap insurance. Some brake kits include one, some don't — check before you order.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TorqueSpecTom",
+        "body": "When you're bolting the backing plates to the axle flange, torque those bolts to 30-35 ft-lbs. And use blue Loctite on them. I've seen backing plates come loose from road vibration on trailers that go on rough roads regularly. Also make sure the mounting surface is clean — any rust or debris between the flange and backing plate will cause the brakes to drag or not sit flat.",
+        "role": "direct_help"
+      },
+      {
+        "username": "LippertLance",
+        "body": "I'll throw in a different perspective since you mentioned Lippert. I run Lippert brakes on one trailer and Dexter on another. Honestly they're very comparable for a 3500lb application. Lippert is usually a few bucks cheaper. The Dexter parts are easier to find at local stores and the aftermarket support is deeper. If you ever need to replace shoes, magnets, or springs down the road, Dexter parts are on the shelf at every trailer supply shop. For that reason alone I'd go Dexter.",
+        "role": "direct_help"
+      },
+      {
+        "username": "GrinderGus",
+        "body": "Installed Dexter 10\" electric brakes on my tandem landscaping trailer about three years ago. Same axle size as yours. Couple things I wish I'd known going in:\n\n1. The drums need to be burnished — drive about 200 miles with light braking before you expect full stopping power. They feel weak at first.\n2. Adjust the brakes manually the first time even if they're self-adjusting. The self-adjusters need a starting point.\n3. Check the brake controller gain setting. Too high and the tires lock up, too low and it feels like you have no brakes. I started at about 6 on the P3 and worked up from there.\n\nOverall very happy with the setup. Night and day difference from running with no brakes.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SafetyFirstSam",
+        "body": "Since you mentioned hauling equipment and landscaping materials — that stuff shifts around. Good brakes are critical but so is having the load secured. When a 500lb mower slides forward on a hard stop it puts a lot of stress on the coupler and tongue. Just something to keep in mind. Good brakes + good tie-downs = safe towing.",
+        "role": "direct_help"
+      },
+      {
+        "username": "HitchHarryH",
+        "body": "Might be obvious but make sure your tow vehicle's 7-way plug is wired for electric brakes before you buy the controller. Most trucks with a factory tow package have the brake wire already run to the 7-way — it's the blue wire. If you have an aftermarket hitch or a vehicle without a tow package, you might need to run a wire from where the controller mounts to the back of the truck. Not hard but it's an extra step some folks forget about.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DualAxleDan",
+        "body": "Confirming the $400-500 total estimate from the first answer. Here's roughly what I spent when I did mine:\n- 4 Dexter brake assemblies: ~$200\n- Brake controller (Voyager): $55\n- Breakaway kit: $45\n- Wiring, connectors, split loom: $30\n- Brake drums came already on my hubs\n\nSo about $330 in my case since I went with the Voyager instead of the P3 and already had the drums. Your mileage may vary depending on whether you need new drums or hub/drum combos.",
+        "role": "confirmation"
+      },
+      {
+        "username": "TackWeldTony",
+        "body": "One more thing — if your 2\" round axles don't already have mounting flanges welded on for brake backing plates, you'll need those too. Some bare axles come without flanges if they were set up as idler axles (no brakes). Check if there are 4-bolt flanges welded to each spindle area. If not, you might need to swap the spindles or have flanges welded on, which complicates things a bit.",
+        "role": "correction"
+      }
+    ]
+  }
+]

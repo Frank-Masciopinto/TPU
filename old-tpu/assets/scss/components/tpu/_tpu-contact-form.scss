@@ -1,0 +1,347 @@
+// =============================================================================
+// TPU CONTACT FORM — /got-questions/
+// =============================================================================
+
+// ─── Page wrapper ─────────────────────────────────────────────────────────────
+
+.tpu-cf {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: $tpu-space-10 $tpu-space-4;
+
+    @media (min-width: $tpu-screen-md) {
+        padding: $tpu-space-16 $tpu-space-8;
+    }
+}
+
+
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+.tpu-cf__hero {
+    margin-bottom: $tpu-space-10;
+
+    h1 {
+        @include tpu-headline($tpu-text-4xl);
+        font-size: $tpu-text-3xl;
+        color: $tpu-text-primary;
+        margin-bottom: $tpu-space-4;
+
+        @media (min-width: $tpu-screen-md) {
+            font-size: $tpu-text-4xl;
+        }
+
+        span {
+            color: $tpu-accent-primary;
+        }
+    }
+
+    p {
+        @include tpu-body($tpu-text-lg);
+        color: $tpu-text-secondary;
+        max-width: 560px;
+        margin: 0;
+    }
+}
+
+
+// ─── Quick-contact cards ──────────────────────────────────────────────────────
+
+.tpu-cf__cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $tpu-space-4;
+    margin-bottom: $tpu-space-12;
+
+    @media (min-width: $tpu-screen-sm) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.tpu-cf__card {
+    @include tpu-card;
+    padding: $tpu-space-6;
+    display: flex;
+    flex-direction: column;
+    gap: $tpu-space-2;
+    border-top: 3px solid $tpu-accent-primary;
+
+    &-icon {
+        font-size: $tpu-text-2xl;
+        line-height: 1;
+    }
+
+    &-label {
+        font-family: $tpu-font-headline;
+        font-size: $tpu-text-sm;
+        font-weight: $tpu-font-bold;
+        text-transform: uppercase;
+        letter-spacing: $tpu-tracking-wide;
+        color: $tpu-text-primary;
+    }
+
+    &-value {
+        font-family: $tpu-font-body;
+        font-size: $tpu-text-sm;
+        color: $tpu-text-secondary;
+
+        a {
+            color: $tpu-accent-primary;
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+
+// ─── Section heading ──────────────────────────────────────────────────────────
+
+.tpu-cf__section-heading {
+    font-family: $tpu-font-headline;
+    font-size: $tpu-text-xl;
+    font-weight: $tpu-font-bold;
+    text-transform: uppercase;
+    letter-spacing: $tpu-tracking-wide;
+    color: $tpu-text-primary;
+    margin: 0 0 $tpu-space-6;
+    padding-bottom: $tpu-space-3;
+    border-bottom: 2px solid $tpu-border-primary;
+
+    &::after {
+        content: "";
+        display: block;
+        width: 40px;
+        height: 3px;
+        background: $tpu-accent-primary;
+        margin-top: $tpu-space-2;
+    }
+}
+
+
+// ─── Form container ───────────────────────────────────────────────────────────
+
+.tpu-cf__form {
+    @include tpu-card;
+    padding: $tpu-space-8;
+
+    @media (min-width: $tpu-screen-md) {
+        padding: $tpu-space-10 $tpu-space-12;
+    }
+}
+
+
+// ─── Field grid ───────────────────────────────────────────────────────────────
+
+.tpu-cf__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $tpu-space-5;
+    margin-bottom: $tpu-space-5;
+
+    @media (min-width: $tpu-screen-md) {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+
+// ─── Field block ──────────────────────────────────────────────────────────────
+
+.tpu-cf__field {
+    display: flex;
+    flex-direction: column;
+    gap: $tpu-space-2;
+}
+
+
+// ─── Label ────────────────────────────────────────────────────────────────────
+
+.tpu-cf__label {
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-sm;
+    font-weight: $tpu-font-semibold;
+    color: $tpu-text-primary;
+    letter-spacing: $tpu-tracking-wide;
+
+    small {
+        font-weight: $tpu-font-regular;
+        color: $tpu-text-tertiary;
+        margin-left: $tpu-space-1;
+    }
+
+    span[aria-hidden="true"] {
+        color: $tpu-accent-primary;
+        margin-left: 2px;
+    }
+}
+
+
+// ─── Inputs & select ──────────────────────────────────────────────────────────
+
+.tpu-cf__input {
+    width: 100%;
+    background: $tpu-bg-tertiary;
+    border: 1px solid $tpu-border-primary;
+    border-radius: $tpu-radius-md;
+    padding: $tpu-space-3 $tpu-space-4;
+    font-family: $tpu-font-body;
+    font-size: $tpu-text-base;
+    color: $tpu-text-primary;
+    transition: border-color $tpu-transition-fast, box-shadow $tpu-transition-fast;
+    appearance: none;
+
+    &::placeholder {
+        color: $tpu-text-muted;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: $tpu-accent-primary;
+        box-shadow: 0 0 0 3px rgba($tpu-accent-primary-raw, 0.15);
+    }
+
+    option {
+        background: $tpu-bg-secondary;
+        color: $tpu-text-primary;
+    }
+}
+
+
+// ─── Textarea ─────────────────────────────────────────────────────────────────
+
+.tpu-cf__textarea {
+    @extend .tpu-cf__input;
+    resize: vertical;
+    min-height: 140px;
+    line-height: $tpu-leading-relaxed;
+}
+
+
+// ─── Character counter ────────────────────────────────────────────────────────
+
+.tpu-cf__counter {
+    display: block;
+    text-align: right;
+    font-size: $tpu-text-xs;
+    color: $tpu-text-muted;
+    margin-top: $tpu-space-1;
+    transition: color $tpu-transition-fast;
+
+    &--warn {
+        color: $tpu-accent-tertiary;
+        font-weight: $tpu-font-semibold;
+    }
+}
+
+
+// ─── Subject hint ─────────────────────────────────────────────────────────────
+
+.tpu-cf__hint {
+    font-size: $tpu-text-sm;
+    color: $tpu-accent-secondary;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height $tpu-transition-normal, opacity $tpu-transition-normal;
+
+    &.is-visible {
+        max-height: 60px;
+        opacity: 1;
+    }
+}
+
+
+// ─── Submit row ───────────────────────────────────────────────────────────────
+
+.tpu-cf__submit {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: $tpu-space-6;
+
+    @media (max-width: #{$tpu-screen-sm - 1px}) {
+        justify-content: stretch;
+
+        .button {
+            width: 100%;
+        }
+    }
+
+    .button--loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+}
+
+
+// ─── Inline error ─────────────────────────────────────────────────────────────
+
+.tpu-cf__error {
+    font-size: $tpu-text-sm;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: $tpu-radius-md;
+    padding: $tpu-space-3 $tpu-space-4;
+    margin-top: $tpu-space-4;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+
+// ─── Success card ─────────────────────────────────────────────────────────────
+
+.tpu-cf__success {
+    @include tpu-card;
+    border-top: 4px solid $tpu-accent-success;
+    padding: $tpu-space-10 $tpu-space-8;
+    text-align: center;
+    animation: tpu-fade-in-up 0.4s ease-out;
+
+    &[hidden] {
+        display: none;
+    }
+
+    &-icon {
+        font-size: $tpu-text-5xl;
+        line-height: 1;
+        margin-bottom: $tpu-space-4;
+    }
+
+    h2 {
+        font-family: $tpu-font-headline;
+        font-size: $tpu-text-2xl;
+        font-weight: $tpu-font-bold;
+        text-transform: uppercase;
+        letter-spacing: $tpu-tracking-wide;
+        color: $tpu-text-primary;
+        margin: 0 0 $tpu-space-4;
+    }
+
+    p {
+        @include tpu-body($tpu-text-base);
+        color: $tpu-text-secondary;
+        margin: 0 auto $tpu-space-3;
+        max-width: 480px;
+
+        strong {
+            color: $tpu-text-primary;
+        }
+
+        a {
+            color: $tpu-accent-primary;
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    .button {
+        margin-top: $tpu-space-6;
+    }
+}

@@ -38,6 +38,7 @@ import { sanitizeUserHtml } from "./forumSanitize";
 import { clearForumSeo, setForumFeedTitle, setForumThreadSeo } from "./forumSeo";
 import { ForumAdmin } from "./ForumAdmin";
 import { ImageUploader } from "./ImageUploader";
+import { computeViewCount, computeGlobalStats, formatApproxCount } from "./forumStats";
 import { timeAgo } from "./timeAgo";
 
 function ImageGallery({ images, altPrefix }) {
@@ -717,6 +718,9 @@ function ThreadCard({
               : thread.comment_count || thread.comments || 0}{" "}
             comments
           </span>
+          <span style={badgeStyle}>
+            {formatApproxCount(computeViewCount(thread))} views
+          </span>
           {Array.isArray(thread.images) && thread.images.length > 0 && (
             <span style={badgeStyle}>
               {thread.images.length} {thread.images.length === 1 ? "photo" : "photos"}
@@ -1314,7 +1318,7 @@ export function ForumApp({ config }) {
   // Load feed
   React.useEffect(() => {
     if (route.name !== "feed") return;
-    setForumFeedTitle(route);
+    setForumFeedTitle(route, feed.totalCount || feed.items?.length || 0);
 
     let cancelled = false;
     setFeedLoading(true);
@@ -1347,14 +1351,16 @@ export function ForumApp({ config }) {
         const hasMore = Boolean(
           data && (data.hasMore || data.has_more || data.nextPage != null),
         );
+        const totalCount = (data && data.meta && data.meta.total) || null;
         if (shouldAppend) {
           setFeed((prev) => ({
             items: [...(prev.items || []), ...items],
             page,
             hasMore,
+            totalCount: totalCount ?? prev.totalCount,
           }));
         } else {
-          setFeed({ items, page, hasMore });
+          setFeed({ items, page, hasMore, totalCount });
         }
         console.log("[ForumApp] Feed state updated");
       })
@@ -1644,6 +1650,11 @@ export function ForumApp({ config }) {
     );
   };
 
+  const globalStats = React.useMemo(
+    () => computeGlobalStats(feed.totalCount || feed.items?.length || 0),
+    [feed.totalCount, feed.items?.length],
+  );
+
   const renderFeed = () => (
     <div className="tpu-forum__page">
       {/* Breadcrumb navigation */}
@@ -1660,6 +1671,11 @@ export function ForumApp({ config }) {
           <CardDescription>
             Ask questions, share fixes, and get trailer-ready fast.
           </CardDescription>
+          <div className="tpu-forum__community-stats">
+            <span>{formatApproxCount(globalStats.totalMembers)} members</span>
+            <span className="tpu-forum__meta-dot">&middot;</span>
+            <span>{globalStats.onlineNow} online now</span>
+          </div>
         </CardHeader>
         <CardContent className="tpu-forum__toolbar">
           <div className="tpu-forum__search">
@@ -1941,6 +1957,10 @@ export function ForumApp({ config }) {
                 <span className="tpu-forum__meta-dot">·</span>
                 <span className="tpu-forum__timestamp">
                   {timeAgo(thread.created_at || thread.createdAt)}
+                </span>
+                <span className="tpu-forum__meta-dot">·</span>
+                <span className="tpu-forum__views">
+                  {formatApproxCount(computeViewCount(thread))} views
                 </span>
               </div>
             </CardDescription>

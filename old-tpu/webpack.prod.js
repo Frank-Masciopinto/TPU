@@ -2,9 +2,10 @@ const { merge } = require('webpack-merge'),
       commonConfig = require('./webpack.common.js');
 
 module.exports = merge(commonConfig, {
-    devtool: 'source-map',
+    devtool: false,
     mode: 'production',
     optimization: {
+        chunkIds: 'deterministic',
         emitOnErrors: true,
         splitChunks: {
             chunks: 'async',

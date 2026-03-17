@@ -1,0 +1,132 @@
+{{!--
+  BigCommerce Admin mapping instructions:
+  - Create a Web Page (Storefront > Web Pages)
+    - URL: /admin-quotes (keep obscure — no nav link, visibility off)
+    - Template: admin-quotes
+  - Access is restricted to forum admin accounts automatically.
+--}}
+
+{{#partial "page"}}
+
+<script>
+  (function() {
+    var customer = null;
+    {{#if customer}}
+    customer = { id: {{customer.id}}, email: "{{customer.email}}" };
+    {{/if}}
+    window.__TPU_ADMIN_QUOTES__ = {
+      customer: customer,
+      loginUrl: "{{urls.auth.login}}",
+    };
+  })();
+</script>
+
+<div class="aq">
+
+  {{!-- Page header --}}
+  <div class="aq-header">
+    <h1>Quotes</h1>
+    <span class="aq-header-badge">Staff Admin</span>
+  </div>
+
+  {{!-- Checking admin status --}}
+  <div id="aq-checking" class="aq-checking" style="display:none;">
+    <div class="aq-spinner"></div>
+    <p>Verifying access...</p>
+  </div>
+
+  {{!-- Not logged in / session expired --}}
+  <div id="aq-not-logged-in" class="aq-state-card" style="display:none;">
+    <h2>Sign In Required</h2>
+    <p>You need to be logged into your admin account to access this page.</p>
+    <a href="/login.php?returnUrl=/admin-quotes" class="button button--primary">Log In</a>
+  </div>
+
+  {{!-- Logged in but not an admin --}}
+  <div id="aq-access-denied" class="aq-state-card aq-state-card--denied" style="display:none;">
+    <h2>Access Denied</h2>
+    <p>This page is restricted to staff admin accounts. Contact your store administrator if you believe this is an error.</p>
+    <a href="/" class="button button--secondary">Back to Home</a>
+  </div>
+
+  {{!-- Main app (shown only to admins) --}}
+  <div id="aq-app" style="display:none;">
+
+    {{!-- Apple-style search toolbar --}}
+    <div class="aq-toolbar">
+
+      {{!-- Search pill --}}
+      <div class="aq-search-pill">
+        <svg class="aq-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input
+          id="aq-search-input"
+          class="aq-search-input"
+          type="search"
+          placeholder="Search quotes..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="aq-clear-btn" class="aq-clear-btn" aria-label="Clear search" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      {{!-- Scope tabs --}}
+      <div class="aq-scope-bar" role="group" aria-label="Search scope">
+        <button class="aq-scope-tab is-active" data-field="all">All</button>
+        <button class="aq-scope-tab" data-field="email">Email</button>
+        <button class="aq-scope-tab" data-field="quote_number">Quote #</button>
+        <button class="aq-scope-tab" data-field="phone">Phone</button>
+      </div>
+
+    </div>
+
+    {{!-- Loading state --}}
+    <div id="aq-loading" class="aq-loading" style="display:none;">
+      <div class="aq-spinner"></div>
+    </div>
+
+    {{!-- Error state --}}
+    <div id="aq-error" class="aq-error" style="display:none;"></div>
+
+    {{!-- Results --}}
+    <div id="aq-results" style="display:none;">
+      <div class="aq-summary">
+        <span id="aq-count-chip" class="aq-count-chip"></span>
+      </div>
+      <div class="aq-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quote #</th>
+              <th>Customer</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Total</th>
+              <th>Created</th>
+              <th>Expires</th>
+              <th>Email Sent</th>
+              <th>Cart</th>
+            </tr>
+          </thead>
+          <tbody id="aq-tbody"></tbody>
+        </table>
+      </div>
+      <div id="aq-pagination" class="aq-pagination"></div>
+    </div>
+
+    {{!-- Empty state --}}
+    <div id="aq-empty" class="aq-empty" style="display:none;">No quotes match your search.</div>
+
+  </div>
+
+</div>
+
+{{/partial}}
+
+{{> layout/base}}

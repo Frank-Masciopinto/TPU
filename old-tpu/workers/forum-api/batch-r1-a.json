@@ -1,0 +1,382 @@
+[
+  {
+    "thread_id": "24ee1cc8-8ee4-4248-8dc4-4fdd4f80a31d",
+    "new_comments": [
+      {
+        "username": "TorqueWrenchTerry",
+        "body": "One thing worth adding — those 30-50 ft-lb values assume you're using Grade 5 hardware, which is what most hanger kits ship with. If you upgraded to Grade 8 bolts (which some guys do for peace of mind), the torque spec stays the same for this application because you're not supposed to clamp the equalizer tight. You want it snug but still pivoting freely. Over-torquing Grade 8 bolts on an equalizer is actually worse because they won't give you any warning before something binds.",
+        "role": "direct_help"
+      },
+      {
+        "username": "OzarkHauler",
+        "body": "Learned this the hard way on my 7K tandem car hauler. Cranked the equalizer bolts to about 75 ft-lbs because I figured tighter = better. Took it on a 200 mile trip and the trailer was riding rough as hell. Got home and realized the equalizer wasn't pivoting at all — basically locked solid. Backed off to about 40 ft-lbs and it was night and day difference. The suspension actually needs to move.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SteelFrameSteve",
+        "body": "Can confirm the 30-50 range. I build about 10-12 trailers a year in my shop and that's what I torque every tandem hanger kit to. One small addition: I always put a dab of anti-seize on the equalizer and spring eye bolts before assembly. Makes it a lot easier when you need to pull things apart 3 years down the road. Without it, those bolts rust in place and you're reaching for the torch.",
+        "role": "confirmation"
+      },
+      {
+        "username": "FlatbedFreak",
+        "body": "Quick question — if I'm using nylock nuts instead of regular nuts with cotter pins, does that change the torque spec at all? I've heard nylocks need a bit more initial torque to seat the nylon insert.",
+        "role": "followup_question"
+      },
+      {
+        "username": "BrakeShopMike",
+        "body": "Nylocks don't really change the target torque for this application. The nylon insert adds maybe 5-10 ft-lbs of prevailing torque (the resistance you feel before the nut contacts the hanger), but you're still torquing to the same final clamping value. The advantage of nylocks is you don't need cotter pins and they're less likely to back off from vibration. Just don't reuse nylocks — once they've been run on, the nylon is deformed and won't hold as well the second time.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TexasTrailerTech",
+        "body": "Something that gets overlooked: re-torque your U-bolts after the first 100 miles and again at 500 miles. New springs settle and the U-bolt clamp load drops. I've seen axles shift on springs because someone installed them, torqued everything to spec, and never went back to check. On a tandem setup that shift throws your axle alignment off and you'll eat tires.",
+        "role": "correction"
+      },
+      {
+        "username": "GarageGuyKC",
+        "body": "If you don't already have a decent torque wrench, get a click-type (like a 1/2\" drive that goes to 150 ft-lbs). The beam-type wrenches are fine for engine work where you can see the scale, but crawling under a trailer trying to read a beam wrench upside down is miserable. I keep a cheap 3/8\" drive click wrench just for spring bolts — the 30-50 range is right in its sweet spot.",
+        "role": "alternative"
+      },
+      {
+        "username": "HeavyHaulJoe",
+        "body": "Had my spring bolts back off on a trip from Memphis to Dallas pulling a skid steer. Started hearing a clunk over every bump. Pulled over at a truck stop and the front spring eye bolt on the driver side was finger loose. The cotter pin had sheared off at some point. Now I do a walk-around and wiggle test on every bolt before any trip over 50 miles. Takes 5 minutes and it's cheap insurance.",
+        "role": "anecdote"
+      },
+      {
+        "username": "AxleMaster_AL",
+        "body": "One more detail on the torque specs — wet vs dry makes a difference. If you're applying anti-seize or grease to the threads (which Steve mentioned above), the effective clamping force at the same torque reading is higher than dry threads. Some people compensate by reducing torque about 15-20% on lubricated bolts. For these spring bolts at 30-50 ft-lbs it's a narrow range, so if you're using anti-seize I'd stay at the lower end, around 30-35 ft-lbs, and verify the equalizer pivots freely.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SpringShopGreg",
+        "body": "Good info in this thread. I'll just add — check your bolts for signs of stretching or necking once a year. If the shank diameter under the bolt head looks narrower than the threads, that bolt has been overloaded and needs replacing. On a 2\" slipper spring setup, the bolts see a lot of cyclical loading, especially if you're running heavy loads on rough roads. I swap all my hanger hardware every 3-4 years as preventative maintenance. Bolts are cheap, axle failures aren't.",
+        "role": "confirmation"
+      }
+    ]
+  },
+  {
+    "thread_id": "2b3488a7-844b-449d-abb6-52a6febd55a8",
+    "new_comments": [
+      {
+        "username": "BoatTrailerBob",
+        "body": "What year and make is the trailer? Some of the older Calkins and EZ Loader boat trailers used oddball spindle sizes that don't match anything standard anymore. If it's pre-1995 there's a decent chance the spindle is a proprietary size from a manufacturer that either changed specs or went out of business.",
+        "role": "followup_question"
+      },
+      {
+        "username": "BearingBoss",
+        "body": "Before you buy another drum, pull the old bearings out (or what's left of them) and look for a number stamped on the bearing cone — it's usually on the flat face of the inner race. Common trailer bearings have numbers like L44649, L68149, 25580, 15123, etc. Those numbers will tell you exactly what drum you need. If the numbers are worn off, measure the inner diameter of the cone with a caliper. That'll narrow it down fast.",
+        "role": "direct_help"
+      },
+      {
+        "username": "JimK_FL",
+        "body": "I ran into almost this exact problem on a 1992 boat trailer I bought at auction. Turned out the spindles were Fulton brand with non-standard bearing sizes. I went through two drums that didn't fit before I figured it out. What finally solved it was taking the old drum and spindle to my local NAPA and having them cross-reference the bearing numbers right there. They pulled the correct bearings off the shelf and we confirmed it in 10 minutes.",
+        "role": "anecdote"
+      },
+      {
+        "username": "AxleMaster_AL",
+        "body": "Your spindle at 1\" outer and 1-1/2\" inner — that actually sounds like it could be an L44649 outer bearing (1.0\" bore) and L68149 inner bearing (1.3775\" bore). The L68149 is close to 1-3/8\" not 1-1/2\" though. Are you measuring the spindle shaft diameter or the bearing bore? Because if it's the shaft you're measuring, 1-1/2\" inner could actually be a bearing with a 1.500\" bore, which would be a different series entirely. Worth double checking with a set of calipers.",
+        "role": "correction"
+      },
+      {
+        "username": "TrailerMechanic_OH",
+        "body": "Here's what I'd do: get a set of cheap digital calipers (Harbor Freight sells them for $15) and measure three things — (1) the outer spindle diameter where the outer bearing sits, (2) the inner spindle diameter where the inner bearing sits, and (3) the outer diameter of the hub bore where each race/cup is pressed in. Write those numbers down and you can match the correct bearing set from any bearing catalog. The races that were \"too big\" in your last drum just means the cups in that drum were for a larger bearing set than your spindle takes.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DuallyDan",
+        "body": "Have you considered just swapping the spindles to a standard 3,500 lb straight spindle? They're like $30-40 each, and then you can use any standard 6-lug 12x2 brake drum that's meant for a 3.5K axle. You'd need to press off the old spindles and press on the new ones (or have a shop do it), but it means you'll never have a sourcing problem for drums or bearings again. Standard 3.5K parts are everywhere.",
+        "role": "alternative"
+      },
+      {
+        "username": "RustySpindle",
+        "body": "This happened to me three separate times on the same trailer. Bought drums that looked right, got them home, races wouldn't seat on the spindle. Turned out I had been pressing the new races into the drum but the cup outer diameters were slightly wrong — the races would drop in loose instead of press-fitting tight. If your races are going in too easy or wobbling, that's a red flag that you have the wrong bearing set for that drum casting.",
+        "role": "anecdote"
+      },
+      {
+        "username": "SuncoastTrailers",
+        "body": "If you can take the old drum off and bring it to any trailer parts shop, they can usually identify it by the casting markings. Most drums have a cast-in number somewhere on the outside of the cup. Even just a photo of the hub face showing the bolt pattern and inner bore would help narrow things down. Also measure the bolt circle — 6 lug at what spacing? 6 on 5.5\" is the most common trailer pattern, but some older ones ran 6 on 5.25\" or even 6 on 6\".",
+        "role": "direct_help"
+      },
+      {
+        "username": "SpringShopGreg",
+        "body": "Agree with the accepted answer — if you can't match the bearings, the most hassle-free path is switching to a standard hub/drum assembly. A 6-lug 5.2K or 6K hub and drum with standard bearings (25580 inner / 15123 outer) is readily available and reasonably priced. You'd need to confirm the spindle fits, but if you're already buying a drum, spending a little more for the correct matched assembly saves a lot of headache.",
+        "role": "confirmation"
+      },
+      {
+        "username": "MidwestTrailerRepair",
+        "body": "One more thing to watch for on older trailers — some of them came with metric bearings rather than standard inch-series Timken-style bearings. If your trailer was imported or built by a manufacturer that sourced overseas axles, the bearing designations will look completely different (like 30205 or 32008 instead of L44649). Metric bearings and inch-series bearings are NOT interchangeable even if they look similar in size.",
+        "role": "correction"
+      },
+      {
+        "username": "EnclosedCargoKen",
+        "body": "Don't forget to measure your bolt circle diameter too. On a 6-lug drum, the bolt circle (center to center across the hub face) tells you a lot. 6 on 5.5\" is the standard for 5.2K-7K trailer axles. If yours measures 6 on 5.25\" or something else, that confirms you have a non-standard hub and you'll need to factor that into whatever replacement you choose. Bolt pattern plus bearing sizes together will give you a definitive match.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "1572625c-0e31-4ddb-9241-2d566b52447a",
+    "new_comments": [
+      {
+        "username": "TandemTrailerGuy",
+        "body": "Can confirm the two-tandem-kit approach. I did this on my 21-foot triple axle flatbed last year. Bought two APT5 kits, used 6 of the 8 hangers and both equalizer sets. Had two spare hangers left over which I kept as backups. Total install took about 4 hours including welding the hangers in place.",
+        "role": "confirmation"
+      },
+      {
+        "username": "WeldingDave",
+        "body": "If you go the two-tandem-kit route, pay close attention to your hanger spacing. On a triple axle, you have four hanger brackets and two equalizers. The spacing between hangers needs to match your axle-to-axle distance. Measure center-to-center of your axles and that's your equalizer spacing. I like to tack weld the hangers first, roll the trailer to check alignment, then finish the welds once everything tracks straight.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FlatbedFreak",
+        "body": "Does the equalizer on a triple axle sit in between axle 1 and 2, and then another between 2 and 3? Or is there a different arrangement? I've only ever done tandems so I'm not sure how the load transfer works with three axles and double eye springs.",
+        "role": "followup_question"
+      },
+      {
+        "username": "HeavyHaulJoe",
+        "body": "Built a triple axle gooseneck about 6 years ago using this same method. Two tandem hanger kits bolted to slipper springs. One thing I'll say — triple axle trailers with leaf spring suspension are harder on tires in tight turns because the middle axle scrubs. Not a suspension kit issue per se, but something to keep in mind if you're doing a lot of parking lot maneuvering. I ended up lifting my middle axle slightly to reduce tire wear.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TexasTrailerTech",
+        "body": "If you're building a triple axle from scratch rather than replacing existing suspension, you might want to look into Torflex (rubber torsion) independent axles instead of leaf springs. They're more expensive up front but there's no inter-axle load transfer to worry about, each axle is independent. Downside is if one goes bad you replace the whole axle instead of just a spring. For leaf springs though, the two-tandem-kit solution is the most cost-effective route by far.",
+        "role": "alternative"
+      },
+      {
+        "username": "AxleMaster_AL",
+        "body": "Just a heads up — double eye springs on a triple axle work differently than slipper springs. With double eye springs, both ends of the spring are fixed, so the equalizer geometry is more critical. Make sure the equalizer is positioned exactly at the midpoint between axles, and that the spring eye bolts allow the spring to pivot without binding. If the hangers are even slightly off-center, you'll get uneven tire wear across the three axles. I'd recommend a string line or laser level when positioning the hangers before welding.",
+        "role": "correction"
+      }
+    ]
+  },
+  {
+    "thread_id": "9e427666-6219-49ff-918e-fb7a27332355",
+    "new_comments": [
+      {
+        "username": "LandscapeTrailerPro",
+        "body": "I put the TPU-212 on my Carry-On 5x10 utility trailer about 8 months ago. Bolted right in, no modifications needed. The ride is slightly stiffer than the original 3-leaf spring, which makes sense since you're adding a leaf. But it's a good kind of stiff — less sag when I load up 2,000 lbs of mulch. I'd do it again.",
+        "role": "confirmation"
+      },
+      {
+        "username": "BoatTrailerBob",
+        "body": "My 5x8 Carry-On had the original 3-leaf springs and they were sagging noticeably after about 2 years of hauling a 14-foot aluminum boat. One spring actually cracked at the eye. The 504 series springs on those little Carry-Ons are just light duty. Upgrading to a 4-leaf made a real difference in how the trailer sits loaded and unloaded.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TrailerMechanic_OH",
+        "body": "Before you order, grab a tape measure and confirm the eye-to-eye length is actually 25-1/4 inches. Carry-On used a few different spring lengths across their models, and I've seen guys order the wrong size because they assumed all Carry-Ons are the same. Takes 30 seconds to measure and saves you a return shipping hassle.",
+        "role": "direct_help"
+      },
+      {
+        "username": "DumpTrailerDan",
+        "body": "Heads up — some Carry-On models actually used slipper springs on one end instead of double eye. If your spring has a curved end that sits in a hanger cradle (no bolt through it), you've got a slipper spring and the 504T/TPU-212 double eye replacement won't work. Just double-check both ends before ordering. Double eye means a bolt goes through a loop at both ends of the spring.",
+        "role": "correction"
+      },
+      {
+        "username": "GarageGuyKC",
+        "body": "Should I replace both springs at the same time even if only one looks bad? One of mine is cracked but the other looks fine. Trying to save a few bucks if I can get away with just doing one side.",
+        "role": "followup_question"
+      },
+      {
+        "username": "SteelFrameSteve",
+        "body": "Always replace springs in pairs — even if only one is visibly bad, the other one has the same age and fatigue. If you put a new spring on one side and keep the old one, the trailer will sit uneven and the new spring will carry more of the load than it should. Springs are cheap enough that doing both sides at once is worth it. Plus you only have to crawl under there once.",
+        "role": "direct_help"
+      },
+      {
+        "username": "MidwestTrailerRepair",
+        "body": "Worth noting that the 504T part number shows up on more than just Carry-On trailers. I've seen the same spring on some Big Tex utility trailers and a few PJ models in the light-duty range. So if you're searching for a cross-reference for any 25-1/4\" double eye 3-leaf spring, the TPU-212 four-leaf upgrade is a solid option regardless of brand.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "0ce32851-0298-46f5-83d7-b87dae11f95e",
+    "new_comments": [
+      {
+        "username": "BrakeShopMike",
+        "body": "Important note on the 4738-L and 4738-R: make sure you install them on the correct sides. The L (left) goes on the driver side and the R (right) goes on the passenger side when you're standing behind the trailer looking forward. The magnet arm orientation is different between left and right — if you swap them, the brakes will still work but they'll apply unevenly and you'll get a pull to one side under braking.",
+        "role": "direct_help"
+      },
+      {
+        "username": "OzarkHauler",
+        "body": "Ask me how I know the left/right thing matters. Installed a set on my tandem 10K and accidentally swapped them. First time I hit the brakes at highway speed the trailer tried to swap ends on me. Pulled over, checked everything, realized my mistake. Swapped them to the correct sides and it was fine. Scared the life out of me though.",
+        "role": "anecdote"
+      },
+      {
+        "username": "FlatbedFreak",
+        "body": "Are these self-adjusting brakes or do you need to manually adjust them after install? Also what size brake controller do I need for 10K electric brakes — is a 2-channel proportional controller enough?",
+        "role": "followup_question"
+      },
+      {
+        "username": "TexasTrailerTech",
+        "body": "These are manually adjusted — you set the star adjuster through the slot in the backing plate until you get light drag on the drum, then back off a couple clicks. For brake controllers, a proportional (inertia-based) controller is what you want for 10K axles. Something like a Tekonsha P3 or Curt Assure handles up to 4 brakes easily. If you're running tandem 10K axles that's 4 brake assemblies drawing about 3 amps each, so 12 amps total — make sure your controller and wiring can handle that. 10-gauge wire minimum from the controller to the trailer plug.",
+        "role": "direct_help"
+      },
+      {
+        "username": "TandemTrailerGuy",
+        "body": "I've got the same Quality/Rockwell American 10K axles on my car hauler and the Carter 4738 assemblies bolted right on. Backing plate bolt pattern matches perfectly. One tip — when you mount them, put a thin layer of grease on the brake shoe contact points on the backing plate (the raised pads where the shoes rest). It helps the shoes slide smoothly and prevents squealing.",
+        "role": "confirmation"
+      },
+      {
+        "username": "DuallyDan",
+        "body": "If your 10K axles see heavy use or you haul in mountainous terrain, you might want to consider upgrading to hydraulic disc brakes instead of electric drums. The disc brake conversion kits for 10K axles run about $350-400 per axle but you get way better stopping power, no fade on long downhill grades, and they're virtually maintenance free compared to drums. Tradeoff is cost and you need a hydraulic actuator instead of an electric brake controller. For flat-land hauling though, the electric drums are perfectly adequate.",
+        "role": "alternative"
+      },
+      {
+        "username": "HaulerPro99",
+        "body": "When you install new brake assemblies, don't forget the burnish-in procedure. You need about 20-30 light-to-moderate stops from around 30 mph to seat the shoes to the drum properly. Until the shoes are burnished in, braking performance will feel weak. Also, after about 200 miles, go back and re-adjust the brakes — the shoes wear into the drum and the gap opens up. I see guys complain about weak brakes on new assemblies and 9 times out of 10 they just didn't adjust them after break-in.",
+        "role": "direct_help"
+      },
+      {
+        "username": "ShopRatCarl",
+        "body": "Did a full brake job on my tandem 10K equipment hauler last spring with the Carter assemblies. Whole job took about 3 hours per axle including cleaning up the old mounting surface and running new wires. One thing I'll mention — check your brake drums for scoring while you've got everything apart. If there are deep grooves in the drum surface, the new shoes won't seat properly and you'll be disappointed in the braking. Drums for 10K axles aren't that expensive and it's the right time to replace them if they're worn.",
+        "role": "anecdote"
+      },
+      {
+        "username": "NorthwestWelding",
+        "body": "For anyone reading this thread down the road — the wire connections on 10K electric brakes are pretty simple. White wire is ground, and the colored wire (usually blue) is the hot lead from your brake controller. Left and right assemblies share the same wiring, just make sure your grounds are solid. A bad ground is the number one cause of weak or no trailer brakes. I always run a dedicated ground wire back to the frame rather than relying on the ball/coupler connection for ground.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "d80b4761-db42-4347-9873-b357d571329c",
+    "new_comments": [
+      {
+        "username": "TandemTrailerGuy",
+        "body": "That checks out. On a 7K axle with standard brake flanges, the difference from backing plate face to hub face is about 4.5 inches per side, so 9 inches total. 86 + 9 = 95. Good rule of thumb.",
+        "role": "confirmation"
+      },
+      {
+        "username": "AxleMaster_AL",
+        "body": "Here's a quick reference for those who want to use the backing plate method on different axle sizes:\n\n- 3.5K axle: hub face ≈ backing plate measurement + 7 to 8 inches total\n- 5.2K/6K axle: hub face ≈ backing plate measurement + 8 to 9 inches total\n- 7K axle: hub face ≈ backing plate measurement + 9 inches total\n- 8K+ axle: hub face ≈ backing plate measurement + 9 to 10 inches total\n\nThese are approximate because different manufacturers have slightly different flange thicknesses and spindle lengths. Always verify with the actual axle if you can.",
+        "role": "direct_help"
+      },
+      {
+        "username": "EnclosedCargoKen",
+        "body": "Does this offset number change if it's a 5.2K or 3.5K axle? I need to order a replacement axle for my enclosed cargo trailer and I can only get to the backing plates easily — the hub face is buried behind the wheels and I'd rather not pull them off if I can avoid it.",
+        "role": "followup_question"
+      },
+      {
+        "username": "BrakeShopMike",
+        "body": "Yes, smaller axles have a smaller offset. A 3.5K axle has a shorter spindle and smaller brake assembly, so the difference is more like 7-8 inches total (about 3.5-4\" per side). On a 5.2K or 6K it's around 8-9 inches. Just measure backing plate to backing plate and add the appropriate offset for your axle weight rating.",
+        "role": "direct_help"
+      },
+      {
+        "username": "RustySpindle",
+        "body": "Careful with this measurement — I messed it up the first time because I was measuring to the outside face of the backing plate instead of the mounting flange where the plate bolts to the axle tube. The backing plate itself sticks out a bit past the flange. You want to measure to the flange face (where the flat of the backing plate contacts the axle), not the outer rim of the plate. It's only about a half inch difference per side but that's a full inch on hub face, which could give you the wrong axle.",
+        "role": "correction"
+      },
+      {
+        "username": "HeavyHaulJoe",
+        "body": "Another approach if you don't have brakes (like on an idler axle) — measure from the inboard face of the hub at each end, then add for the distance from hub face to hub mounting surface. But honestly, backing plate to backing plate is the easiest proxy when you have brake axles. If you have the axle tube exposed somewhere, you can also measure spring seat to spring seat to get your spring center directly, which is the other measurement you'll need when ordering.",
+        "role": "alternative"
+      },
+      {
+        "username": "TrailerMechanic_OH",
+        "body": "Good thread. One more tip — on older trailers, take your measurements at a couple of different points because things shift over time. I've seen axles that were slightly bent or frames that were tweaked from overloading. If your backing plate measurements differ by more than about 1/4 inch from one method to another, something is off and you should investigate before ordering a replacement axle.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SuncoastTrailers",
+        "body": "For anyone searching for this info later: the 80\" spring center with a 95\" hub face is one of the most common configurations for 7K trailer axles. If you're getting those numbers, you're dealing with a very standard setup and replacement axles should be easy to source in that size.",
+        "role": "confirmation"
+      }
+    ]
+  },
+  {
+    "thread_id": "74b39944-0e3d-45e2-a728-1598b424bc85",
+    "new_comments": [
+      {
+        "username": "DumpTrailerDan",
+        "body": "Went through this same decision on my 14-foot dump trailer last year. Two bad hubs on a Dexter 10K axle. By the time I priced out hubs ($450 each), new bearings, seals, and races for both sides, I was looking at over $1,000 just for the hub rebuild. Bought a complete 10K axle with electric brakes already mounted for about the same money and got essentially a brand new everything. No brainer.",
+        "role": "anecdote"
+      },
+      {
+        "username": "TexasTrailerTech",
+        "body": "The accepted answer is right on the money. The math almost always favors a complete axle at the 10K and 12K level. But one thing to keep in mind — if you go with a complete replacement axle, you'll need to cut off the old spring perches and weld new ones in the correct position to match your spring center. That's a couple extra hours of work and you need a decent welder. If you're not comfortable welding load-bearing structural components, have a shop do it.",
+        "role": "direct_help"
+      },
+      {
+        "username": "FlatbedFreak",
+        "body": "Does the replacement axle need to be Dexter specifically, or can you put a different brand (like Lippert) on the same trailer? My concern is whether the spindle diameter and flange pattern would match my existing drums and brakes if I keep any of those parts.",
+        "role": "followup_question"
+      },
+      {
+        "username": "BrakeShopMike",
+        "body": "For 10K axles, the spindle size is pretty much standardized across manufacturers — typically 2-1/4\" diameter with a 3.38\" seal. Dexter, Lippert, and most aftermarket 10K axles use the same spindle spec, so your hubs, drums, and brakes will swap right over. The key measurements are spindle diameter, flange bolt pattern (usually 5 bolts), hub face, and spring center. Match those and you're good regardless of brand.",
+        "role": "direct_help"
+      },
+      {
+        "username": "GarageGuyKC",
+        "body": "If your hubs are damaged but the spindle, brakes, and axle tube are fine, you might be able to get away with just replacing bearings, seals, and races. A bearing kit for a 10K hub runs about $40-60 per side, and the inner and outer races press into the drum. That's a LOT cheaper than $450 per hub. It depends on what actually failed — if the spindle is scored or the hub bore is out of round, then yeah, you need hubs or a full axle. But if it's just bearing failure from running dry, new bearings and seals might be all you need.",
+        "role": "alternative"
+      },
+      {
+        "username": "HaulerPro99",
+        "body": "Just want to clarify something from the thread title — the part number 8-214-5-UC1 is actually for a 10K Dexter hub, not a 12K. The 12K Dexter hubs use a different, larger hub and bearing set. So if you're actually running a 12K axle, make sure you get the correct part number. The 10K and 12K are NOT interchangeable.",
+        "role": "correction"
+      },
+      {
+        "username": "EquipmentHaulerRay",
+        "body": "Bought a complete 10K axle from TPU for my equipment trailer when I had a hub failure. Came assembled with electric brakes, hubs, drums, even had the spring perches welded on at the right spacing. Total out-the-door was around $1,000 and I had it swapped in a Saturday afternoon. When you factor in the cost of individual Dexter hubs plus your time chasing parts, the complete axle is hard to beat.",
+        "role": "anecdote"
+      },
+      {
+        "username": "WeldingDave",
+        "body": "If you do go the full axle replacement route, here's a tip from experience: before you cut off the old spring perches, mark their position on the new axle tube with a soapstone marker and double-check the spring center measurement. Measure twice, weld once. I use a fish scale to set the perch — tack it, measure spring center and verify it matches the opposite perch, then do a full weld. Use at least a 3/16\" fillet weld all the way around the perch.",
+        "role": "direct_help"
+      },
+      {
+        "username": "SpringShopGreg",
+        "body": "Another thing people don't think about — when you replace the whole axle, you also get a new axle tube that isn't fatigued or corroded. On a heavy-use trailer, the axle tube itself can develop micro-cracks over time, especially near the spring perch welds. So you're not just getting new hubs, you're getting structural peace of mind too. At the $1,000 price point for a fully assembled 10K electric brake axle, that's honestly a bargain.",
+        "role": "confirmation"
+      },
+      {
+        "username": "ShopRatCarl",
+        "body": "At $450 per hub, the axle practically pays for itself with the brakes included as a bonus. My only regret when I did this swap was not ordering two axles at once for my tandem — I replaced one, then the other side failed six months later and I had to do the whole job again. If one hub is shot on a tandem, the other side has the same miles on it. Just saying.",
+        "role": "direct_help"
+      }
+    ]
+  },
+  {
+    "thread_id": "baf8eea9-ab49-49d8-9f75-bc962ba37d19",
+    "new_comments": [
+      {
+        "username": "HaulerPro99",
+        "body": "Can confirm the 19.75\" overhang. I'm running Lippert 10K axles on a 20-foot car hauler with a 95\" hub face and 72\" spring center. That gives me exactly the minimum overhang and the axles are rated at full capacity. Been hauling loaded at 10K for two seasons with no issues.",
+        "role": "confirmation"
+      },
+      {
+        "username": "AxleMaster_AL",
+        "body": "The reason minimum overhang matters is structural — the unsupported length of the spindle beyond the spring seat is a cantilever. If you make that cantilever too long (by spreading the spring centers too far apart), the bending moment at the spring seat increases and the axle tube or spindle weld can fail below the rated capacity. Lippert's 19.75\" is their tested limit. Going wider than that doesn't mean it'll break tomorrow, but the axle is effectively de-rated and you won't be covered under warranty.",
+        "role": "direct_help"
+      },
+      {
+        "username": "EnclosedCargoKen",
+        "body": "Is the 19.75\" overhang figure specific to Lippert, or is it the same for Dexter and other 10K axle manufacturers? I've got Dexter 10K axles and I want to make sure I'm not running too wide on my spring centers.",
+        "role": "followup_question"
+      },
+      {
+        "username": "TexasTrailerTech",
+        "body": "Dexter's minimum overhang for their 10K axles is in the same ballpark — roughly 18 to 20 inches depending on the specific model. I've seen Dexter spec sheets that call out 19\" minimum on some and 20\" on others. If you don't have the spec sheet for your exact axle, contacting the manufacturer with your axle model number is the safest bet. But 19-20\" per side is a good rule of thumb across the industry for 10K rated axles.",
+        "role": "direct_help"
+      },
+      {
+        "username": "NorthwestWelding",
+        "body": "Important clarification: the minimum overhang is measured from the CENTER of the spring seat pad to the outboard end of the spindle, not to the hub face. Hub face is measured from the mounting surface of the hub/drum on each side. The spindle extends inboard of the hub face by a few inches. So don't confuse hub face measurement with overhang — they're related but not the same reference points. If you're calculating spring center from hub face, subtract overhang from each side: spring center = hub face - (2 × overhang).",
+        "role": "correction"
+      },
+      {
+        "username": "OzarkHauler",
+        "body": "Found out the hard way about overhang when I rebuilt a flatbed and set the spring centers too wide. Was trying to get wider spring centers for stability, ended up at about 78\" on a 95\" hub face 10K axle. That's only about 8.5\" overhang per side. The axles sagged noticeably under full load after about a year. Had to cut off the perches and reweld them at the correct spacing. Expensive lesson in not ignoring the manufacturer's specs.",
+        "role": "anecdote"
+      },
+      {
+        "username": "DuallyDan",
+        "body": "If you find yourself needing wider spring centers than the minimum overhang allows on a 10K, consider stepping up to a 12K axle. The 12K has a heavier tube and longer spindles, which allows for wider spring center spacing while maintaining adequate overhang. You'll have more capacity headroom too. The cost difference between a 10K and 12K axle isn't that much — maybe $100-150 — and it gives you more flexibility in your frame design.",
+        "role": "alternative"
+      }
+    ]
+  }
+]
