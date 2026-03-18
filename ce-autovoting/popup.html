@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vote Bot</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 320px;
+      background: #1a1a1a;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      padding-bottom: 12px;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .header h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
+    .header p  { font-size: 11px; color: #888; margin-top: 2px; }
+
+    /* ---- Stats bar ---- */
+    .stats-bar {
+      display: flex;
+      gap: 1px;
+      background: #2a2a2a;
+      margin: 12px 12px 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .stat-col {
+      flex: 1;
+      background: #222;
+      padding: 10px 8px 8px;
+      text-align: center;
+    }
+    .stat-col:not(:last-child) { border-right: 1px solid #2a2a2a; }
+    .stat-num   { font-size: 22px; font-weight: 700; color: #4ade80; line-height: 1; }
+    .stat-label { font-size: 10px; color: #666; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ---- Sections ---- */
+    .section { padding: 12px 12px 0; }
+
+    /* ---- Buttons ---- */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 9px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      text-align: center;
+    }
+    .btn:hover:not(:disabled) { opacity: 0.88; }
+    .btn:active:not(:disabled) { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-green { background: #4ade80; color: #0a0a0a; }
+    .btn-blue  { background: #3b82f6; color: #fff; }
+    .btn-red   { background: #ef4444; color: #fff; }
+    .btn-ghost { background: #2a2a2a; color: #aaa; font-weight: 500; }
+
+    /* ---- Loop controls ---- */
+    .loop-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .loop-row label { font-size: 12px; color: #888; white-space: nowrap; }
+    .loop-row input {
+      flex: 1;
+      background: #2a2a2a;
+      border: 1px solid #333;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 13px;
+      padding: 6px 8px;
+      outline: none;
+    }
+    .loop-row input:focus { border-color: #3b82f6; }
+
+    .schedule-info {
+      font-size: 11px;
+      color: #666;
+      margin-top: 6px;
+      min-height: 14px;
+    }
+
+    /* ---- Status ---- */
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 12px 0;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: #4ade80;
+    }
+    .status-dot.yellow { background: #facc15; }
+    .status-dot.red    { background: #ef4444; }
+    #statusText { font-size: 12px; color: #aaa; }
+
+    /* ---- Settings (API Key) ---- */
+    #settingsSection {
+      padding: 12px 12px 0;
+    }
+    #settingsSection label { font-size: 11px; color: #888; display: block; margin-bottom: 4px; }
+    .key-row { display: flex; gap: 6px; }
+    .key-row input {
+      flex: 1;
+      background: #2a2a2a;
+      border: 1px solid #333;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 12px;
+      padding: 6px 8px;
+      outline: none;
+    }
+    .key-row input:focus { border-color: #4ade80; }
+    .key-row .btn {
+      width: auto;
+      padding: 6px 10px;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .key-saved { font-size: 10px; color: #4ade80; margin-top: 4px; display: none; }
+
+    /* ---- Errors ---- */
+    .errors-section { padding: 10px 12px 0; }
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 11px;
+      cursor: pointer;
+      padding: 0;
+      text-align: left;
+    }
+    .toggle-btn:hover { color: #aaa; }
+    #errorList {
+      display: none;
+      margin-top: 6px;
+      background: #111;
+      border-radius: 5px;
+      padding: 8px;
+      max-height: 130px;
+      overflow-y: auto;
+    }
+    .error-entry {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 10px;
+      color: #ef9999;
+      line-height: 1.5;
+      border-bottom: 1px solid #1e1e1e;
+      padding-bottom: 4px;
+      margin-bottom: 4px;
+    }
+    .error-entry:last-child { border-bottom: none; margin-bottom: 0; }
+    .error-ts { color: #555; }
+
+    /* ---- Divider ---- */
+    .divider { border: none; border-top: 1px solid #2a2a2a; margin: 10px 12px 0; }
+
+    /* ---- Footer ---- */
+    .footer { padding: 8px 12px 0; text-align: center; }
+    #resetStats {
+      background: none;
+      border: none;
+      color: #444;
+      font-size: 11px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    #resetStats:hover { color: #888; }
+
+    .mt8 { margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Vote Bot</h1>
+    <p>SecondStreet Automation</p>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stat-col">
+      <div class="stat-num" id="voteCount">0</div>
+      <div class="stat-label">Votes</div>
+    </div>
+    <div class="stat-col">
+      <div class="stat-num" id="errorCount" style="color:#ef4444">0</div>
+      <div class="stat-label">Errors</div>
+    </div>
+    <div class="stat-col">
+      <div class="stat-num" id="sessionProgress" style="font-size:15px;padding-top:4px">0 / 0</div>
+      <div class="stat-label">Session</div>
+    </div>
+  </div>
+
+  <!-- API Key Settings -->
+  <div id="settingsSection">
+    <label>CapSolver API Key</label>
+    <div class="key-row">
+      <input type="password" id="capsolverKeyInput" placeholder="CAP-xxxxxxxxxxxxxxxx">
+      <button class="btn btn-green" id="saveKeyBtn">Save</button>
+    </div>
+    <div class="key-saved" id="keySavedMsg">Key saved</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Single vote -->
+  <div class="section">
+    <button class="btn btn-green" id="singleVoteBtn">&#9654; Vote Once</button>
+  </div>
+
+  <hr class="divider" style="margin-top:10px">
+
+  <!-- Loop controls -->
+  <div class="section">
+    <div class="loop-row">
+      <label>Total votes:</label>
+      <input type="number" id="totalVotesInput" placeholder="1400" min="1">
+    </div>
+    <button class="btn btn-blue" id="startLoopBtn">&#x27F3; Start Loop</button>
+    <button class="btn btn-red mt8" id="stopLoopBtn" style="display:none">&#9632; Stop Loop</button>
+    <div class="schedule-info" id="scheduleInfo"></div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-row">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">Idle</span>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Errors -->
+  <div class="errors-section">
+    <button class="toggle-btn" id="errorsToggleBtn">&#9660; Show Errors (0)</button>
+    <div id="errorList"></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Footer -->
+  <div class="footer">
+    <button id="resetStats">Reset Stats</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
