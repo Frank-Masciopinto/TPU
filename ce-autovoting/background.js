@@ -13,11 +13,10 @@ const MAX_PER_DAY   = 100;
 const MIN_GAP_MS    = 5 * 60 * 1000; // 5 minutes minimum between votes
 
 // ============================================================
-// TEMP EMAIL CONFIG (1secmail.com)
+// TEMP EMAIL CONFIG (mail.tm — uses real-looking domains)
 // ============================================================
 
-const TEMP_EMAIL_API = 'https://www.1secmail.com/api/v1/';
-const TEMP_EMAIL_DOMAINS = ['kzccv.com', 'qiott.com', 'wuuvo.com', 'bheps.com', 'dcctb.com'];
+const MAIL_TM_API = 'https://api.mail.tm';
 const TEMP_FIRST = ['james','mike','sarah','emma','john','anna','david','lisa','chris','kate',
                     'tom','mark','amy','nicole','ryan','brian','laura','rachel','kevin','megan'];
 const TEMP_LAST  = ['smith','jones','brown','white','green','hill','clark','hall','lee','king',
@@ -94,30 +93,66 @@ function randomTempLogin() {
   return `${first}.${last}${num}`;
 }
 
+async function getMailTmDomain() {
+  const res = await fetch(`${MAIL_TM_API}/domains`);
+  if (!res.ok) throw new Error(`mail.tm /domains failed: HTTP ${res.status}`);
+  const data = await res.json();
+  const domains = data['hydra:member'] || [];
+  const active = domains.filter(d => d.isActive);
+  if (active.length === 0) throw new Error('mail.tm has no active domains');
+  return active[Math.floor(Math.random() * active.length)].domain;
+}
+
 async function generateTempEmail() {
-  const domain  = TEMP_EMAIL_DOMAINS[Math.floor(Math.random() * TEMP_EMAIL_DOMAINS.length)];
-  const login   = randomTempLogin();
-  const address = `${login}@${domain}`;
-  const tempEmail = { login, domain, address };
+  const domain   = await getMailTmDomain();
+  const login    = randomTempLogin();
+  const address  = `${login}@${domain}`;
+  const password = 'VoteBot_' + Math.random().toString(36).slice(2, 14);
+
+  // Create account
+  const createRes = await fetch(`${MAIL_TM_API}/accounts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address, password }),
+  });
+  if (!createRes.ok) {
+    const errBody = await createRes.text();
+    throw new Error(`mail.tm account creation failed (${createRes.status}): ${errBody}`);
+  }
+  const account = await createRes.json();
+
+  // Get auth token
+  const tokenRes = await fetch(`${MAIL_TM_API}/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address, password }),
+  });
+  if (!tokenRes.ok) throw new Error(`mail.tm token failed: HTTP ${tokenRes.status}`);
+  const { token } = await tokenRes.json();
+
+  const tempEmail = { login, domain, address, password, token, accountId: account.id };
   await chrome.storage.local.set({ currentTempEmail: tempEmail });
-  console.log('[bg] Generated temp email:', address);
+  console.log('[bg] Generated mail.tm email:', address);
   return tempEmail;
 }
 
-async function pollTempEmailInbox(login, domain, timeoutMs = 90000) {
+async function pollTempEmailInbox(token, timeoutMs = 90000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     try {
-      const url = `${TEMP_EMAIL_API}?action=getMessages&login=${encodeURIComponent(login)}&domain=${encodeURIComponent(domain)}`;
-      const res = await fetch(url);
+      const res = await fetch(`${MAIL_TM_API}/messages`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) {
-        console.warn(`[bg] 1secmail getMessages HTTP ${res.status}`);
+        console.warn(`[bg] mail.tm messages HTTP ${res.status}`);
       } else {
-        const messages = await res.json();
-        if (Array.isArray(messages) && messages.length > 0) {
-          const msgId  = messages[0].id;
-          const msgUrl = `${TEMP_EMAIL_API}?action=readMessage&login=${encodeURIComponent(login)}&domain=${encodeURIComponent(domain)}&id=${msgId}`;
-          const msgRes = await fetch(msgUrl);
+        const data = await res.json();
+        const messages = data['hydra:member'] || [];
+        if (messages.length > 0) {
+          const msgId = messages[0].id;
+          const msgRes = await fetch(`${MAIL_TM_API}/messages/${msgId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           if (msgRes.ok) {
             const msg = await msgRes.json();
             console.log('[bg] Email received:', msg.subject);
@@ -384,7 +419,7 @@ async function handleEmailVerification(stats) {
   console.log(`[bg] Polling temp inbox for ${currentTempEmail.address}...`);
 
   // Poll for verification email (up to 90 seconds)
-  const emailMsg = await pollTempEmailInbox(currentTempEmail.login, currentTempEmail.domain, 90000);
+  const emailMsg = await pollTempEmailInbox(currentTempEmail.token, 90000);
 
   if (!emailMsg) {
     throw new Error(`Verification email not received within 90s (${currentTempEmail.address})`);
@@ -394,8 +429,12 @@ async function handleEmailVerification(stats) {
   await saveStats({ verificationStatus: 'clicking_link' });
   broadcastStatsUpdate();
 
-  // Extract verification link from HTML body
-  const link = extractVerificationLink(emailMsg.htmlBody || emailMsg.textBody || emailMsg.body || '');
+  // Extract verification link from email body
+  // mail.tm returns: html[] array with HTML parts, text for plain text
+  const htmlParts = emailMsg.html || [];
+  const htmlBody  = Array.isArray(htmlParts) ? htmlParts.join('') : (htmlParts || '');
+  const textBody  = emailMsg.text || '';
+  const link = extractVerificationLink(htmlBody || textBody);
 
   if (!link) {
     throw new Error('No verification link found in email body');

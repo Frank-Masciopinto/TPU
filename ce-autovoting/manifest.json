@@ -13,7 +13,7 @@
   "host_permissions": [
     "https://*.secondstreetapp.com/*",
     "https://api.capsolver.com/*",
-    "https://www.1secmail.com/*"
+    "https://api.mail.tm/*"
   ],
   "background": {
     "service_worker": "background.js"
