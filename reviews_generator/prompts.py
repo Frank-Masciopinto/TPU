@@ -397,7 +397,20 @@ A fleet manager says "ordered another batch for the shop" not "I purchased multi
 units." A rancher says "bolted right up" not "installation was straightforward." \
 The persona voice must be obvious to anyone reading the review.
 
-6. VOCAB VARIATION — persona vocabulary anchors are inspiration only, never \
+6. REGIONAL DIALECT — the persona_must_sound_like field may include \
+regional_slang phrases specific to the reviewer's home region. Rules: \
+- Use 0-2 slang phrases per review, naturally woven in — never forced. \
+- NOT every review needs slang. Maybe 60% of reviews include one phrase. \
+- A Texas rancher might write "fixin' to mount it" or "I reckon it'll hold". \
+- A Cajun-adjacent guy near Louisiana might say "mais yeah" or "I tell you what". \
+- A Valley contractor might say "for real" or "no lie" once. \
+- A young Austin reseller might say "lowkey" or "no joke". \
+- If the persona has NO regional_slang (e.g. a corporate fleet manager), \
+write in clean, neutral professional English. That is correct for them. \
+- NEVER mix regions. A Missouri guy does NOT say "y'all" and a Texan does \
+NOT say "heck yeah". Each persona's slang is region-locked.
+
+7. VOCAB VARIATION — persona vocabulary anchors are inspiration only, never \
 copy-paste. If the persona says "margins are tight", each review must phrase \
 that concept differently: "slim margins on these flips", "not a lot of room \
 on the price", "tight on budget for this turnaround". \
@@ -405,22 +418,22 @@ NEVER repeat the exact same phrase from the vocabulary list across two reviews \
 in the same batch, even for the same persona. The vocabulary is a starting \
 point — rephrase the idea each time.
 
-7. VARIATION — a variation_seed (0-9) will be provided. Even for the same persona \
+8. VARIATION — a variation_seed (0-9) will be provided. Even for the same persona \
 and same product, produce meaningfully different content: different opening angle, \
 different product aspect discussed, different gripe, different use-case detail.
 
-8. LENGTH — each review has a target_words value. Write to within ±5 words of that \
+9. LENGTH — each review has a target_words value. Write to within ±5 words of that \
 exact target. Every review in the batch MUST be a different length — a batch where \
 every review is 40-50 words is a failure. At least one review per batch must be \
 under 32 words (short, punchy) and at least one must be over 70 words (detailed). \
 4-star reviews must average longer than 5-star reviews. \
 Vary from very short (~24 words) to long (~120 words) across the batch.
 
-9. REVIEWER NAMES AND EMAILS — will be provided. Use them exactly as given.
+10. REVIEWER NAMES AND EMAILS — will be provided. Use them exactly as given.
 
-10. DATES — will be provided. Use them exactly as given in YYYY-MM-DD format.
+11. DATES — will be provided. Use them exactly as given in YYYY-MM-DD format.
 
-11. OUTPUT FORMAT — return a single JSON object with key "reviews" containing \
+12. OUTPUT FORMAT — return a single JSON object with key "reviews" containing \
 an array of exactly N review objects. Each review object has these exact keys:
    {
      "reviews": [
@@ -622,9 +635,16 @@ def build_user_prompt(
                 "spec_language=codes — exact technical notation is natural for this person."
             )
 
+        slang = persona.get("regional_slang", [])
+        slang_note = (
+            f" Regional dialect: {', '.join(slang[:3])}."
+            if slang
+            else " No regional slang — write in clean neutral English."
+        )
+
         persona_voice = (
             f"{persona['occupation']} from {persona['location']}. "
-            f"{persona['writing_style']}. "
+            f"{persona['writing_style']}.{slang_note} "
             f"{spec_lang_note} "
             f"Use phrases like: {', '.join(vocab_slice)}."
         )

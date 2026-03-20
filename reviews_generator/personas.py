@@ -72,6 +72,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "hauls hay bales, livestock, farm equipment on a utility trailer he built himself",
         "technical_level": "medium",
         "spec_language": "plain",
+        "regional_slang": ["fixin' to", "I reckon", "right quick", "dadgum", "over yonder"],
         "vocabulary": [
             "bolted right up", "fit my trailer", "solid build", "no complaints so far",
             "been using it for a while now", "had to order this after my old one gave out",
@@ -89,6 +90,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "hauls mowers, debris, mulch on a 16-ft tandem landscape trailer",
         "technical_level": "medium-high",
         "spec_language": "partial",
+        "regional_slang": [],
         "vocabulary": [
             "cheaper than the dealer", "my crew uses this daily", "had to replace after it wore out",
             "decent quality for the price", "ordered a few of these for the shop",
@@ -106,6 +108,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "2-horse slant-load trailer, weekend trail rides and competitions",
         "technical_level": "low-medium",
         "spec_language": "plain",
+        "regional_slang": [],
         "vocabulary": [
             "my horses are everything to me", "safety is non-negotiable",
             "had a mechanic install it", "peace of mind on the road",
@@ -123,6 +126,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "20-ft bumper-pull car hauler, hauls a Fox Body Mustang",
         "technical_level": "high",
         "spec_language": "partial",
+        "regional_slang": [],
         "vocabulary": [
             "GVWR", "bolt pattern", "5 lug", "6 lug", "axle rating",
             "Dexter-compatible", "upgraded from the stock setup",
@@ -140,6 +144,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "mixed fleet: flatbeds, equipment trailers, car haulers",
         "technical_level": "high",
         "spec_language": "partial",
+        "regional_slang": [],
         "vocabulary": [
             "ordered in bulk", "lead time was acceptable", "fits our Dexter axles",
             "maintenance schedule", "we run these on multiple trailers",
@@ -157,6 +162,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "20-ft bass boat trailer, freshwater and occasional coastal launches",
         "technical_level": "medium",
         "spec_language": "plain",
+        "regional_slang": ["man", "shoot", "tight lines", "no kidding"],
         "vocabulary": [
             "saltwater rated", "rust was starting to show", "freshwater use only",
             "boat launch", "replaced the bearings after last season",
@@ -174,6 +180,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "16-ft open trailer, hauls 2 ATVs for deer season and trail rides",
         "technical_level": "low-medium",
         "spec_language": "plain",
+        "regional_slang": ["shoot", "I tell you what", "mais yeah", "man", "no kidding"],
         "vocabulary": [
             "held up fine", "no issues", "fast shipping", "easy install",
             "needed this for deer season", "good deal", "did the job",
@@ -191,6 +198,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "20-ft enclosed concession trailer, moves every weekend",
         "technical_level": "low",
         "spec_language": "plain",
+        "regional_slang": ["y'all", "honey", "Lord have mercy", "bless your heart"],
         "vocabulary": [
             "my livelihood depends on this trailer", "needed something reliable",
             "not very mechanical but it was easy to install",
@@ -209,6 +217,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "buys parts for customer repairs — all types of trailers",
         "technical_level": "expert",
         "spec_language": "codes",
+        "regional_slang": ["I tell you what", "ol' boy", "she bolted right up", "ain't bad"],
         "vocabulary": [
             "Dexter-interchangeable", "drop-in replacement", "bearing kit",
             "ordered for a customer's 7k axle", "fits the Lippert spindle",
@@ -227,6 +236,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "tandem flatbed, hauls lumber, roofing materials, equipment",
         "technical_level": "medium",
         "spec_language": "plain",
+        "regional_slang": ["for real", "no lie", "man", "you know what I mean"],
         "vocabulary": [
             "good price", "holds up on my work trailer", "fast delivery",
             "needed this to get the job done", "no problems so far",
@@ -244,6 +254,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "builds custom utility and car trailers in retirement",
         "technical_level": "expert",
         "spec_language": "codes",
+        "regional_slang": ["I'll tell ya", "she'll hold", "ain't bad", "back when I was runnin'"],
         "vocabulary": [
             "back in the day", "quality has gone downhill on most brands",
             "this one held up", "been doing this for 40 years",
@@ -262,6 +273,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "various trailer types — flips them after reconditioning",
         "technical_level": "medium-high",
         "spec_language": "partial",
+        "regional_slang": [],
         "vocabulary": [
             "margins are tight", "fit and finish was acceptable",
             "quick turnaround matters on flips",
@@ -280,6 +292,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "small utility trailer for moving supplies and equipment around property",
         "technical_level": "low",
         "spec_language": "plain",
+        "regional_slang": [],
         "vocabulary": [
             "not a trailer expert", "my maintenance guy recommended this",
             "seems to work fine", "the trailer is back in service",
@@ -297,6 +310,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "40-ft gooseneck, 24k GVWR, hauls excavators and skid steers",
         "technical_level": "expert",
         "spec_language": "codes",
+        "regional_slang": ["dadgum", "she pulled fine", "ain't had no trouble", "run her loaded"],
         "vocabulary": [
             "20k GVWR", "24k tandem", "DOT compliant", "fifth wheel",
             "gooseneck", "hydraulic brakes", "12k axle", "8 lug",
@@ -314,6 +328,7 @@ PERSONAS: list[dict] = [
         "trailer_use": "building a 16-ft utility trailer from scratch using online plans",
         "technical_level": "low-medium",
         "spec_language": "plain",
+        "regional_slang": [],
         "vocabulary": [
             "first time building a trailer", "watched a lot of YouTube videos",
             "instructions were helpful", "wasn't sure at first",

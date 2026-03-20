@@ -25,6 +25,7 @@ from prompts import (
     build_user_prompt,
     build_tier1_text_prompt,
     detect_axle_weight,
+    detect_tire_size,
     random_title_only_title,
     _TRUCK_TIRE,
 )
@@ -57,6 +58,13 @@ _MEDIUM_HEAVY_PERSONA_IDS = _HEAVY_AXLE_PERSONA_IDS | {
 # All personas are valid for 6k and below
 _ALL_PERSONA_IDS = {p["id"] for p in PERSONAS}
 
+# Personas whose trailer type only uses small tires (12"-15").
+# Must be excluded from 16"+ tire/wheel products.
+_SMALL_TIRE_ONLY_PERSONA_IDS = {
+    "bobby_atv_guy",       # ATV trailers: 12"-15" tires, 3.5k axles max
+    "chris_boat_trailer",  # boat trailers: 13"-15" tires, light axles
+}
+
 # Commercial truck tires (22.5/24.5 inch) — only personas who operate
 # semi trucks, commercial fleets, or heavy freight vehicles
 _TRUCK_TIRE_PERSONA_IDS = {
@@ -72,8 +80,8 @@ _TRUCK_TIRE_PERSONA_IDS = {
 def _get_eligible_personas(product_name: str) -> list[dict]:
     """
     Return the filtered list of personas that are realistic for this product.
-    Commercial truck tires, heavy axles, and medium axles each have restricted pools.
-    All other products get all personas.
+    Applies layered filters: truck tires > axle weight > tire size > all.
+    Small-trailer personas (ATV, boat) are excluded from 16"+ tire/wheel products.
     """
     # Commercial truck tires take priority — very specific operator profile
     if _TRUCK_TIRE.search(product_name):
@@ -85,10 +93,15 @@ def _get_eligible_personas(product_name: str) -> list[dict]:
         elif weight is not None and weight >= 7000:
             eligible_ids = _MEDIUM_HEAVY_PERSONA_IDS
         else:
-            eligible_ids = _ALL_PERSONA_IDS
+            eligible_ids = set(_ALL_PERSONA_IDS)
+
+        # Exclude small-trailer personas from 16"+ tire/wheel products
+        tire_info = detect_tire_size(product_name)
+        if tire_info and tire_info["size"] in ("16", "17.5"):
+            eligible_ids = eligible_ids - _SMALL_TIRE_ONLY_PERSONA_IDS
 
     eligible = [p for p in PERSONAS if p["id"] in eligible_ids]
-    return eligible if eligible else PERSONAS   # fallback: never return empty list
+    return eligible if eligible else PERSONAS
 
 logger = logging.getLogger(__name__)
 

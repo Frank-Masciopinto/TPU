@@ -2,7 +2,11 @@
 // CONSTANTS
 // ============================================================
 
-const TARGET_URL    = 'https://thehuntsvilleitem.secondstreetapp.com/2026-Huntsville-Items-Readers-Choice/gallery/531033351';
+const TARGET_URL    = 'https://embed-1142836.secondstreetapp.com/embed/16a05f9b-0bff-4657-8d74-414c5a771dc1/gallery/531033351';
+const TARGET_ORIGINS = [
+  'embed-1142836.secondstreetapp.com',
+  'thehuntsvilleitem.secondstreetapp.com',
+];
 const VOTE_WINDOW   = { start: 8, end: 22 }; // Central time, 24h
 const TIMEZONE      = 'America/Chicago';
 const MAX_PER_DAY   = 100;
@@ -35,6 +39,21 @@ async function saveStats(updates) {
 
 function broadcastStatsUpdate() {
   chrome.runtime.sendMessage({ type: 'STATS_UPDATE' }).catch(() => {});
+}
+
+// Wipes cookies, cache, localStorage etc. for all target origins
+async function clearAllOriginData() {
+  const removeOpts = {
+    cookies: true, cache: true, localStorage: true,
+    indexedDB: true, serviceWorkers: true, cacheStorage: true,
+  };
+  for (const origin of TARGET_ORIGINS) {
+    try {
+      await chrome.browsingData.remove({ origins: [`https://${origin}`] }, removeOpts);
+    } catch (err) {
+      console.warn(`[bg] browsingData.remove failed for ${origin}:`, err.message);
+    }
+  }
 }
 
 // Clears only vote/timeout alarms — never wipes unrelated alarms
@@ -200,14 +219,26 @@ async function executeVoteInTab() {
   // Single-in-flight guard — bail if a vote tab is already open
   const current = await getStats();
   if (current.activeTabId !== null) {
-    console.warn('[bg] executeVoteInTab: vote already in progress (tabId:', current.activeTabId, '), skipping');
-    return;
+    // Check if the tab still actually exists — if not, it's a stale lock
+    try {
+      await chrome.tabs.get(current.activeTabId);
+      console.warn('[bg] executeVoteInTab: vote already in progress (tabId:', current.activeTabId, '), skipping');
+      return;
+    } catch (_) {
+      // Tab is gone — clear the stale lock and continue
+      console.log('[bg] Stale activeTabId', current.activeTabId, 'detected — clearing lock');
+      await saveStats({ activeTabId: null, autoVoteEnabled: false });
+    }
   }
+
+  // Pre-clear all origin data so the page loads fresh (no "already voted" state)
+  await clearAllOriginData();
+  console.log('[bg] Pre-cleared origin data before opening vote tab');
 
   // Set the guard flag so content_script.js actually runs
   await saveStats({ autoVoteEnabled: true });
 
-  const tab = await chrome.tabs.create({ url: TARGET_URL, active: false });
+  const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
   const tabId = tab.id;
   await saveStats({ activeTabId: tabId });
 
@@ -262,6 +293,17 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     switch (msg.type) {
 
       case 'VOTE_SUCCESS': {
+        // Remove the successfully used email from the pool and mark as used
+        const { emailPool = [], usedEmails = [] } = await chrome.storage.local.get(['emailPool', 'usedEmails']);
+        const consumedEmail = msg.email || (emailPool[0] ?? null);
+        const newPool = consumedEmail && emailPool[0] === consumedEmail
+          ? emailPool.slice(1)
+          : emailPool; // safety: only remove if it matches the front
+        await chrome.storage.local.set({
+          emailPool:  newPool,
+          usedEmails: consumedEmail ? [...usedEmails, consumedEmail].slice(-5000) : usedEmails,
+        });
+
         await saveStats({
           voteCount:    stats.voteCount    + 1,
           sessionTotal: stats.sessionTotal + 1
@@ -295,22 +337,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       }
 
       case 'CLEAR_DATA': {
-        // Always use the hardcoded constant — never trust msg.origin from caller
-        try {
-          await chrome.browsingData.remove(
-            { origins: [`https://${TARGET_ORIGIN}`] },
-            {
-              cookies:        true,
-              cache:          true,
-              localStorage:   true,
-              indexedDB:      true,
-              serviceWorkers: true,
-              cacheStorage:   true
-            }
-          );
-        } catch (err) {
-          console.warn('[bg] browsingData.remove failed (non-fatal):', err.message);
-        }
+        await clearAllOriginData();
         sendResponse({ success: true });
         break;
       }
@@ -349,17 +376,20 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
       case 'RESET_STATS': {
         await clearVoteAlarms();
+        // emailPool is intentionally NOT reset — preserves the loaded email list
+        // usedEmails IS reset so the pool emails become available again
         await saveStats({
-          voteCount:      0,
-          errorCount:     0,
-          errors:         [],
-          sessionTotal:   0,
-          sessionTarget:  0,
-          loopActive:     false,
-          scheduledVotes: [],
-          schedulingLock: false,
-          activeTabId:    null,
-          autoVoteEnabled: false
+          voteCount:       0,
+          errorCount:      0,
+          errors:          [],
+          sessionTotal:    0,
+          sessionTarget:   0,
+          loopActive:      false,
+          scheduledVotes:  [],
+          schedulingLock:  false,
+          activeTabId:     null,
+          autoVoteEnabled: false,
+          usedEmails:      [],
         });
         broadcastStatsUpdate();
         sendResponse({ ok: true });

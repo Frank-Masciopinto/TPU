@@ -1,0 +1,5 @@
+# Generated email pool — contains real PII, never commit
+emails_pool.json
+
+# DB extraction script — contains production credentials
+extract_emails.py

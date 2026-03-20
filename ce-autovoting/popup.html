@@ -222,6 +222,16 @@
     <div class="key-saved" id="keySavedMsg">Key saved</div>
   </div>
 
+  <!-- Email Pool -->
+  <div id="poolSection" style="padding:10px 12px 0">
+    <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Email Pool</label>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="btn btn-ghost" id="loadPoolBtn" style="width:auto;padding:6px 10px;font-size:11px;flex-shrink:0">Load JSON</button>
+      <span id="poolStats" style="font-size:10px;color:#666">Not loaded</span>
+    </div>
+    <input type="file" id="poolFileInput" accept=".json" style="display:none">
+  </div>
+
   <hr class="divider">
 
   <!-- Single vote -->
