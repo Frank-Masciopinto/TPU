@@ -12,7 +12,8 @@
   ],
   "host_permissions": [
     "https://*.secondstreetapp.com/*",
-    "https://api.capsolver.com/*"
+    "https://api.capsolver.com/*",
+    "https://www.1secmail.com/*"
   ],
   "background": {
     "service_worker": "background.js"
