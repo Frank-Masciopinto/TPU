@@ -21,6 +21,18 @@ const TARGET_ORIGINS = [
 })();
 
 // ============================================================
+// DEBUG LOG — persists to chrome.storage for post-mortem analysis
+// ============================================================
+
+const _debugLog = [];
+async function dbg(msg) {
+  const entry = `[${new Date().toISOString()}] ${msg}`;
+  _debugLog.push(entry);
+  console.log('[autoVote]', msg);
+  await chrome.storage.local.set({ debugLog: _debugLog }).catch(() => {});
+}
+
+// ============================================================
 // HELPERS
 // ============================================================
 
@@ -160,23 +172,23 @@ async function autoVote() {
     const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
     const lastName  = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
     const email     = await getNextEmail();
-    console.log(`[autoVote] Identity: ${firstName} ${lastName} <${email}>`);
+    await dbg(`Identity: ${firstName} ${lastName} <${email}>`);
 
-    console.log('[autoVote] Waiting for Ember render...');
+    await dbg('Waiting for Ember render...');
     await sleep(3000);
 
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     await sleep(1500);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     await sleep(500);
-    console.log('[autoVote] Scroll complete');
+    await dbg('Scroll complete');
 
     // ----------------------------------------------------------
     // Step 2 — Click vote button
     // ----------------------------------------------------------
     const voteBtn = await waitForElement('button.voting-button:not(.ssButtonDisabled)', 30000);
     voteBtn.click();
-    console.log('[autoVote] Vote button clicked');
+    await dbg('Vote button clicked');
     await sleep(2000);
 
     // ==========================================================
@@ -198,16 +210,16 @@ async function autoVote() {
     }
     if (!emailInput) throw new Error('[autoVote] Could not find email input after 15s');
     fillInput(emailInput, email);
-    console.log(`[autoVote] Email filled: ${email}`);
+    await dbg(`Email filled: ${email}`);
     await sleep(800);
 
     const hasCaptcha = !!document.querySelector('.cf-turnstile');
     if (hasCaptcha) {
-      console.log('[autoVote] Turnstile detected, solving...');
+      await dbg('Turnstile detected on page 1, solving...');
       await solveTurnstile();
       await sleep(800);
     } else {
-      console.log('[autoVote] No CAPTCHA on page 1');
+      await dbg('No CAPTCHA on page 1');
     }
 
     const page1SubmitSelectors = [
@@ -223,7 +235,7 @@ async function autoVote() {
       page1Btn = await waitForElement(page1SubmitSelectors.join(', '), 10000);
     }
     page1Btn.click();
-    console.log('[autoVote] Page 1 (email) submitted');
+    await dbg('Page 1 (email) submitted');
     await sleep(3000);
 
     // ==========================================================
@@ -232,16 +244,16 @@ async function autoVote() {
 
     const firstNameInput = await waitForElement('ss-form-field[data-field-id="40"] input.ember-text-field', 15000);
     fillInput(firstNameInput, firstName);
-    console.log(`[autoVote] First name filled: ${firstName}`);
+    await dbg(`First name filled: ${firstName}`);
     await sleep(600);
 
     const lastNameInput = document.querySelector('ss-form-field[data-field-id="41"] input.ember-text-field');
     if (lastNameInput) { fillInput(lastNameInput, lastName); await sleep(600); }
-    console.log(`[autoVote] Last name filled: ${lastName}`);
+    await dbg(`Last name filled: ${lastName}`);
 
     const zipInput = document.querySelector('ss-form-field[data-field-id="43"] input.ember-text-field');
     if (zipInput) { fillInput(zipInput, '77340'); await sleep(600); }
-    console.log('[autoVote] Zip filled: 77340');
+    await dbg('Zip filled: 77340');
 
     const checkboxInput = document.querySelector('ss-form-field[data-field-id="594"] input.ssCheckboxField');
     if (checkboxInput && !checkboxInput.checked) {
@@ -251,7 +263,7 @@ async function autoVote() {
       await sleep(600);
     }
 
-    console.log('[autoVote] Page 2 form fields filled');
+    await dbg('Page 2 form fields filled');
     await sleep(800);
 
     const page2SubmitSelectors = [
@@ -267,7 +279,7 @@ async function autoVote() {
       page2Btn = await waitForElement(page2SubmitSelectors.join(', '), 10000);
     }
     page2Btn.click();
-    console.log('[autoVote] Page 2 (vote) submitted');
+    await dbg('Page 2 (vote) submitted');
     await sleep(2000);
 
     // Step 7b — Turnstile after page 2 submit
@@ -281,30 +293,44 @@ async function autoVote() {
       await sleep(500);
     }
     if (turnstileFound) {
-      console.log('[autoVote] Turnstile detected after page 2 submit, solving...');
+      await dbg('Turnstile detected after page 2 submit, solving...');
       await solveTurnstile();
       await sleep(3000);
+      await dbg('Turnstile solved, waiting for page transition...');
     } else {
-      console.log('[autoVote] No Turnstile after page 2 submit');
+      await dbg('No Turnstile after page 2 submit');
     }
 
     // ----------------------------------------------------------
     // Step 8 — Detect: email verification OR direct success
     // ----------------------------------------------------------
+    await dbg('Step 8: Scanning for confirmation/verification screen...');
     let result = null; // 'needs_verification' | 'success'
-    const confirmDeadline = Date.now() + 20000;
+    const confirmDeadline = Date.now() + 30000;
+    let scanCount = 0;
 
     while (Date.now() < confirmDeadline) {
       const pageText = (document.body?.innerText || '').toLowerCase();
+      scanCount++;
+
+      // Log first scan and every 10th scan for diagnostics
+      if (scanCount === 1 || scanCount % 10 === 0) {
+        const snippet = pageText.slice(0, 300).replace(/\n/g, ' ');
+        await dbg(`Scan #${scanCount} — page text (first 300): "${snippet}"`);
+      }
 
       // Check for email verification screen FIRST (higher priority)
       if (pageText.includes('we sent an email') ||
+          pageText.includes('we\'ve sent') ||
           pageText.includes('link you must click') ||
           pageText.includes('check your email') ||
           pageText.includes('verify your email') ||
           pageText.includes('continue participating') ||
-          pageText.includes('confirmation email')) {
+          pageText.includes('confirmation email') ||
+          pageText.includes('sent you an email') ||
+          pageText.includes('email with a link')) {
         result = 'needs_verification';
+        await dbg('DETECTED: Email verification screen');
         break;
       }
 
@@ -316,12 +342,14 @@ async function autoVote() {
       }
       if (!directSuccess) {
         if (pageText.includes('thank you') || pageText.includes('thanks for entering') ||
-            pageText.includes('voted') || pageText.includes('vote has been')) {
+            pageText.includes('voted') || pageText.includes('vote has been') ||
+            pageText.includes('your entry') || pageText.includes('successfully entered')) {
           directSuccess = true;
         }
       }
       if (directSuccess) {
         result = 'success';
+        await dbg('DETECTED: Direct success screen');
         break;
       }
 
@@ -329,14 +357,16 @@ async function autoVote() {
     }
 
     if (result === 'needs_verification') {
-      console.log('[autoVote] Email verification required — handing off to background');
+      await dbg('Email verification required — handing off to background');
       chrome.runtime.sendMessage({ type: 'VOTE_NEEDS_VERIFICATION', email }).catch(() => {});
     } else if (result === 'success') {
-      console.log('[autoVote] ✓ Direct success confirmed');
+      await dbg('✓ Direct success confirmed');
       chrome.runtime.sendMessage({ type: 'VOTE_SUCCESS', email }).catch(() => {});
     } else {
-      console.warn('[autoVote] No confirmation or verification screen detected after 20s');
-      chrome.runtime.sendMessage({ type: 'VOTE_ERROR', error: 'No confirmation or verification detected after 20s' }).catch(() => {});
+      const finalText = (document.body?.innerText || '').slice(0, 500).replace(/\n/g, ' ');
+      await dbg(`TIMEOUT — page text (first 500): "${finalText}"`);
+      await dbg('No confirmation or verification screen detected after 30s');
+      chrome.runtime.sendMessage({ type: 'VOTE_ERROR', error: 'No confirmation or verification detected after 30s' }).catch(() => {});
     }
 
     // ----------------------------------------------------------
@@ -348,7 +378,7 @@ async function autoVote() {
     console.log('[autoVote] Cache and cookies cleared for all origins');
 
   } catch (err) {
-    console.error('[autoVote] Fatal error:', err.message);
+    await dbg(`FATAL ERROR: ${err.message}`);
     chrome.runtime.sendMessage({ type: 'VOTE_ERROR', error: err.message }).catch(() => {});
     for (const origin of TARGET_ORIGINS) {
       await chrome.runtime.sendMessage({ type: 'CLEAR_DATA', origin }).catch(() => {});

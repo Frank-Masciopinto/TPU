@@ -530,6 +530,12 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         break;
       }
 
+      case 'GET_DEBUG_LOG': {
+        const { debugLog = [] } = await chrome.storage.local.get('debugLog');
+        sendResponse(debugLog);
+        break;
+      }
+
       case 'START_LOOP': {
         const totalVotes = parseInt(msg.totalVotes, 10);
         if (!totalVotes || totalVotes < 1) {
