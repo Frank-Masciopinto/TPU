@@ -7,13 +7,13 @@ const TARGET_ORIGINS = [
   'embed-1142836.secondstreetapp.com',
   'thehuntsvilleitem.secondstreetapp.com',
 ];
-const VOTE_WINDOW   = { start: 8, end: 22 }; // Central time, 24h
+const VOTE_WINDOW   = { start: 8, end: 22 };
 const TIMEZONE      = 'America/Chicago';
 const MAX_PER_DAY   = 100;
-const MIN_GAP_MS    = 5 * 60 * 1000; // 5 minutes minimum between votes
+const MIN_GAP_MS    = 5 * 60 * 1000;
 
 // ============================================================
-// TEMP EMAIL CONFIG (mail.tm — uses real-looking domains)
+// TEMP EMAIL CONFIG (mail.tm)
 // ============================================================
 
 const MAIL_TM_API = 'https://api.mail.tm';
@@ -23,21 +23,32 @@ const TEMP_LAST  = ['smith','jones','brown','white','green','hill','clark','hall
                     'walker','young','allen','scott','adams','baker','turner','nelson','carter','morris'];
 
 // ============================================================
+// SERVICE-WORKER KEEPALIVE
+// Chrome terminates idle service workers after ~30 s.
+// A repeating alarm fires every 25 s to keep it alive while
+// a vote is in progress (long-running: captcha + email poll).
+// ============================================================
+
+const KEEPALIVE_ALARM = 'sw_keepalive';
+
+async function startKeepalive() {
+  await chrome.alarms.create(KEEPALIVE_ALARM, { periodInMinutes: 0.4 });
+}
+
+async function stopKeepalive() {
+  await chrome.alarms.clear(KEEPALIVE_ALARM);
+}
+
+// ============================================================
 // STORAGE HELPERS
 // ============================================================
 
 async function getStats() {
   const defaults = {
-    voteCount:          0,
-    errorCount:         0,
-    errors:             [],
-    sessionTotal:       0,
-    sessionTarget:      0,
-    loopActive:         false,
-    scheduledVotes:     [],
-    schedulingLock:     false,
-    activeTabId:        null,
-    verificationStatus: null,
+    voteCount: 0, errorCount: 0, errors: [],
+    sessionTotal: 0, sessionTarget: 0, loopActive: false,
+    scheduledVotes: [], schedulingLock: false,
+    activeTabId: null, verificationStatus: null,
   };
   const stored = await chrome.storage.local.get(Object.keys(defaults));
   return { ...defaults, ...stored };
@@ -49,6 +60,13 @@ async function saveStats(updates) {
 
 function broadcastStatsUpdate() {
   chrome.runtime.sendMessage({ type: 'STATS_UPDATE' }).catch(() => {});
+}
+
+async function recordError(message) {
+  const stats = await getStats();
+  const errors = [...stats.errors, { message, timestamp: new Date().toISOString() }].slice(-100);
+  await saveStats({ errorCount: stats.errorCount + 1, errors });
+  broadcastStatsUpdate();
 }
 
 async function clearAllOriginData() {
@@ -68,15 +86,10 @@ async function clearAllOriginData() {
 async function clearVoteAlarms() {
   const all = await chrome.alarms.getAll();
   await Promise.all(
-    all
-      .filter(a => a.name.startsWith('vote_') || a.name.startsWith('tab_timeout_'))
-      .map(a => chrome.alarms.clear(a.name))
+    all.filter(a => a.name.startsWith('vote_') || a.name.startsWith('tab_timeout_'))
+       .map(a => chrome.alarms.clear(a.name))
   );
 }
-
-// ============================================================
-// NATURAL DELAY HELPER
-// ============================================================
 
 function naturalDelay(baseMinutes) {
   return baseMinutes * (0.8 + Math.random() * 0.4) * 60 * 1000;
@@ -95,10 +108,9 @@ function randomTempLogin() {
 
 async function getMailTmDomain() {
   const res = await fetch(`${MAIL_TM_API}/domains`);
-  if (!res.ok) throw new Error(`mail.tm /domains failed: HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`mail.tm /domains HTTP ${res.status}`);
   const data = await res.json();
-  const domains = data['hydra:member'] || [];
-  const active = domains.filter(d => d.isActive);
+  const active = (data['hydra:member'] || []).filter(d => d.isActive);
   if (active.length === 0) throw new Error('mail.tm has no active domains');
   return active[Math.floor(Math.random() * active.length)].domain;
 }
@@ -107,33 +119,43 @@ async function generateTempEmail() {
   const domain   = await getMailTmDomain();
   const login    = randomTempLogin();
   const address  = `${login}@${domain}`;
-  const password = 'VoteBot_' + Math.random().toString(36).slice(2, 14);
+  const password = 'VB_' + Math.random().toString(36).slice(2, 14);
 
-  // Create account
   const createRes = await fetch(`${MAIL_TM_API}/accounts`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ address, password }),
   });
   if (!createRes.ok) {
-    const errBody = await createRes.text();
-    throw new Error(`mail.tm account creation failed (${createRes.status}): ${errBody}`);
+    const body = await createRes.text();
+    throw new Error(`mail.tm account ${createRes.status}: ${body}`);
   }
   const account = await createRes.json();
 
-  // Get auth token
   const tokenRes = await fetch(`${MAIL_TM_API}/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ address, password }),
   });
-  if (!tokenRes.ok) throw new Error(`mail.tm token failed: HTTP ${tokenRes.status}`);
+  if (!tokenRes.ok) throw new Error(`mail.tm token HTTP ${tokenRes.status}`);
   const { token } = await tokenRes.json();
 
   const tempEmail = { login, domain, address, password, token, accountId: account.id };
   await chrome.storage.local.set({ currentTempEmail: tempEmail });
-  console.log('[bg] Generated mail.tm email:', address);
+  console.log('[bg] Temp email ready:', address);
   return tempEmail;
+}
+
+async function generateTempEmailWithRetry() {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      return await generateTempEmail();
+    } catch (err) {
+      console.warn(`[bg] generateTempEmail attempt ${attempt}:`, err.message);
+      if (attempt < 3) await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+  throw new Error('Failed to generate temp email after 3 attempts');
 }
 
 async function pollTempEmailInbox(token, timeoutMs = 90000) {
@@ -143,14 +165,11 @@ async function pollTempEmailInbox(token, timeoutMs = 90000) {
       const res = await fetch(`${MAIL_TM_API}/messages`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) {
-        console.warn(`[bg] mail.tm messages HTTP ${res.status}`);
-      } else {
+      if (res.ok) {
         const data = await res.json();
         const messages = data['hydra:member'] || [];
         if (messages.length > 0) {
-          const msgId = messages[0].id;
-          const msgRes = await fetch(`${MAIL_TM_API}/messages/${msgId}`, {
+          const msgRes = await fetch(`${MAIL_TM_API}/messages/${messages[0].id}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (msgRes.ok) {
@@ -161,7 +180,7 @@ async function pollTempEmailInbox(token, timeoutMs = 90000) {
         }
       }
     } catch (err) {
-      console.warn('[bg] pollTempEmailInbox error:', err.message);
+      console.warn('[bg] pollTempEmailInbox:', err.message);
     }
     await new Promise(r => setTimeout(r, 5000));
   }
@@ -170,40 +189,25 @@ async function pollTempEmailInbox(token, timeoutMs = 90000) {
 
 function extractVerificationLink(html) {
   if (!html) return null;
+  const decoded = html.replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 
-  const decoded = html
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+  const textPat = /href=["'](https?:\/\/[^"']+)["'][^>]*>[^<]*(?:verify|confirm|vote|click\s+here|continue|participate)[^<]*/gi;
+  let m = textPat.exec(decoded);
+  if (m) return m[1];
 
-  // Strategy 1: Links whose visible text contains action words
-  const textPatterns = /href=["'](https?:\/\/[^"']+)["'][^>]*>[^<]*(?:verify|confirm|vote|click\s+here|continue|participate)[^<]*/gi;
-  let match = textPatterns.exec(decoded);
-  if (match) return match[1];
+  const urlPat = /href=["'](https?:\/\/[^"']*(?:verify|confirm|vote|token|auth|activate|click|entry)[^"']*?)["']/gi;
+  m = urlPat.exec(decoded);
+  if (m) return m[1];
 
-  // Strategy 2: URLs containing verification keywords
-  const urlPatterns = /href=["'](https?:\/\/[^"']*(?:verify|confirm|vote|token|auth|activate|click|entry)[^"']*?)["']/gi;
-  match = urlPatterns.exec(decoded);
-  if (match) return match[1];
-
-  // Strategy 3: First non-utility link (most prominent CTA)
-  const allLinksRegex = /href=["'](https?:\/\/[^"']+)["']/gi;
-  const allLinks = [];
-  while ((match = allLinksRegex.exec(decoded)) !== null) {
-    const url = match[1];
-    if (url.includes('unsubscribe') || url.includes('privacy') ||
-        url.includes('support') || url.includes('mailto:') ||
-        url.includes('facebook.com') || url.includes('twitter.com') ||
-        url.includes('instagram.com') || url.includes('linkedin.com') ||
-        url.includes('youtube.com') || url.includes('#') ||
-        url.includes('terms') || url.includes('opt-out')) {
-      continue;
-    }
-    allLinks.push(url);
+  const all = /href=["'](https?:\/\/[^"']+)["']/gi;
+  const links = [];
+  while ((m = all.exec(decoded)) !== null) {
+    const u = m[1];
+    if (/(unsubscribe|privacy|support|mailto:|facebook|twitter|instagram|linkedin|youtube|terms|opt-out|#)/.test(u)) continue;
+    links.push(u);
   }
-  return allLinks[0] || null;
+  return links[0] || null;
 }
 
 // ============================================================
@@ -213,22 +217,16 @@ function extractVerificationLink(html) {
 async function restoreAlarms() {
   const stats = await getStats();
   if (!stats.loopActive || !stats.scheduledVotes.length) return;
-
   const now = Date.now();
-  const existingAlarms = await chrome.alarms.getAll();
-  const existingNames  = new Set(existingAlarms.map(a => a.name));
-
+  const existingNames = new Set((await chrome.alarms.getAll()).map(a => a.name));
   const futureVotes = stats.scheduledVotes.filter(iso => new Date(iso).getTime() > now);
   await saveStats({ scheduledVotes: futureVotes });
-
-  for (const isoTime of futureVotes) {
-    const when      = new Date(isoTime).getTime();
-    const alarmName = `vote_${when}`;
-    if (!existingNames.has(alarmName)) {
-      chrome.alarms.create(alarmName, { when });
-    }
+  for (const iso of futureVotes) {
+    const when = new Date(iso).getTime();
+    const name = `vote_${when}`;
+    if (!existingNames.has(name)) chrome.alarms.create(name, { when });
   }
-  console.log('[bg] restoreAlarms: restored', futureVotes.length, 'future votes');
+  console.log('[bg] restoreAlarms:', futureVotes.length, 'future votes');
 }
 
 // ============================================================
@@ -237,179 +235,114 @@ async function restoreAlarms() {
 
 async function scheduleNextBatch() {
   const stats = await getStats();
-
-  if (stats.schedulingLock) {
-    console.log('[bg] scheduleNextBatch: lock held, skipping');
-    return;
-  }
+  if (stats.schedulingLock) return;
   if (!stats.loopActive || stats.sessionTotal >= stats.sessionTarget) {
-    console.log('[bg] scheduleNextBatch: loop complete or inactive');
-    await saveStats({ loopActive: false });
-    broadcastStatsUpdate();
-    return;
+    await saveStats({ loopActive: false }); broadcastStatsUpdate(); return;
   }
-  const existingAlarms = await chrome.alarms.getAll();
-  const voteAlarms     = existingAlarms.filter(a => a.name.startsWith('vote_'));
-  if (voteAlarms.length > 0) {
-    console.log('[bg] scheduleNextBatch: alarms already scheduled, skipping');
-    return;
-  }
+  if ((await chrome.alarms.getAll()).filter(a => a.name.startsWith('vote_')).length > 0) return;
 
   await saveStats({ schedulingLock: true });
-
   try {
     const remaining  = stats.sessionTarget - stats.sessionTotal;
     const todayBatch = Math.min(MAX_PER_DAY, remaining);
-
     const nowMs      = Date.now();
     const centralNow = new Intl.DateTimeFormat('en-US', {
-      timeZone: TIMEZONE,
-      hour: 'numeric', minute: 'numeric', hour12: false
+      timeZone: TIMEZONE, hour: 'numeric', minute: 'numeric', hour12: false
     }).formatToParts(new Date(nowMs));
-
-    const centralHour   = parseInt(centralNow.find(p => p.type === 'hour').value,   10);
+    const centralHour   = parseInt(centralNow.find(p => p.type === 'hour').value, 10);
     const centralMinute = parseInt(centralNow.find(p => p.type === 'minute').value, 10);
+    const windowEnd = VOTE_WINDOW.end * 60, curMins = centralHour * 60 + centralMinute, windowStart = VOTE_WINDOW.start * 60;
 
-    const windowEndMinutes    = VOTE_WINDOW.end * 60;
-    const currentTotalMinutes = centralHour * 60 + centralMinute;
-    const windowStartMinutes  = VOTE_WINDOW.start * 60;
-
-    let startMinutesFromNow;
-    if (currentTotalMinutes >= windowEndMinutes) {
-      const minutesUntilMidnight = (24 * 60) - currentTotalMinutes;
-      startMinutesFromNow        = minutesUntilMidnight + windowStartMinutes;
+    let startFromNow;
+    if (curMins >= windowEnd) {
+      startFromNow = (24 * 60 - curMins) + windowStart;
     } else {
-      startMinutesFromNow = Math.max(1, 1);
+      startFromNow = 1;
     }
-
-    const availableWindowMinutes = Math.max(
-      1,
-      windowEndMinutes - Math.max(currentTotalMinutes, windowStartMinutes)
-    );
-
-    const baseIntervalMinutes = Math.max(5, availableWindowMinutes / todayBatch);
-    const scheduledTimes      = [];
-    let   cursor               = nowMs + startMinutesFromNow * 60 * 1000;
-
+    const avail = Math.max(1, windowEnd - Math.max(curMins, windowStart));
+    const baseInterval = Math.max(5, avail / todayBatch);
+    const times = [];
+    let cursor = nowMs + startFromNow * 60000;
     for (let i = 0; i < todayBatch; i++) {
-      const delay = naturalDelay(baseIntervalMinutes);
-      cursor += Math.max(delay, MIN_GAP_MS, 60 * 1000);
-
-      const centralParts = new Intl.DateTimeFormat('en-US', {
+      cursor += Math.max(naturalDelay(baseInterval), MIN_GAP_MS, 60000);
+      const cp = new Intl.DateTimeFormat('en-US', {
         timeZone: TIMEZONE, hour: 'numeric', minute: 'numeric', hour12: false
       }).formatToParts(new Date(cursor));
-      const cHour = parseInt(centralParts.find(p => p.type === 'hour').value,   10);
-      const cMin  = parseInt(centralParts.find(p => p.type === 'minute').value, 10);
-      const cTotalMins = cHour * 60 + cMin;
-      if (cTotalMins >= VOTE_WINDOW.end * 60) {
-        const minsToMidnight    = (24 * 60) - cTotalMins;
-        const minsToWindowStart = minsToMidnight + VOTE_WINDOW.start * 60;
-        cursor += minsToWindowStart * 60 * 1000;
+      const cH = parseInt(cp.find(p => p.type === 'hour').value, 10);
+      const cM = parseInt(cp.find(p => p.type === 'minute').value, 10);
+      if (cH * 60 + cM >= windowEnd) {
+        cursor += ((24 * 60 - (cH * 60 + cM)) + windowStart) * 60000;
       }
-
-      scheduledTimes.push(new Date(cursor).toISOString());
+      times.push(new Date(cursor).toISOString());
     }
-
-    await saveStats({ scheduledVotes: scheduledTimes, schedulingLock: false });
-
-    for (const isoTime of scheduledTimes) {
-      const when      = new Date(isoTime).getTime();
-      const alarmName = `vote_${when}`;
-      chrome.alarms.create(alarmName, { when });
-    }
-
-    console.log('[bg] Scheduled', todayBatch, 'votes:', scheduledTimes);
+    await saveStats({ scheduledVotes: times, schedulingLock: false });
+    for (const t of times) chrome.alarms.create(`vote_${new Date(t).getTime()}`, { when: new Date(t).getTime() });
+    console.log('[bg] Scheduled', todayBatch, 'votes');
     broadcastStatsUpdate();
-
   } catch (err) {
-    console.error('[bg] scheduleNextBatch error:', err);
+    console.error('[bg] scheduleNextBatch:', err);
     await saveStats({ schedulingLock: false });
   }
 }
 
 // ============================================================
-// TAB VOTE EXECUTION
+// TAB VOTE EXECUTION  —  fire-and-forget, never awaited by popup
 // ============================================================
 
 async function executeVoteInTab() {
-  const current = await getStats();
-  if (current.activeTabId !== null) {
-    try {
-      await chrome.tabs.get(current.activeTabId);
-      console.warn('[bg] executeVoteInTab: vote already in progress (tabId:', current.activeTabId, '), skipping');
-      return;
-    } catch (_) {
-      console.log('[bg] Stale activeTabId', current.activeTabId, 'detected — clearing lock');
-      await saveStats({ activeTabId: null, autoVoteEnabled: false, verificationStatus: null });
+  // --- keepalive so Chrome won't kill us mid-vote ---
+  await startKeepalive();
+
+  try {
+    const current = await getStats();
+    if (current.activeTabId !== null) {
+      try { await chrome.tabs.get(current.activeTabId); console.warn('[bg] vote in progress, skip'); return; }
+      catch (_) { await saveStats({ activeTabId: null, autoVoteEnabled: false, verificationStatus: null }); }
     }
+
+    // ★ OPEN TAB FIRST — no awaits before this that could let SW die
+    const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
+    const tabId = tab.id;
+    console.log(`[bg] Tab ${tabId} opened`);
+
+    // Persist state immediately after tab opens
+    await saveStats({ autoVoteEnabled: true, verificationStatus: null, activeTabId: tabId });
+
+    // Run email gen + clearing + page-load in parallel
+    const emailPromise = generateTempEmailWithRetry();
+    const clearPromise = clearAllOriginData().catch(e => console.warn('[bg] clear failed:', e.message));
+    const pagePromise  = new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { chrome.tabs.onUpdated.removeListener(fn); reject(new Error('page load timeout 60s')); }, 60000);
+      function fn(id, info) {
+        if (id === tabId && info.status === 'complete') { clearTimeout(timer); chrome.tabs.onUpdated.removeListener(fn); resolve(); }
+      }
+      chrome.tabs.onUpdated.addListener(fn);
+    });
+
+    await Promise.all([emailPromise, clearPromise, pagePromise]);
+
+    // Inject content script
+    await chrome.scripting.executeScript({ target: { tabId }, files: ['content_script.js'] });
+    chrome.alarms.create(`tab_timeout_${tabId}`, { delayInMinutes: 5 });
+    console.log(`[bg] Tab ${tabId} script injected`);
+
+  } catch (err) {
+    console.error('[bg] executeVoteInTab failed:', err.message);
+    await recordError(`executeVoteInTab: ${err.message}`);
+    // Try to clean up the tab we may have opened
+    const { activeTabId } = await chrome.storage.local.get('activeTabId');
+    if (activeTabId) { try { await chrome.tabs.remove(activeTabId); } catch (_) {} }
+    await saveStats({ activeTabId: null, autoVoteEnabled: false, verificationStatus: null });
+    await stopKeepalive();
   }
-
-  // Open the tab INSTANTLY — don't block on email generation
-  await saveStats({ autoVoteEnabled: true, verificationStatus: null });
-  const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
-  const tabId = tab.id;
-  await saveStats({ activeTabId: tabId });
-  console.log(`[bg] Tab ${tabId} opened instantly`);
-
-  // Generate temp email (with retry) while page loads
-  let emailReady = false;
-  const emailPromise = (async () => {
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        await generateTempEmail();
-        console.log(`[bg] Temp email ready (attempt ${attempt})`);
-        emailReady = true;
-        return;
-      } catch (err) {
-        console.warn(`[bg] generateTempEmail attempt ${attempt} failed:`, err.message);
-        if (attempt < 3) await new Promise(r => setTimeout(r, 2000));
-      }
-    }
-    throw new Error('Failed to generate temp email after 3 attempts');
-  })();
-
-  // Clear origin data (non-fatal if it fails)
-  const clearPromise = clearAllOriginData()
-    .then(() => console.log('[bg] Origin data cleared'))
-    .catch(e => console.warn('[bg] clearAllOriginData failed:', e.message));
-
-  // Wait for page to load
-  const pagePromise = new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      chrome.tabs.onUpdated.removeListener(onUpdated);
-      reject(new Error(`Tab ${tabId} never reached complete status after 60s`));
-    }, 60000);
-    function onUpdated(id, changeInfo) {
-      if (id === tabId && changeInfo.status === 'complete') {
-        clearTimeout(timer);
-        chrome.tabs.onUpdated.removeListener(onUpdated);
-        resolve();
-      }
-    }
-    chrome.tabs.onUpdated.addListener(onUpdated);
-  });
-
-  // Wait for all three, but handle email failure gracefully
-  await Promise.all([emailPromise, clearPromise, pagePromise]);
-
-  // Inject content script (email is ready in storage by now)
-  await chrome.scripting.executeScript({
-    target: { tabId },
-    files:  ['content_script.js']
-  });
-
-  // Fallback: close tab after 5 minutes
-  chrome.alarms.create(`tab_timeout_${tabId}`, { delayInMinutes: 5 });
-  console.log(`[bg] Tab ${tabId} script injected. Awaiting vote result...`);
 }
 
 async function closeVoteTab(tabId) {
   if (!tabId) return;
   chrome.alarms.clear(`tab_timeout_${tabId}`).catch(() => {});
-  try {
-    await chrome.tabs.remove(tabId);
-  } catch (_) {}
+  try { await chrome.tabs.remove(tabId); } catch (_) {}
   await saveStats({ activeTabId: null, autoVoteEnabled: false, verificationStatus: null });
+  await stopKeepalive();
 }
 
 // ============================================================
@@ -418,74 +351,39 @@ async function closeVoteTab(tabId) {
 
 async function handleEmailVerification(stats) {
   const { currentTempEmail } = await chrome.storage.local.get('currentTempEmail');
-  if (!currentTempEmail) {
-    throw new Error('Temp email data missing during verification');
+  if (!currentTempEmail) throw new Error('Temp email data missing');
+
+  if (stats.activeTabId) {
+    chrome.alarms.clear(`tab_timeout_${stats.activeTabId}`).catch(() => {});
+    try { await chrome.tabs.remove(stats.activeTabId); } catch (_) {}
   }
 
-  const voteTabId = stats.activeTabId;
-
-  // Clear the tab timeout alarm
-  if (voteTabId) {
-    chrome.alarms.clear(`tab_timeout_${voteTabId}`).catch(() => {});
-    try { await chrome.tabs.remove(voteTabId); } catch (_) {}
-  }
-
-  // Update status
   await saveStats({ verificationStatus: 'waiting_for_email', activeTabId: null });
   broadcastStatsUpdate();
+  console.log(`[bg] Polling inbox for ${currentTempEmail.address}...`);
 
-  console.log(`[bg] Polling temp inbox for ${currentTempEmail.address}...`);
-
-  // Poll for verification email (up to 90 seconds)
   const emailMsg = await pollTempEmailInbox(currentTempEmail.token, 90000);
+  if (!emailMsg) throw new Error(`Verification email not received within 90s (${currentTempEmail.address})`);
 
-  if (!emailMsg) {
-    throw new Error(`Verification email not received within 90s (${currentTempEmail.address})`);
-  }
-
-  console.log('[bg] Verification email received, extracting link...');
   await saveStats({ verificationStatus: 'clicking_link' });
   broadcastStatsUpdate();
 
-  // Extract verification link from email body
-  // mail.tm returns: html[] array with HTML parts, text for plain text
   const htmlParts = emailMsg.html || [];
   const htmlBody  = Array.isArray(htmlParts) ? htmlParts.join('') : (htmlParts || '');
-  const textBody  = emailMsg.text || '';
-  const link = extractVerificationLink(htmlBody || textBody);
+  const link = extractVerificationLink(htmlBody || emailMsg.text || '');
+  if (!link) throw new Error('No verification link found in email');
 
-  if (!link) {
-    throw new Error('No verification link found in email body');
-  }
-
-  console.log('[bg] Opening verification link:', link);
-
-  // Open verification link in a new tab
-  const verifyTab = await chrome.tabs.create({ url: link, active: false });
-
-  // Wait for tab to finish loading (max 30s)
-  await new Promise((resolve) => {
-    const timer = setTimeout(() => {
-      chrome.tabs.onUpdated.removeListener(onUpdated);
-      resolve();
-    }, 30000);
-    function onUpdated(id, changeInfo) {
-      if (id === verifyTab.id && changeInfo.status === 'complete') {
-        clearTimeout(timer);
-        chrome.tabs.onUpdated.removeListener(onUpdated);
-        resolve();
-      }
+  console.log('[bg] Verification link:', link);
+  const vTab = await chrome.tabs.create({ url: link, active: false });
+  await new Promise(resolve => {
+    const timer = setTimeout(() => { chrome.tabs.onUpdated.removeListener(fn); resolve(); }, 30000);
+    function fn(id, info) {
+      if (id === vTab.id && info.status === 'complete') { clearTimeout(timer); chrome.tabs.onUpdated.removeListener(fn); resolve(); }
     }
-    chrome.tabs.onUpdated.addListener(onUpdated);
+    chrome.tabs.onUpdated.addListener(fn);
   });
-
-  // Allow time for any redirects / processing
   await new Promise(r => setTimeout(r, 3000));
-
-  // Close verification tab
-  try { await chrome.tabs.remove(verifyTab.id); } catch (_) {}
-
-  // Clear origin data after verification
+  try { await chrome.tabs.remove(vTab.id); } catch (_) {}
   await clearAllOriginData();
 }
 
@@ -494,24 +392,25 @@ async function handleEmailVerification(stats) {
 // ============================================================
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  // ★ SINGLE_VOTE: respond IMMEDIATELY, run in background
+  if (msg.type === 'SINGLE_VOTE') {
+    sendResponse({ ok: true, note: 'vote started' });
+    executeVoteInTab();         // fire-and-forget — popup is already closed
+    return false;               // sync response already sent
+  }
+
+  // Everything else: async handler
   (async () => {
     const stats = await getStats();
 
     switch (msg.type) {
 
       case 'VOTE_SUCCESS': {
-        await saveStats({
-          voteCount:          stats.voteCount    + 1,
-          sessionTotal:       stats.sessionTotal + 1,
-          verificationStatus: null,
-        });
+        await saveStats({ voteCount: stats.voteCount + 1, sessionTotal: stats.sessionTotal + 1, verificationStatus: null });
         await closeVoteTab(stats.activeTabId);
         broadcastStatsUpdate();
-
-        const updated = await getStats();
-        if (updated.loopActive && updated.sessionTotal >= updated.sessionTarget) {
-          await saveStats({ loopActive: false });
-        }
+        const u = await getStats();
+        if (u.loopActive && u.sessionTotal >= u.sessionTarget) await saveStats({ loopActive: false });
         sendResponse({ ok: true });
         break;
       }
@@ -519,94 +418,40 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       case 'VOTE_NEEDS_VERIFICATION': {
         try {
           await handleEmailVerification(stats);
-
-          // Mark as success
-          const freshStats = await getStats();
-          await saveStats({
-            voteCount:          freshStats.voteCount    + 1,
-            sessionTotal:       freshStats.sessionTotal + 1,
-            verificationStatus: null,
-            activeTabId:        null,
-            autoVoteEnabled:    false,
-          });
+          const f = await getStats();
+          await saveStats({ voteCount: f.voteCount + 1, sessionTotal: f.sessionTotal + 1, verificationStatus: null, activeTabId: null, autoVoteEnabled: false });
           broadcastStatsUpdate();
-          console.log('[bg] ✓ Vote verified and counted!');
-
-          const updated = await getStats();
-          if (updated.loopActive && updated.sessionTotal >= updated.sessionTarget) {
-            await saveStats({ loopActive: false });
-          }
+          console.log('[bg] ✓ Vote verified!');
+          const u = await getStats();
+          if (u.loopActive && u.sessionTotal >= u.sessionTarget) await saveStats({ loopActive: false });
+          await stopKeepalive();
           sendResponse({ ok: true });
-
         } catch (err) {
-          console.error('[bg] Email verification failed:', err.message);
-          const freshStats = await getStats();
-          const errors = [...freshStats.errors, {
-            message:   err.message,
-            timestamp: new Date().toISOString()
-          }].slice(-100);
-          await saveStats({
-            errorCount:         freshStats.errorCount + 1,
-            sessionTotal:       freshStats.sessionTotal + 1,
-            errors,
-            activeTabId:        null,
-            autoVoteEnabled:    false,
-            verificationStatus: null,
-          });
-          broadcastStatsUpdate();
+          console.error('[bg] Verification failed:', err.message);
+          await recordError(err.message);
+          await saveStats({ activeTabId: null, autoVoteEnabled: false, verificationStatus: null });
+          await stopKeepalive();
           sendResponse({ ok: false, error: err.message });
         }
         break;
       }
 
       case 'VOTE_ERROR': {
-        const errors = [...stats.errors, {
-          message:   msg.error || 'Unknown error',
-          timestamp: new Date().toISOString()
-        }].slice(-100);
-        await saveStats({
-          errorCount:         stats.errorCount   + 1,
-          sessionTotal:       stats.sessionTotal + 1,
-          errors,
-          verificationStatus: null,
-        });
+        await recordError(msg.error || 'Unknown error');
+        await saveStats({ sessionTotal: stats.sessionTotal + 1 });
         await closeVoteTab(stats.activeTabId);
-        broadcastStatsUpdate();
         sendResponse({ ok: true });
         break;
       }
 
-      case 'CLEAR_DATA': {
-        await clearAllOriginData();
-        sendResponse({ success: true });
-        break;
-      }
-
-      case 'GET_STATS': {
-        sendResponse(stats);
-        break;
-      }
-
-      case 'GET_DEBUG_LOG': {
-        const { debugLog = [] } = await chrome.storage.local.get('debugLog');
-        sendResponse(debugLog);
-        break;
-      }
+      case 'CLEAR_DATA':    { await clearAllOriginData(); sendResponse({ success: true }); break; }
+      case 'GET_STATS':     { sendResponse(stats); break; }
+      case 'GET_DEBUG_LOG': { const { debugLog = [] } = await chrome.storage.local.get('debugLog'); sendResponse(debugLog); break; }
 
       case 'START_LOOP': {
-        const totalVotes = parseInt(msg.totalVotes, 10);
-        if (!totalVotes || totalVotes < 1) {
-          sendResponse({ ok: false, error: 'totalVotes must be >= 1' });
-          break;
-        }
-        await saveStats({
-          sessionTarget:      totalVotes,
-          sessionTotal:       0,
-          loopActive:         true,
-          schedulingLock:     false,
-          scheduledVotes:     [],
-          verificationStatus: null,
-        });
+        const total = parseInt(msg.totalVotes, 10);
+        if (!total || total < 1) { sendResponse({ ok: false }); break; }
+        await saveStats({ sessionTarget: total, sessionTotal: 0, loopActive: true, schedulingLock: false, scheduledVotes: [], verificationStatus: null });
         await scheduleNextBatch();
         sendResponse({ ok: true });
         break;
@@ -615,12 +460,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       case 'STOP_LOOP': {
         await closeVoteTab(stats.activeTabId);
         await clearVoteAlarms();
-        await saveStats({
-          loopActive:         false,
-          scheduledVotes:     [],
-          schedulingLock:     false,
-          verificationStatus: null,
-        });
+        await saveStats({ loopActive: false, scheduledVotes: [], schedulingLock: false, verificationStatus: null });
         broadcastStatsUpdate();
         sendResponse({ ok: true });
         break;
@@ -628,44 +468,14 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
       case 'RESET_STATS': {
         await clearVoteAlarms();
-        await saveStats({
-          voteCount:          0,
-          errorCount:         0,
-          errors:             [],
-          sessionTotal:       0,
-          sessionTarget:      0,
-          loopActive:         false,
-          scheduledVotes:     [],
-          schedulingLock:     false,
-          activeTabId:        null,
-          autoVoteEnabled:    false,
-          verificationStatus: null,
-        });
+        await saveStats({ voteCount: 0, errorCount: 0, errors: [], sessionTotal: 0, sessionTarget: 0,
+          loopActive: false, scheduledVotes: [], schedulingLock: false, activeTabId: null, autoVoteEnabled: false, verificationStatus: null });
         broadcastStatsUpdate();
         sendResponse({ ok: true });
         break;
       }
 
-      case 'SINGLE_VOTE': {
-        try {
-          await executeVoteInTab();
-          sendResponse({ ok: true });
-        } catch (err) {
-          console.error('[bg] SINGLE_VOTE failed:', err.message);
-          const freshStats = await getStats();
-          const errors = [...freshStats.errors, {
-            message: `SINGLE_VOTE: ${err.message}`,
-            timestamp: new Date().toISOString()
-          }].slice(-100);
-          await saveStats({ errorCount: freshStats.errorCount + 1, errors });
-          broadcastStatsUpdate();
-          sendResponse({ ok: false, error: err.message });
-        }
-        break;
-      }
-
-      default:
-        sendResponse({});
+      default: sendResponse({});
     }
   })();
   return true;
@@ -676,48 +486,29 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 // ============================================================
 
 chrome.alarms.onAlarm.addListener(async alarm => {
+  if (alarm.name === KEEPALIVE_ALARM) return; // just keeps SW alive
+
   if (alarm.name.startsWith('tab_timeout_')) {
     const tabId = parseInt(alarm.name.split('tab_timeout_')[1], 10);
-    console.warn(`[bg] Tab timeout for tabId ${tabId} — force closing`);
+    console.warn(`[bg] Tab timeout ${tabId}`);
     await closeVoteTab(tabId);
-    const stats = await getStats();
-    const errors = [...stats.errors, {
-      message:   'Tab timeout: vote script did not respond within 5 minutes',
-      timestamp: new Date().toISOString()
-    }].slice(-100);
-    await saveStats({ errorCount: stats.errorCount + 1, errors, verificationStatus: null });
-    broadcastStatsUpdate();
+    await recordError('Tab timeout: vote did not complete within 5 minutes');
     return;
   }
 
   if (!alarm.name.startsWith('vote_')) return;
-
   const stats = await getStats();
-  if (!stats.loopActive) {
-    console.log('[bg] Alarm fired but loop is inactive, ignoring:', alarm.name);
-    return;
+  if (!stats.loopActive) return;
+
+  console.log('[bg] Vote alarm:', alarm.name);
+  try { await executeVoteInTab(); } catch (err) {
+    console.error('[bg] alarm vote error:', err);
+    await recordError(err.message);
   }
 
-  console.log('[bg] Vote alarm fired:', alarm.name);
-  try {
-    await executeVoteInTab();
-  } catch (err) {
-    console.error('[bg] executeVoteInTab error:', err);
-    const errors = [...stats.errors, {
-      message:   err.message,
-      timestamp: new Date().toISOString()
-    }].slice(-100);
-    await saveStats({ errorCount: stats.errorCount + 1, errors });
-    broadcastStatsUpdate();
-  }
-
-  const remainingAlarms = (await chrome.alarms.getAll()).filter(a => a.name.startsWith('vote_'));
-  if (remainingAlarms.length === 0) {
-    const freshStats = await getStats();
-    if (freshStats.loopActive && freshStats.sessionTotal < freshStats.sessionTarget) {
-      console.log('[bg] Last alarm of batch fired — scheduling next batch');
-      await scheduleNextBatch();
-    }
+  if ((await chrome.alarms.getAll()).filter(a => a.name.startsWith('vote_')).length === 0) {
+    const f = await getStats();
+    if (f.loopActive && f.sessionTotal < f.sessionTarget) await scheduleNextBatch();
   }
 });
 
@@ -725,12 +516,5 @@ chrome.alarms.onAlarm.addListener(async alarm => {
 // STARTUP / INSTALL HOOKS
 // ============================================================
 
-chrome.runtime.onInstalled.addListener(async () => {
-  console.log('[bg] Extension installed/updated — restoring alarms');
-  await restoreAlarms();
-});
-
-chrome.runtime.onStartup.addListener(async () => {
-  console.log('[bg] Browser started — restoring alarms');
-  await restoreAlarms();
-});
+chrome.runtime.onInstalled.addListener(() => restoreAlarms());
+chrome.runtime.onStartup.addListener(() => restoreAlarms());
