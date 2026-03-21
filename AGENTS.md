@@ -18,9 +18,12 @@ This repo contains multiple products for Trailer Parts Unlimited:
 - **No build step.** Load as unpacked extension: `chrome://extensions` → Developer mode → Load unpacked → select `/workspace/ce-autovoting`.
 - After code changes, click the reload (circular arrow) button on the extension card in `chrome://extensions`.
 - The extension uses **mail.tm** API for disposable temp emails. Domains rotate; current active domain is fetched dynamically from `GET https://api.mail.tm/domains`.
+- **mail.tm gotcha**: mail.tm normalizes email addresses (strips dots from local part). The code uses the address from the create-account response for token requests — do not change this.
 - CapSolver API key must be saved in the popup before voting works.
+- **MV3 Service Worker lifecycle**: The popup uses `chrome.storage.local.set({voteCommand: ...})` to trigger votes instead of `chrome.runtime.sendMessage`, because the popup closing kills the message channel and Chrome terminates the SW. The SW listens on `chrome.storage.onChanged` and opens the vote tab itself. A keepalive alarm (`sw_keepalive`, period 0.4 min) prevents SW termination during long operations.
 - `background.js` is a service worker — its console logs disappear when it goes inactive. To debug, open the service worker DevTools via `chrome://extensions` **before** triggering a vote. Content script logs go to the **page console** of the vote tab.
 - Persistent debug log: after a vote attempt, check `chrome.storage.local` key `debugLog` for step-by-step content script logs.
+- **Cloud VM testing**: To test interactively, use Playwright to connect to Chrome via CDP (`http://localhost:9222`), navigate to `chrome-extension://{EXT_ID}/popup.html` as a full page tab (not popup), set the API key, then click Vote Once. The popup as a page stays open, unlike the real popup which auto-closes.
 
 ### old-tpu (Stencil Theme)
 
