@@ -147,15 +147,18 @@ async function generateTempEmail() {
 }
 
 async function generateTempEmailWithRetry() {
+  const errors = [];
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       return await generateTempEmail();
     } catch (err) {
-      console.warn(`[bg] generateTempEmail attempt ${attempt}:`, err.message);
+      const detail = `attempt ${attempt}: ${err.message}`;
+      console.warn(`[bg] generateTempEmail ${detail}`);
+      errors.push(detail);
       if (attempt < 3) await new Promise(r => setTimeout(r, 2000));
     }
   }
-  throw new Error('Failed to generate temp email after 3 attempts');
+  throw new Error('Failed to generate temp email after 3 attempts: ' + errors.join('; '));
 }
 
 async function pollTempEmailInbox(token, timeoutMs = 90000) {
