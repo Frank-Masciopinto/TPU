@@ -651,6 +651,14 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           await executeVoteInTab();
           sendResponse({ ok: true });
         } catch (err) {
+          console.error('[bg] SINGLE_VOTE failed:', err.message);
+          const freshStats = await getStats();
+          const errors = [...freshStats.errors, {
+            message: `SINGLE_VOTE: ${err.message}`,
+            timestamp: new Date().toISOString()
+          }].slice(-100);
+          await saveStats({ errorCount: freshStats.errorCount + 1, errors });
+          broadcastStatsUpdate();
           sendResponse({ ok: false, error: err.message });
         }
         break;
