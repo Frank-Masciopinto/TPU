@@ -132,17 +132,20 @@ async function generateTempEmail() {
   }
   const account = await createRes.json();
 
+  // mail.tm normalizes addresses (e.g. strips dots), use the actual address it returns
+  const actualAddress = account.address || address;
+
   const tokenRes = await fetch(`${MAIL_TM_API}/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ address, password }),
+    body: JSON.stringify({ address: actualAddress, password }),
   });
   if (!tokenRes.ok) throw new Error(`mail.tm token HTTP ${tokenRes.status}`);
   const { token } = await tokenRes.json();
 
-  const tempEmail = { login, domain, address, password, token, accountId: account.id };
+  const tempEmail = { login, domain, address: actualAddress, password, token, accountId: account.id };
   await chrome.storage.local.set({ currentTempEmail: tempEmail });
-  console.log('[bg] Temp email ready:', address);
+  console.log('[bg] Temp email ready:', actualAddress);
   return tempEmail;
 }
 
