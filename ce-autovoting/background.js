@@ -344,45 +344,42 @@ async function executeVoteInTab() {
     }
   }
 
-  // Generate a fresh temp email for this vote
-  await generateTempEmail();
-
-  // Pre-clear all origin data so the page loads fresh
-  await clearAllOriginData();
-  console.log('[bg] Pre-cleared origin data before opening vote tab');
-
+  // Open the tab INSTANTLY — don't block on email generation
   await saveStats({ autoVoteEnabled: true, verificationStatus: null });
-
   const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
   const tabId = tab.id;
   await saveStats({ activeTabId: tabId });
+  console.log(`[bg] Tab ${tabId} opened instantly`);
 
-  // Wait for tab to finish loading
-  await new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      chrome.tabs.onUpdated.removeListener(onUpdated);
-      reject(new Error(`[bg] Tab ${tabId} never reached complete status after 60s`));
-    }, 60000);
-
-    function onUpdated(id, changeInfo) {
-      if (id === tabId && changeInfo.status === 'complete') {
-        clearTimeout(timer);
+  // Run email generation + data clearing IN PARALLEL with page load
+  const [, ,] = await Promise.all([
+    generateTempEmail().then(() => console.log('[bg] Temp email ready')),
+    clearAllOriginData().then(() => console.log('[bg] Origin data cleared')),
+    new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
         chrome.tabs.onUpdated.removeListener(onUpdated);
-        resolve();
+        reject(new Error(`[bg] Tab ${tabId} never reached complete status after 60s`));
+      }, 60000);
+      function onUpdated(id, changeInfo) {
+        if (id === tabId && changeInfo.status === 'complete') {
+          clearTimeout(timer);
+          chrome.tabs.onUpdated.removeListener(onUpdated);
+          resolve();
+        }
       }
-    }
-    chrome.tabs.onUpdated.addListener(onUpdated);
-  });
+      chrome.tabs.onUpdated.addListener(onUpdated);
+    }),
+  ]);
 
-  // Inject content script
+  // Inject content script (email is ready in storage by now)
   await chrome.scripting.executeScript({
     target: { tabId },
     files:  ['content_script.js']
   });
 
-  // Fallback: close tab after 5 minutes (longer to allow for email verification)
+  // Fallback: close tab after 5 minutes
   chrome.alarms.create(`tab_timeout_${tabId}`, { delayInMinutes: 5 });
-  console.log(`[bg] Tab ${tabId} opened and script injected. Awaiting vote result...`);
+  console.log(`[bg] Tab ${tabId} script injected. Awaiting vote result...`);
 }
 
 async function closeVoteTab(tabId) {
