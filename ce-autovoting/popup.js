@@ -154,12 +154,21 @@ function setStatus(state, text) {
 singleVoteBtn.addEventListener('click', async () => {
   singleVoteBtn.disabled = true;
   setStatus('yellow', 'Opening tab...');
+
   try {
-    await chrome.runtime.sendMessage({ type: 'SINGLE_VOTE' });
-  } catch (_) {
+    // Open the vote tab FROM THE POPUP — instant, no SW needed
+    const TARGET_URL = 'https://embed-1142836.secondstreetapp.com/embed/16a05f9b-0bff-4657-8d74-414c5a771dc1/gallery/531033351';
+    const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
+
+    // Signal the background via storage (wakes SW via onChanged)
+    await chrome.storage.local.set({
+      voteCommand: { action: 'execute', tabId: tab.id, ts: Date.now() }
+    });
+  } catch (err) {
     singleVoteBtn.disabled = false;
-    setStatus('red', 'Error sending message');
+    setStatus('red', 'Error: ' + err.message);
   }
+
   setTimeout(() => {
     if (singleVoteBtn.disabled) {
       singleVoteBtn.disabled = false;

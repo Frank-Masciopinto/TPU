@@ -286,42 +286,39 @@ async function scheduleNextBatch() {
 }
 
 // ============================================================
-// TAB VOTE EXECUTION  —  fire-and-forget, never awaited by popup
+// TAB VOTE EXECUTION
+// When called from popup: tabId is provided (popup already opened tab)
+// When called from alarm loop: no tabId, we open it ourselves
 // ============================================================
 
-async function executeVoteInTab() {
-  // ★ OPEN TAB IMMEDIATELY — before any storage awaits
-  const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
-  const tabId = tab.id;
-  console.log(`[bg] Tab ${tabId} opened`);
-
-  // Now that tab is open, ensure keepalive is running
+async function executeVoteInTab(preOpenedTabId) {
   await startKeepalive();
 
+  let tabId = preOpenedTabId;
   try {
-    const current = await getStats();
-    if (current.activeTabId !== null && current.activeTabId !== tabId) {
-      try { await chrome.tabs.get(current.activeTabId); console.warn('[bg] prior vote tab still open'); }
-      catch (_) { /* stale tab ID, ignore */ }
+    // If no pre-opened tab, open one ourselves (alarm-based flow)
+    if (!tabId) {
+      const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
+      tabId = tab.id;
     }
+    console.log(`[bg] Using tab ${tabId}`);
 
-    // Persist state immediately after tab opens
     await saveStats({ autoVoteEnabled: true, verificationStatus: null, activeTabId: tabId });
 
-    // Run email gen + clearing + page-load in parallel
     const emailPromise = generateTempEmailWithRetry();
-    const clearPromise = clearAllOriginData().catch(e => console.warn('[bg] clear failed:', e.message));
+    const clearPromise = clearAllOriginData().catch(e => console.warn('[bg] clear:', e.message));
     const pagePromise  = new Promise((resolve, reject) => {
-      const timer = setTimeout(() => { chrome.tabs.onUpdated.removeListener(fn); reject(new Error('page load timeout 60s')); }, 60000);
+      const timer = setTimeout(() => { chrome.tabs.onUpdated.removeListener(fn); reject(new Error('page load 60s timeout')); }, 60000);
       function fn(id, info) {
         if (id === tabId && info.status === 'complete') { clearTimeout(timer); chrome.tabs.onUpdated.removeListener(fn); resolve(); }
       }
       chrome.tabs.onUpdated.addListener(fn);
+      // Check immediately if already loaded
+      chrome.tabs.get(tabId).then(t => { if (t.status === 'complete') { clearTimeout(timer); chrome.tabs.onUpdated.removeListener(fn); resolve(); } }).catch(() => {});
     });
 
     await Promise.all([emailPromise, clearPromise, pagePromise]);
 
-    // Inject content script
     await chrome.scripting.executeScript({ target: { tabId }, files: ['content_script.js'] });
     chrome.alarms.create(`tab_timeout_${tabId}`, { delayInMinutes: 5 });
     console.log(`[bg] Tab ${tabId} script injected`);
@@ -329,13 +326,23 @@ async function executeVoteInTab() {
   } catch (err) {
     console.error('[bg] executeVoteInTab failed:', err.message);
     await recordError(`executeVoteInTab: ${err.message}`);
-    // Try to clean up the tab we may have opened
-    const { activeTabId } = await chrome.storage.local.get('activeTabId');
-    if (activeTabId) { try { await chrome.tabs.remove(activeTabId); } catch (_) {} }
+    if (tabId) { try { await chrome.tabs.remove(tabId); } catch (_) {} }
     await saveStats({ activeTabId: null, autoVoteEnabled: false, verificationStatus: null });
     await stopKeepalive();
   }
 }
+
+// ============================================================
+// STORAGE-BASED VOTE TRIGGER  (from popup — wakes SW reliably)
+// ============================================================
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local' || !changes.voteCommand) return;
+  const cmd = changes.voteCommand.newValue;
+  if (!cmd || cmd.action !== 'execute') return;
+  console.log('[bg] voteCommand received, tabId:', cmd.tabId);
+  executeVoteInTab(cmd.tabId);
+});
 
 async function closeVoteTab(tabId) {
   if (!tabId) return;
@@ -392,16 +399,6 @@ async function handleEmailVerification(stats) {
 // ============================================================
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  // ★ SINGLE_VOTE: start keepalive synchronously, then run vote
-  if (msg.type === 'SINGLE_VOTE') {
-    chrome.alarms.create(KEEPALIVE_ALARM, { periodInMinutes: 0.4 });
-    executeVoteInTab().then(
-      () => { try { sendResponse({ ok: true }); } catch (_) {} },
-      (err) => { recordError(`SINGLE_VOTE: ${err.message}`).then(() => { try { sendResponse({ ok: false, error: err.message }); } catch (_) {} }); }
-    );
-    return true;   // keep message channel open → SW stays alive
-  }
-
   (async () => {
     const stats = await getStats();
 
