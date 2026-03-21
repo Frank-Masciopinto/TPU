@@ -351,25 +351,46 @@ async function executeVoteInTab() {
   await saveStats({ activeTabId: tabId });
   console.log(`[bg] Tab ${tabId} opened instantly`);
 
-  // Run email generation + data clearing IN PARALLEL with page load
-  const [, ,] = await Promise.all([
-    generateTempEmail().then(() => console.log('[bg] Temp email ready')),
-    clearAllOriginData().then(() => console.log('[bg] Origin data cleared')),
-    new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        chrome.tabs.onUpdated.removeListener(onUpdated);
-        reject(new Error(`[bg] Tab ${tabId} never reached complete status after 60s`));
-      }, 60000);
-      function onUpdated(id, changeInfo) {
-        if (id === tabId && changeInfo.status === 'complete') {
-          clearTimeout(timer);
-          chrome.tabs.onUpdated.removeListener(onUpdated);
-          resolve();
-        }
+  // Generate temp email (with retry) while page loads
+  let emailReady = false;
+  const emailPromise = (async () => {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        await generateTempEmail();
+        console.log(`[bg] Temp email ready (attempt ${attempt})`);
+        emailReady = true;
+        return;
+      } catch (err) {
+        console.warn(`[bg] generateTempEmail attempt ${attempt} failed:`, err.message);
+        if (attempt < 3) await new Promise(r => setTimeout(r, 2000));
       }
-      chrome.tabs.onUpdated.addListener(onUpdated);
-    }),
-  ]);
+    }
+    throw new Error('Failed to generate temp email after 3 attempts');
+  })();
+
+  // Clear origin data (non-fatal if it fails)
+  const clearPromise = clearAllOriginData()
+    .then(() => console.log('[bg] Origin data cleared'))
+    .catch(e => console.warn('[bg] clearAllOriginData failed:', e.message));
+
+  // Wait for page to load
+  const pagePromise = new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      chrome.tabs.onUpdated.removeListener(onUpdated);
+      reject(new Error(`Tab ${tabId} never reached complete status after 60s`));
+    }, 60000);
+    function onUpdated(id, changeInfo) {
+      if (id === tabId && changeInfo.status === 'complete') {
+        clearTimeout(timer);
+        chrome.tabs.onUpdated.removeListener(onUpdated);
+        resolve();
+      }
+    }
+    chrome.tabs.onUpdated.addListener(onUpdated);
+  });
+
+  // Wait for all three, but handle email failure gracefully
+  await Promise.all([emailPromise, clearPromise, pagePromise]);
 
   // Inject content script (email is ready in storage by now)
   await chrome.scripting.executeScript({
