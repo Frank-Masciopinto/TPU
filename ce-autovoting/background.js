@@ -291,17 +291,14 @@ async function scheduleNextBatch() {
 // When called from alarm loop: no tabId, we open it ourselves
 // ============================================================
 
-async function executeVoteInTab(preOpenedTabId) {
+async function executeVoteInTab() {
   await startKeepalive();
 
-  let tabId = preOpenedTabId;
+  let tabId;
   try {
-    // If no pre-opened tab, open one ourselves (alarm-based flow)
-    if (!tabId) {
-      const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
-      tabId = tab.id;
-    }
-    console.log(`[bg] Using tab ${tabId}`);
+    const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
+    tabId = tab.id;
+    console.log(`[bg] Tab ${tabId} opened`);
 
     await saveStats({ autoVoteEnabled: true, verificationStatus: null, activeTabId: tabId });
 
@@ -340,8 +337,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local' || !changes.voteCommand) return;
   const cmd = changes.voteCommand.newValue;
   if (!cmd || cmd.action !== 'execute') return;
-  console.log('[bg] voteCommand received, tabId:', cmd.tabId);
-  executeVoteInTab(cmd.tabId);
+  console.log('[bg] voteCommand received via storage');
+  executeVoteInTab();
 });
 
 async function closeVoteTab(tabId) {
