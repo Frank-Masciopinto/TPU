@@ -20,9 +20,6 @@ const settingsSection   = document.getElementById('settingsSection');
 const capsolverKeyInput = document.getElementById('capsolverKeyInput');
 const saveKeyBtn        = document.getElementById('saveKeyBtn');
 const keySavedMsg       = document.getElementById('keySavedMsg');
-const poolStatsEl       = document.getElementById('poolStats');
-const loadPoolBtn       = document.getElementById('loadPoolBtn');
-const poolFileInput     = document.getElementById('poolFileInput');
 
 // ============================================================
 // INITIALISE
@@ -32,10 +29,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initSettingsSection();
   await loadStats();
 
-  // Live updates from background
   chrome.runtime.onMessage.addListener(msg => {
     if (msg.type === 'STATS_UPDATE') {
-      singleVoteBtn.disabled = false; // re-enable after any vote outcome
+      singleVoteBtn.disabled = false;
       loadStats();
     }
   });
@@ -50,7 +46,6 @@ async function initSettingsSection() {
   if (capsolverKey) {
     capsolverKeyInput.placeholder = '••••••••••••••••';
   } else {
-    // Block voting until key is configured
     singleVoteBtn.disabled = true;
     startLoopBtn.disabled  = true;
     const warn = document.createElement('div');
@@ -69,34 +64,9 @@ saveKeyBtn.addEventListener('click', async () => {
   capsolverKeyInput.placeholder = '••••••••••••••••';
   keySavedMsg.style.display     = 'block';
   setTimeout(() => { keySavedMsg.style.display = 'none'; }, 2500);
-  // Unblock vote buttons now that key is saved
   singleVoteBtn.disabled = false;
   startLoopBtn.disabled  = false;
   document.getElementById('keyWarning')?.remove();
-});
-
-// ============================================================
-// EMAIL POOL
-// ============================================================
-
-loadPoolBtn.addEventListener('click', () => {
-  poolFileInput.click();
-});
-
-poolFileInput.addEventListener('change', async e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  try {
-    const data   = JSON.parse(await file.text());
-    const emails = Array.isArray(data) ? data : (data.emails ?? []);
-    if (!emails.length) { alert('No emails found in the selected file.'); return; }
-    await chrome.storage.local.set({ emailPool: emails });
-    await loadStats();
-    alert(`Loaded ${emails.length} emails into pool.`);
-  } catch (err) {
-    alert('Failed to parse JSON: ' + err.message);
-  }
-  e.target.value = ''; // reset so the same file can be re-loaded if needed
 });
 
 // ============================================================
@@ -108,7 +78,7 @@ async function loadStats() {
   try {
     stats = await chrome.runtime.sendMessage({ type: 'GET_STATS' });
   } catch (_) {
-    return; // background not ready yet
+    return;
   }
   if (!stats) return;
 
@@ -117,8 +87,12 @@ async function loadStats() {
   errorCountEl.textContent      = stats.errorCount  ?? 0;
   sessionProgressEl.textContent = `${stats.sessionTotal ?? 0} / ${stats.sessionTarget ?? 0}`;
 
-  // Loop state
-  if (stats.loopActive) {
+  // Status based on verification state and loop state
+  if (stats.verificationStatus === 'waiting_for_email') {
+    setStatus('blue', 'Waiting for verification email...');
+  } else if (stats.verificationStatus === 'clicking_link') {
+    setStatus('blue', 'Clicking verification link...');
+  } else if (stats.loopActive) {
     startLoopBtn.style.display = 'none';
     stopLoopBtn.style.display  = 'block';
     setStatus('yellow', 'Running loop...');
@@ -126,16 +100,6 @@ async function loadStats() {
     startLoopBtn.style.display = 'block';
     stopLoopBtn.style.display  = 'none';
     setStatus('green', 'Idle');
-  }
-
-  // Email pool stats
-  const { emailPool = [], usedEmails = [] } = await chrome.storage.local.get(['emailPool', 'usedEmails']);
-  if (emailPool.length > 0) {
-    poolStatsEl.textContent = `${emailPool.length} remaining · ${usedEmails.length} used`;
-    poolStatsEl.style.color = '#4ade80';
-  } else {
-    poolStatsEl.textContent = 'Not loaded';
-    poolStatsEl.style.color = '#ef4444';
   }
 
   // Next scheduled vote
@@ -187,24 +151,22 @@ function setStatus(state, text) {
 // SINGLE VOTE
 // ============================================================
 
-singleVoteBtn.addEventListener('click', async () => {
+singleVoteBtn.addEventListener('click', () => {
   singleVoteBtn.disabled = true;
   setStatus('yellow', 'Opening tab...');
-  try {
-    await chrome.runtime.sendMessage({ type: 'SINGLE_VOTE' });
-  } catch (_) {
-    // Send failed immediately — re-enable right away
-    singleVoteBtn.disabled = false;
-    setStatus('red', 'Error sending message');
-  }
-  // Button is re-enabled by the STATS_UPDATE listener below (on VOTE_SUCCESS/VOTE_ERROR)
-  // Safety fallback: re-enable after 3 minutes if no message ever arrives
+
+  // Write storage FIRST (sync call — fires before popup closes).
+  // storage.onChanged in background.js picks this up and opens the tab.
+  chrome.storage.local.set({
+    voteCommand: { action: 'execute', ts: Date.now() }
+  });
+
   setTimeout(() => {
     if (singleVoteBtn.disabled) {
       singleVoteBtn.disabled = false;
       loadStats();
     }
-  }, 3 * 60 * 1000);
+  }, 5 * 60 * 1000);
 });
 
 // ============================================================
@@ -256,5 +218,5 @@ resetStatsBtn.addEventListener('click', async () => {
 errorsToggleBtn.addEventListener('click', () => {
   const isVisible = errorList.style.display === 'block';
   errorList.style.display = isVisible ? 'none' : 'block';
-  loadStats(); // re-render toggle label
+  loadStats();
 });
