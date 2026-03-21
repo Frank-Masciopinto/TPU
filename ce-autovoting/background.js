@@ -290,20 +290,20 @@ async function scheduleNextBatch() {
 // ============================================================
 
 async function executeVoteInTab() {
-  // --- keepalive so Chrome won't kill us mid-vote ---
+  // ★ OPEN TAB IMMEDIATELY — before any storage awaits
+  const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
+  const tabId = tab.id;
+  console.log(`[bg] Tab ${tabId} opened`);
+
+  // Now that tab is open, ensure keepalive is running
   await startKeepalive();
 
   try {
     const current = await getStats();
-    if (current.activeTabId !== null) {
-      try { await chrome.tabs.get(current.activeTabId); console.warn('[bg] vote in progress, skip'); return; }
-      catch (_) { await saveStats({ activeTabId: null, autoVoteEnabled: false, verificationStatus: null }); }
+    if (current.activeTabId !== null && current.activeTabId !== tabId) {
+      try { await chrome.tabs.get(current.activeTabId); console.warn('[bg] prior vote tab still open'); }
+      catch (_) { /* stale tab ID, ignore */ }
     }
-
-    // ★ OPEN TAB FIRST — no awaits before this that could let SW die
-    const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
-    const tabId = tab.id;
-    console.log(`[bg] Tab ${tabId} opened`);
 
     // Persist state immediately after tab opens
     await saveStats({ autoVoteEnabled: true, verificationStatus: null, activeTabId: tabId });
@@ -392,14 +392,16 @@ async function handleEmailVerification(stats) {
 // ============================================================
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  // ★ SINGLE_VOTE: respond IMMEDIATELY, run in background
+  // ★ SINGLE_VOTE: start keepalive synchronously, then run vote
   if (msg.type === 'SINGLE_VOTE') {
-    sendResponse({ ok: true, note: 'vote started' });
-    executeVoteInTab();         // fire-and-forget — popup is already closed
-    return false;               // sync response already sent
+    chrome.alarms.create(KEEPALIVE_ALARM, { periodInMinutes: 0.4 });
+    executeVoteInTab().then(
+      () => { try { sendResponse({ ok: true }); } catch (_) {} },
+      (err) => { recordError(`SINGLE_VOTE: ${err.message}`).then(() => { try { sendResponse({ ok: false, error: err.message }); } catch (_) {} }); }
+    );
+    return true;   // keep message channel open → SW stays alive
   }
 
-  // Everything else: async handler
   (async () => {
     const stats = await getStats();
 
