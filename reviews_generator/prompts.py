@@ -485,7 +485,7 @@ def _next_opener() -> str:
 # ---------------------------------------------------------------------------
 
 _WORD_TARGETS = {
-    5: [24, 29, 35, 42, 50, 58, 67, 75],
+    5: [38, 45, 52, 58, 65, 70],
     4: [65, 75, 88, 100, 112, 120],
 }
 
@@ -698,12 +698,12 @@ def build_tier1_text_prompt(
         "",
         f"VARIATION SEED: {variation_seed}",
         "",
-        f"Generate exactly {len(reviews_spec)} SHORT 5-star reviews as a JSON array.",
+        f"Generate exactly {len(reviews_spec)} VERY SHORT 5-star reviews as a JSON array.",
         "Rules for these reviews:",
         "- Score is always 5.",
-        "- Write to within ±3 words of the target_words value for each review.",
-        "- Very casual, minimal — like someone quickly typing after clicking 5 stars.",
-        "- Must mention the product or what it does in one concrete way.",
+        "- MAXIMUM 12 words per review. NEVER exceed 12 words. Hit the target_words value exactly.",
+        "- These are lazy reviewers — one quick sentence, no punctuation fuss.",
+        "- Examples: 'Fit my trailer, fast shipping', 'Held up fine so far', 'Did the job'.",
         "- Do NOT use banned words: perfect, perfectly, amazing, excellent, outstanding.",
         "- Do NOT start with 'These', 'The', 'This', or 'I '.",
         "- Titles: 3-6 words, specific and casual (not 'Good product' or 'Solid item').",
@@ -714,7 +714,7 @@ def build_tier1_text_prompt(
         lines += [
             f"--- Review {i + 1} ---",
             f"score: 5",
-            f"target_words: {random.choice([6, 8, 10, 12])}",
+            f"target_words: {random.choice([5, 6, 8, 10])}",
             f"display_name: {spec['display_name']}",
             f"email: {spec['email']}",
             f"date: {spec['date']}",

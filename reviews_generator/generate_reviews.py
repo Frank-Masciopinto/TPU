@@ -132,19 +132,14 @@ async def process_product(
     expected = info.review_count
     rows: list[dict] = []
 
-    # Universal 3-bucket split across ALL tiers:
-    #   10% → title-only (local, zero LLM cost)
-    #   10% → short text ≤12 words (LLM)
-    #   80% → full content (LLM for Tier 2-4; local silent for Tier 1)
-    title_only_count = max(1, round(expected * 0.10))
-    short_count      = max(1, round(expected * 0.10))
-    full_count       = max(0, expected - title_only_count - short_count)
+    # Universal 2-bucket split across ALL tiers:
+    #   46% → short text ≤12 words (LLM) — lazy reviewers
+    #   54% → full content (LLM for Tier 2-4; local silent for Tier 1)
+    short_count = max(1, round(expected * 0.46))
+    full_count  = max(0, expected - short_count)
 
     try:
-        # Bucket 1: title-only (all tiers, local, free)
-        rows.extend(generate_title_only_reviews(product, title_only_count))
-
-        # Bucket 2: short text — ≤12 words (all tiers, LLM)
+        # Bucket 1: short text — ≤12 words (all tiers, LLM)
         if short_count > 0:
             short_rows = await generate_llm_reviews(
                 product=product,
