@@ -308,7 +308,16 @@ async function executeVoteInTab() {
 
     await saveStats({ autoVoteEnabled: true, verificationStatus: null, activeTabId: tabId });
 
-    const emailPromise = generateTempEmailWithRetry();
+    const { emailMode = 'pool' } = await chrome.storage.local.get('emailMode');
+
+    let emailPromise;
+    if (emailMode === 'temp') {
+      emailPromise = generateTempEmailWithRetry();
+    } else {
+      // Pool mode: content_script reads directly from emailPool in storage; nothing to generate
+      emailPromise = Promise.resolve();
+    }
+
     const clearPromise = clearAllOriginData().catch(e => console.warn('[bg] clear:', e.message));
     const pagePromise  = new Promise((resolve, reject) => {
       const timer = setTimeout(() => { chrome.tabs.onUpdated.removeListener(fn); reject(new Error('page load 60s timeout')); }, 60000);
@@ -316,7 +325,6 @@ async function executeVoteInTab() {
         if (id === tabId && info.status === 'complete') { clearTimeout(timer); chrome.tabs.onUpdated.removeListener(fn); resolve(); }
       }
       chrome.tabs.onUpdated.addListener(fn);
-      // Check immediately if already loaded
       chrome.tabs.get(tabId).then(t => { if (t.status === 'complete') { clearTimeout(timer); chrome.tabs.onUpdated.removeListener(fn); resolve(); } }).catch(() => {});
     });
 
@@ -408,6 +416,17 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     switch (msg.type) {
 
       case 'VOTE_SUCCESS': {
+        // In pool mode, consume the used email from the pool
+        const { emailMode: mode = 'pool' } = await chrome.storage.local.get('emailMode');
+        if (mode === 'pool') {
+          const { emailPool = [], usedEmails = [] } = await chrome.storage.local.get(['emailPool', 'usedEmails']);
+          const consumed = msg.email || (emailPool[0] ?? null);
+          const newPool = consumed && emailPool[0] === consumed ? emailPool.slice(1) : emailPool;
+          await chrome.storage.local.set({
+            emailPool:  newPool,
+            usedEmails: consumed ? [...usedEmails, consumed].slice(-5000) : usedEmails,
+          });
+        }
         await saveStats({ voteCount: stats.voteCount + 1, sessionTotal: stats.sessionTotal + 1, verificationStatus: null });
         await closeVoteTab(stats.activeTabId);
         broadcastStatsUpdate();
@@ -418,6 +437,26 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       }
 
       case 'VOTE_NEEDS_VERIFICATION': {
+        const { emailMode: vMode = 'pool' } = await chrome.storage.local.get('emailMode');
+        if (vMode === 'pool') {
+          // Pool mode: user handles verification themselves; count as success
+          console.log('[bg] Pool mode — skipping auto-verification, counting as success');
+          const { emailPool = [], usedEmails = [] } = await chrome.storage.local.get(['emailPool', 'usedEmails']);
+          const consumed = msg.email || (emailPool[0] ?? null);
+          const newPool = consumed && emailPool[0] === consumed ? emailPool.slice(1) : emailPool;
+          await chrome.storage.local.set({
+            emailPool: newPool,
+            usedEmails: consumed ? [...usedEmails, consumed].slice(-5000) : usedEmails,
+          });
+          await saveStats({ voteCount: stats.voteCount + 1, sessionTotal: stats.sessionTotal + 1, verificationStatus: null });
+          await closeVoteTab(stats.activeTabId);
+          broadcastStatsUpdate();
+          const u2 = await getStats();
+          if (u2.loopActive && u2.sessionTotal >= u2.sessionTarget) await saveStats({ loopActive: false });
+          sendResponse({ ok: true });
+          break;
+        }
+        // Temp mode: auto-verify via mail.tm
         try {
           await handleEmailVerification(stats);
           const f = await getStats();
@@ -472,6 +511,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         await clearVoteAlarms();
         await saveStats({ voteCount: 0, errorCount: 0, errors: [], sessionTotal: 0, sessionTarget: 0,
           loopActive: false, scheduledVotes: [], schedulingLock: false, activeTabId: null, autoVoteEnabled: false, verificationStatus: null });
+        await chrome.storage.local.set({ usedEmails: [] });
         broadcastStatsUpdate();
         sendResponse({ ok: true });
         break;

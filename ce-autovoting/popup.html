@@ -165,6 +165,9 @@
       margin-top: 4px;
     }
 
+    /* ---- Email tab toggle ---- */
+    .email-tab.active { background: #3b82f6 !important; color: #fff !important; }
+
     /* ---- Errors ---- */
     .errors-section { padding: 10px 12px 0; }
     .toggle-btn {
@@ -250,13 +253,29 @@
     <div class="key-saved" id="keySavedMsg">Key saved</div>
   </div>
 
-  <!-- Email Mode -->
-  <div class="email-mode">
-    <div class="email-badge">
-      <span class="dot"></span>
-      Temp Email (Auto)
+  <!-- Email Mode Toggle -->
+  <div class="email-mode" id="emailModeSection">
+    <div style="display:flex;gap:4px;margin-bottom:6px">
+      <button class="btn btn-ghost email-tab" id="tabPool" data-mode="pool" style="flex:1;padding:6px;font-size:11px">Email Pool</button>
+      <button class="btn btn-ghost email-tab" id="tabTemp" data-mode="temp" style="flex:1;padding:6px;font-size:11px">Temp Email</button>
     </div>
-    <div class="email-mode-note">Fresh disposable email generated per vote &middot; auto-verifies</div>
+    <!-- Pool panel (JSON upload — original method) -->
+    <div id="poolPanel">
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-ghost" id="loadPoolBtn" style="width:auto;padding:6px 10px;font-size:11px;flex-shrink:0">Load JSON</button>
+        <span id="poolStats" style="font-size:10px;color:#666">Not loaded</span>
+      </div>
+      <input type="file" id="poolFileInput" accept=".json" style="display:none">
+      <div class="email-mode-note">Upload a JSON array of real emails &middot; no email confirmation needed</div>
+    </div>
+    <!-- Temp panel -->
+    <div id="tempPanel" style="display:none">
+      <div class="email-badge">
+        <span class="dot"></span>
+        Temp Email (Auto)
+      </div>
+      <div class="email-mode-note">Fresh disposable email per vote &middot; auto-verifies via mail.tm</div>
+    </div>
   </div>
 
   <hr class="divider">

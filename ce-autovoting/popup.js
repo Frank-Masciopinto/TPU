@@ -20,6 +20,13 @@ const settingsSection   = document.getElementById('settingsSection');
 const capsolverKeyInput = document.getElementById('capsolverKeyInput');
 const saveKeyBtn        = document.getElementById('saveKeyBtn');
 const keySavedMsg       = document.getElementById('keySavedMsg');
+const tabPool           = document.getElementById('tabPool');
+const tabTemp           = document.getElementById('tabTemp');
+const poolPanel         = document.getElementById('poolPanel');
+const tempPanel         = document.getElementById('tempPanel');
+const poolStatsEl       = document.getElementById('poolStats');
+const loadPoolBtn       = document.getElementById('loadPoolBtn');
+const poolFileInput     = document.getElementById('poolFileInput');
 
 // ============================================================
 // INITIALISE
@@ -27,6 +34,7 @@ const keySavedMsg       = document.getElementById('keySavedMsg');
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initSettingsSection();
+  await initEmailMode();
   await loadStats();
 
   chrome.runtime.onMessage.addListener(msg => {
@@ -35,6 +43,48 @@ document.addEventListener('DOMContentLoaded', async () => {
       loadStats();
     }
   });
+});
+
+// ============================================================
+// EMAIL MODE TOGGLE
+// ============================================================
+
+async function initEmailMode() {
+  const { emailMode = 'pool' } = await chrome.storage.local.get('emailMode');
+  setEmailMode(emailMode);
+}
+
+function setEmailMode(mode) {
+  tabPool.classList.toggle('active', mode === 'pool');
+  tabTemp.classList.toggle('active', mode === 'temp');
+  poolPanel.style.display = mode === 'pool' ? 'block' : 'none';
+  tempPanel.style.display = mode === 'temp' ? 'block' : 'none';
+  chrome.storage.local.set({ emailMode: mode });
+}
+
+tabPool.addEventListener('click', () => setEmailMode('pool'));
+tabTemp.addEventListener('click', () => setEmailMode('temp'));
+
+// ============================================================
+// EMAIL POOL (JSON upload)
+// ============================================================
+
+loadPoolBtn.addEventListener('click', () => poolFileInput.click());
+
+poolFileInput.addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const data   = JSON.parse(await file.text());
+    const emails = Array.isArray(data) ? data : (data.emails ?? []);
+    if (!emails.length) { alert('No emails found in the selected file.'); return; }
+    await chrome.storage.local.set({ emailPool: emails });
+    await loadStats();
+    alert(`Loaded ${emails.length} emails into pool.`);
+  } catch (err) {
+    alert('Failed to parse JSON: ' + err.message);
+  }
+  e.target.value = '';
 });
 
 // ============================================================
@@ -86,6 +136,16 @@ async function loadStats() {
   voteCountEl.textContent       = stats.voteCount   ?? 0;
   errorCountEl.textContent      = stats.errorCount  ?? 0;
   sessionProgressEl.textContent = `${stats.sessionTotal ?? 0} / ${stats.sessionTarget ?? 0}`;
+
+  // Email pool stats
+  const { emailPool = [], usedEmails = [] } = await chrome.storage.local.get(['emailPool', 'usedEmails']);
+  if (emailPool.length > 0) {
+    poolStatsEl.textContent = `${emailPool.length} remaining · ${usedEmails.length} used`;
+    poolStatsEl.style.color = '#4ade80';
+  } else {
+    poolStatsEl.textContent = 'Not loaded';
+    poolStatsEl.style.color = '#ef4444';
+  }
 
   // Status based on verification state and loop state
   if (stats.verificationStatus === 'waiting_for_email') {
