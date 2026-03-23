@@ -881,6 +881,7 @@ function CommentCard({
   isAuthorAdmin,
   onDelete,
   showDelete,
+  showReply = true,
 }) {
   const bodyHtml = sanitizeUserHtml(comment.bodyHtml || comment.body || "");
   const authorName = comment.author || comment.authorName || "Member";
@@ -925,15 +926,17 @@ function CommentCard({
           onDownvote={() => onVote(-1)}
         />
         <div className="tpu-forum__comment-actions">
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={onReply}
-            disabled={!canInteract}
-          >
-            Reply
-          </Button>
+          {showReply ? (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={onReply}
+              disabled={!canInteract}
+            >
+              Reply
+            </Button>
+          ) : null}
           {showDelete && (
             <Button
               type="button"
@@ -1470,8 +1473,13 @@ export function ForumApp({ config }) {
         navigate("/forum");
       } else if (type === "comment") {
         await api.deleteComment(id);
-        // Remove comment from local state
-        setComments((prev) => prev.filter((c) => String(c.id) !== String(id)));
+        if (thread?.id) {
+          const listed = await api.listComments(thread.id, commentSort);
+          const raw = (listed && (listed.data || listed.items || listed.comments || listed)) || [];
+          if (Array.isArray(raw)) setComments(raw);
+        } else {
+          setComments((prev) => prev.filter((c) => String(c.id) !== String(id)));
+        }
       }
       setDeleteConfirmOpen(false);
       setDeleteTarget(null);
@@ -1481,7 +1489,39 @@ export function ForumApp({ config }) {
     } finally {
       setPosting(false);
     }
-  }, [api, deleteTarget, navigate]);
+  }, [api, commentSort, deleteTarget, navigate, thread?.id]);
+
+  const clearAcceptedAnswer = React.useCallback(async () => {
+    if (!isAdmin || !thread?.id) return;
+    if (!window.confirm("Remove the accepted answer from this thread? Replies stay visible.")) return;
+    try {
+      await api.patchThread(thread.id, { accepted_comment_id: null });
+      setThread((prev) =>
+        prev
+          ? {
+              ...prev,
+              accepted_comment_id: null,
+              acceptedCommentId: null,
+              acceptedAnswerId: null,
+              answered: false,
+            }
+          : prev,
+      );
+      setComments((prevComments) => {
+        const clearedThread = {
+          ...thread,
+          accepted_comment_id: null,
+          acceptedCommentId: null,
+          acceptedAnswerId: null,
+          answered: false,
+        };
+        setForumThreadSeo(clearedThread, null, prevComments.slice(0, 5));
+        return prevComments;
+      });
+    } catch (e) {
+      alert(e.message || "Could not clear accepted answer.");
+    }
+  }, [api, isAdmin, thread]);
 
   const submitThread = async (payload) => {
     if (!requireAuth()) return;
@@ -1517,12 +1557,13 @@ export function ForumApp({ config }) {
   const submitReply = async ({ body, images }) => {
     if (!requireAuth()) return;
     if (!thread || !thread.id) return;
+    const parentForThisReply = replyParentId || null;
     setPosting(true);
     try {
       const result = await api.createComment(thread.id, {
         body,
         images: images || [],
-        parentId: replyParentId || null,
+        parentId: parentForThisReply,
       });
       const newComment = result && (result.data || result);
 
@@ -1542,7 +1583,8 @@ export function ForumApp({ config }) {
             score: 0,
             myVote: 0,
             images: newComment.images || images || [],
-            parentId: replyParentId || null,
+            parentId: parentForThisReply,
+            parent_id: newComment.parent_id ?? parentForThisReply,
           },
         ]);
       }
@@ -1562,6 +1604,7 @@ export function ForumApp({ config }) {
         if (code === "comment_too_short") msg = "Your reply is too short (minimum 5 characters).";
         else if (code === "too_many_links") msg = "Too many links (maximum 2 allowed).";
         else if (code === "thread_locked") msg = "This thread is locked.";
+        else if (code === "invalid_parent") msg = "That reply target is not valid.";
         else if (e.status === 429) msg = "Too many posts — please wait a moment.";
         else msg = e.message || "Failed to post reply.";
         setReplyServerError(msg);
@@ -1910,6 +1953,10 @@ export function ForumApp({ config }) {
       ? allRootComments.filter((c) => String(c.id) !== String(acceptedId))
       : allRootComments;
 
+    const acceptedReplyChildren = accepted
+      ? (byParent.get(String(accepted.id)) || []).slice(0, 50)
+      : [];
+
     return (
       <div className="tpu-forum__page">
         {/* Breadcrumb navigation */}
@@ -2013,6 +2060,33 @@ export function ForumApp({ config }) {
               />
               <ImageGallery images={accepted.images} />
             </CardContent>
+            {acceptedReplyChildren.length > 0 ? (
+              <CardContent className="tpu-forum__accepted-replies">
+                {acceptedReplyChildren.map((child) => {
+                  const childAuthorEmail =
+                    child.author_email || child.authorEmail || "";
+                  const childIsAuthorAdmin =
+                    child.author_is_admin ||
+                    (childAuthorEmail &&
+                      adminList[childAuthorEmail.toLowerCase()]);
+                  return (
+                    <CommentCard
+                      key={String(child.id)}
+                      comment={child}
+                      depth={1}
+                      canInteract={canInteract}
+                      isAccepted={false}
+                      isAuthorAdmin={childIsAuthorAdmin}
+                      showDelete={isAdmin}
+                      showReply={false}
+                      onReply={() => {}}
+                      onVote={(delta) => voteComment(child.id, delta)}
+                      onDelete={() => confirmDelete("comment", child.id)}
+                    />
+                  );
+                })}
+              </CardContent>
+            ) : null}
             <CardFooter className="tpu-forum__comment-footer">
               <VoteWidget
                 score={accepted.votes ?? accepted.score ?? 0}
@@ -2021,6 +2095,31 @@ export function ForumApp({ config }) {
                 onUpvote={() => voteComment(accepted.id, 1)}
                 onDownvote={() => voteComment(accepted.id, -1)}
               />
+              <div className="tpu-forum__comment-actions">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    if (!requireAuth()) return;
+                    setReplyParentId(accepted.id);
+                    setReplyOpen(true);
+                  }}
+                  disabled={!canInteract}
+                >
+                  Reply
+                </Button>
+                {isAdmin ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => clearAcceptedAnswer()}
+                  >
+                    Clear accepted
+                  </Button>
+                ) : null}
+              </div>
             </CardFooter>
           </Card>
         )}
@@ -2097,11 +2196,8 @@ export function ForumApp({ config }) {
                           }
                           isAuthorAdmin={childIsAuthorAdmin}
                           showDelete={isAdmin}
-                          onReply={() => {
-                            if (!requireAuth()) return;
-                            setReplyParentId(c.id);
-                            setReplyOpen(true);
-                          }}
+                          showReply={false}
+                          onReply={() => {}}
                           onVote={(delta) => voteComment(child.id, delta)}
                           onDelete={() => confirmDelete("comment", child.id)}
                         />

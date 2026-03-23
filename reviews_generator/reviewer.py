@@ -15,22 +15,20 @@ import math
 import random
 from typing import Any
 
-from openai import AsyncOpenAI, RateLimitError, APIStatusError
-
 from dates import build_date_pool
 from identity import IdentityPool
+from openai import APIStatusError, AsyncOpenAI, RateLimitError
 from personas import PERSONAS, get_random_persona
 from prompts import (
+    _TRUCK_TIRE,
     SYSTEM_PROMPT,
-    build_user_prompt,
     build_tier1_text_prompt,
+    build_user_prompt,
     detect_axle_weight,
     detect_tire_size,
     random_title_only_title,
-    _TRUCK_TIRE,
 )
-from tier import get_rating_pool, BATCH_SIZE
-
+from tier import BATCH_SIZE, get_rating_pool
 
 # ---------------------------------------------------------------------------
 # Persona eligibility by axle weight
@@ -39,20 +37,20 @@ from tier import get_rating_pool, BATCH_SIZE
 # Personas that are realistic for heavy axles (10k / 12k / 16k).
 # These people actually own or work with flatbeds, goosenecks, and hotshots.
 _HEAVY_AXLE_PERSONA_IDS = {
-    "derek_heavy_hauler",   # 40-ft gooseneck, heavy equipment, DOT
+    "derek_heavy_hauler",  # 40-ft gooseneck, heavy equipment, DOT
     "steve_fleet_manager",  # fleet of trailers including flatbeds
-    "gary_retired_trucker", # 40 years in trucking, builds trailers
-    "mike_repair_shop",     # buys parts for all customer trailer types
-    "luis_contractor",      # GC hauling heavy equipment and materials
-    "zach_reseller",        # flips trailers, knows specs
-    "jake_landscaper",      # landscape contractor (uses tandem flatbeds)
+    "gary_retired_trucker",  # 40 years in trucking, builds trailers
+    "mike_repair_shop",  # buys parts for all customer trailer types
+    "luis_contractor",  # GC hauling heavy equipment and materials
+    "zach_reseller",  # flips trailers, knows specs
+    "jake_landscaper",  # landscape contractor (uses tandem flatbeds)
 }
 
 # Personas appropriate for medium-heavy axles (7k / 8k):
 # car haulers, equipment trailers, large flatbeds
 _MEDIUM_HEAVY_PERSONA_IDS = _HEAVY_AXLE_PERSONA_IDS | {
-    "tony_car_hauler",      # 20-ft car hauler
-    "randy_homesteader",    # larger farm equipment
+    "tony_car_hauler",  # 20-ft car hauler
+    "randy_homesteader",  # larger farm equipment
 }
 
 # All personas are valid for 6k and below
@@ -61,19 +59,19 @@ _ALL_PERSONA_IDS = {p["id"] for p in PERSONAS}
 # Personas whose trailer type only uses small tires (12"-15").
 # Must be excluded from 16"+ tire/wheel products.
 _SMALL_TIRE_ONLY_PERSONA_IDS = {
-    "bobby_atv_guy",       # ATV trailers: 12"-15" tires, 3.5k axles max
+    "bobby_atv_guy",  # ATV trailers: 12"-15" tires, 3.5k axles max
     "chris_boat_trailer",  # boat trailers: 13"-15" tires, light axles
 }
 
 # Commercial truck tires (22.5/24.5 inch) — only personas who operate
 # semi trucks, commercial fleets, or heavy freight vehicles
 _TRUCK_TIRE_PERSONA_IDS = {
-    "derek_heavy_hauler",   # 40-ft gooseneck, commercial hauler
+    "derek_heavy_hauler",  # 40-ft gooseneck, commercial hauler
     "steve_fleet_manager",  # manages 20+ vehicle fleet
-    "gary_retired_trucker", # 40 years OTR trucking
-    "mike_repair_shop",     # buys for all commercial customer vehicles
-    "jake_landscaper",      # runs commercial trucks for his crew
-    "luis_contractor",      # GC with commercial trucks and equipment
+    "gary_retired_trucker",  # 40 years OTR trucking
+    "mike_repair_shop",  # buys for all commercial customer vehicles
+    "jake_landscaper",  # runs commercial trucks for his crew
+    "luis_contractor",  # GC with commercial trucks and equipment
 }
 
 
@@ -103,6 +101,7 @@ def _get_eligible_personas(product_name: str) -> list[dict]:
     eligible = [p for p in PERSONAS if p["id"] in eligible_ids]
     return eligible if eligible else PERSONAS
 
+
 logger = logging.getLogger(__name__)
 
 # Lazily initialized — must NOT be created at module level because
@@ -119,13 +118,14 @@ def _llm_sem() -> asyncio.Semaphore:
 
 
 MAX_RETRIES = 5
-INITIAL_BACKOFF = 2.0    # seconds
+INITIAL_BACKOFF = 2.0  # seconds
 MAX_BACKOFF = 60.0
 
 
 # ---------------------------------------------------------------------------
 # Row builder helpers
 # ---------------------------------------------------------------------------
+
 
 def _base_row(product: dict) -> dict:
     return {
@@ -153,6 +153,7 @@ def _base_row(product: dict) -> dict:
 # Tier 1 silent reviews (local, no LLM)
 # ---------------------------------------------------------------------------
 
+
 def generate_silent_reviews(product: dict, count: int) -> list[dict]:
     """
     Generate `count` silent 5-star reviews (no title, no content).
@@ -170,7 +171,7 @@ def generate_silent_reviews(product: dict, count: int) -> list[dict]:
                 "date": date_str,
                 "review_score": "5",
                 "review_title": "",
-                "review_content": "",
+                "review_content": " ",
                 "display_name": identity.display_name,
                 "email": identity.email,
             }
@@ -198,7 +199,7 @@ def generate_title_only_reviews(product: dict, count: int) -> list[dict]:
                 "date": date_str,
                 "review_score": "5",
                 "review_title": random_title_only_title(),
-                "review_content": "",
+                "review_content": " ",
                 "display_name": identity.display_name,
                 "email": identity.email,
             }
@@ -211,6 +212,7 @@ def generate_title_only_reviews(product: dict, count: int) -> list[dict]:
 # ---------------------------------------------------------------------------
 # LLM review generation
 # ---------------------------------------------------------------------------
+
 
 async def _call_llm_with_retry(
     client: AsyncOpenAI,
@@ -264,26 +266,34 @@ async def _call_llm_with_retry(
                 if "review_title" in parsed or "review_content" in parsed:
                     return [parsed]
 
-            logger.warning(f"Unexpected JSON shape (attempt {attempt + 1}): {list(parsed.keys()) if isinstance(parsed, dict) else type(parsed)}")
+            logger.warning(
+                f"Unexpected JSON shape (attempt {attempt + 1}): {list(parsed.keys()) if isinstance(parsed, dict) else type(parsed)}"
+            )
             last_exc = ValueError("Unexpected JSON shape")
             continue
 
         except RateLimitError as exc:
-            logger.warning(f"Rate limit hit (attempt {attempt + 1}/{MAX_RETRIES}). Sleeping {backoff:.1f}s...")
+            logger.warning(
+                f"Rate limit hit (attempt {attempt + 1}/{MAX_RETRIES}). Sleeping {backoff:.1f}s..."
+            )
             last_exc = exc
             await asyncio.sleep(backoff)
             backoff = min(backoff * 2, MAX_BACKOFF)
 
         except APIStatusError as exc:
             if exc.status_code and exc.status_code >= 500:
-                logger.warning(f"OpenAI 5xx (attempt {attempt + 1}/{MAX_RETRIES}). Sleeping {backoff:.1f}s...")
+                logger.warning(
+                    f"OpenAI 5xx (attempt {attempt + 1}/{MAX_RETRIES}). Sleeping {backoff:.1f}s..."
+                )
                 last_exc = exc
                 await asyncio.sleep(backoff)
                 backoff = min(backoff * 2, MAX_BACKOFF)
             else:
                 raise  # 4xx other than 429 — don't retry
 
-    logger.error(f"LLM call failed after {MAX_RETRIES} attempts. Last error: {last_exc}")
+    logger.error(
+        f"LLM call failed after {MAX_RETRIES} attempts. Last error: {last_exc}"
+    )
     return []
 
 
@@ -316,13 +326,31 @@ def _build_review_specs(
 
 
 _BANNED_TITLE_OPENERS = {
-    "good", "solid", "decent", "nice", "works", "great", "amazing",
-    "excellent", "perfect", "outstanding", "fantastic", "reliable", "quality",
+    "good",
+    "solid",
+    "decent",
+    "nice",
+    "works",
+    "great",
+    "amazing",
+    "excellent",
+    "perfect",
+    "outstanding",
+    "fantastic",
+    "reliable",
+    "quality",
 }
 
 _BANNED_CONTENT_WORDS = [
-    "perfect", "perfectly", "perfectly fine", "works perfectly", "fits perfectly",
-    "works perfect", "work perfect", "runs perfect", "fit perfect",
+    "perfect",
+    "perfectly",
+    "perfectly fine",
+    "works perfectly",
+    "fits perfectly",
+    "works perfect",
+    "work perfect",
+    "runs perfect",
+    "fit perfect",
 ]
 
 _BANNED_CONTENT_OPENERS = {"these", "the", "this", "i ", "got", "ordered", "been"}
@@ -358,7 +386,8 @@ async def _fix_violations(
     Max 2 retries per row. Operates in-place.
     """
     violations = [
-        i for i, r in enumerate(rows)
+        i
+        for i, r in enumerate(rows)
         if _has_title_violation(r.get("review_title", ""))
         or _has_content_violation(r.get("review_content", ""))
         or _has_content_opener_violation(r.get("review_content", ""))
@@ -367,7 +396,9 @@ async def _fix_violations(
     if not violations:
         return rows
 
-    logger.info(f"Fixing {len(violations)} title/content violations via targeted rewrites...")
+    logger.info(
+        f"Fixing {len(violations)} title/content violations via targeted rewrites..."
+    )
 
     for idx in violations:
         row = rows[idx]
@@ -422,7 +453,9 @@ async def _fix_violations(
                 new_title = fixed.get("review_title", title)
                 new_content = fixed.get("review_content", content)
 
-                if not _has_title_violation(new_title) and not _has_content_violation(new_content):
+                if not _has_title_violation(new_title) and not _has_content_violation(
+                    new_content
+                ):
                     rows[idx]["review_title"] = new_title
                     rows[idx]["review_content"] = new_content
                     break
@@ -508,15 +541,27 @@ async def generate_llm_reviews(
             # Split into half-batches and retry
             mid = len(specs) // 2
             r1 = await _call_llm_with_retry(
-                client, model,
-                build_user_prompt(product, specs[:mid], variation_seed + 10) if not is_tier1_text
-                else build_tier1_text_prompt(product, specs[:mid], variation_seed + 10),
+                client,
+                model,
+                (
+                    build_user_prompt(product, specs[:mid], variation_seed + 10)
+                    if not is_tier1_text
+                    else build_tier1_text_prompt(
+                        product, specs[:mid], variation_seed + 10
+                    )
+                ),
                 mid,
             )
             r2 = await _call_llm_with_retry(
-                client, model,
-                build_user_prompt(product, specs[mid:], variation_seed + 20) if not is_tier1_text
-                else build_tier1_text_prompt(product, specs[mid:], variation_seed + 20),
+                client,
+                model,
+                (
+                    build_user_prompt(product, specs[mid:], variation_seed + 20)
+                    if not is_tier1_text
+                    else build_tier1_text_prompt(
+                        product, specs[mid:], variation_seed + 20
+                    )
+                ),
                 len(specs) - mid,
             )
             results = r1 + r2

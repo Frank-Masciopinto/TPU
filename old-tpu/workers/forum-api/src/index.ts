@@ -974,52 +974,59 @@ async function handleVoteThread(
 async function handleGetThreadComments(
   req: Request,
   env: Env,
-  ctx: ExecutionContext,
+  _ctx: ExecutionContext,
   threadId: string,
   authed: Authed | null,
 ): Promise<Response> {
   const workerOrigin = new URL(req.url).origin;
-  return maybeCached(req, ctx, 20, async () => {
-    const params = new URLSearchParams();
-    params.set(
-      "select",
-      "id,thread_id,body,images,created_at,updated_at,score,user_id",
+  // Do not use edge cache: response is personalized (myVote, authors) and must be fresh after POST.
+  const params = new URLSearchParams();
+  params.set(
+    "select",
+    "id,thread_id,parent_id,body,images,created_at,updated_at,score,user_id",
+  );
+  params.set("thread_id", `eq.${threadId}`);
+  params.set("order", "created_at.asc");
+  const r = await supabaseFetch(env, `comments?${params.toString()}`, {
+    method: "GET",
+  });
+  if (!r.ok)
+    return json(
+      { error: "supabase_error", details: await safeJson(r) },
+      { status: 502 },
     );
-    params.set("thread_id", `eq.${threadId}`);
-    params.set("order", "created_at.asc");
-    const r = await supabaseFetch(env, `comments?${params.toString()}`, {
-      method: "GET",
-    });
-    if (!r.ok)
-      return json(
-        { error: "supabase_error", details: await safeJson(r) },
-        { status: 502 },
-      );
-    const comments = (await r.json()) as Record<string, unknown>[];
+  const comments = (await r.json()) as Record<string, unknown>[];
 
-    if (authed && comments.length > 0) {
-      const ids = comments.map((c) => c.id as string).filter(Boolean);
-      const vr = await supabaseFetch(
-        env,
-        `comment_votes?comment_id=in.(${ids.join(",")})\&user_id=eq.${encodeURIComponent(authed.userId)}&select=comment_id,value`,
-        { method: "GET" },
-      );
-      if (vr.ok) {
-        const votes = (await vr.json()) as { comment_id: string; value: number }[];
-        const voteMap = new Map(votes.map((v) => [v.comment_id, v.value]));
-        for (const c of comments) {
-          (c as Record<string, unknown>).myVote = voteMap.get(c.id as string) ?? 0;
-        }
-      }
-    } else {
+  if (authed && comments.length > 0) {
+    const ids = comments.map((c) => c.id as string).filter(Boolean);
+    const vr = await supabaseFetch(
+      env,
+      `comment_votes?comment_id=in.(${ids.join(",")})\&user_id=eq.${encodeURIComponent(authed.userId)}&select=comment_id,value`,
+      { method: "GET" },
+    );
+    if (vr.ok) {
+      const votes = (await vr.json()) as { comment_id: string; value: number }[];
+      const voteMap = new Map(votes.map((v) => [v.comment_id, v.value]));
       for (const c of comments) {
-        (c as Record<string, unknown>).myVote = 0;
+        (c as Record<string, unknown>).myVote = voteMap.get(c.id as string) ?? 0;
       }
     }
+  } else {
+    for (const c of comments) {
+      (c as Record<string, unknown>).myVote = 0;
+    }
+  }
 
-    await enrichWithAuthors(env, comments, undefined, workerOrigin);
-    return json({ data: comments }, { status: 200 });
-  });
+  await enrichWithAuthors(env, comments, undefined, workerOrigin);
+  return json(
+    { data: comments },
+    {
+      status: 200,
+      headers: {
+        "Cache-Control": "private, max-age=0, must-revalidate",
+      },
+    },
+  );
 }
 
 async function handleCreateComment(
@@ -1057,7 +1064,49 @@ async function handleCreateComment(
   if (countLinks(content) > 2) throw new HttpError(400, "too_many_links");
 
   const images = validateImageUrls(body.images, workerOrigin);
-  const insert = { thread_id: threadId, body: content, images, user_id: authed.userId };
+
+  const rawParent =
+    body.parentId !== undefined && body.parentId !== null
+      ? body.parentId
+      : body.parent_id;
+  let parentId: string | null = null;
+  if (rawParent !== undefined && rawParent !== null) {
+    const pid = String(rawParent).trim();
+    if (pid) {
+      const pParams = new URLSearchParams();
+      pParams.set("select", "id,thread_id,parent_id");
+      pParams.set("id", `eq.${pid}`);
+      const pRes = await supabaseFetch(env, `comments?${pParams.toString()}`, {
+        method: "GET",
+        jwt: authed.jwt,
+      });
+      if (!pRes.ok)
+        return json(
+          { error: "supabase_error", details: await safeJson(pRes) },
+          { status: 502 },
+        );
+      const parents = (await pRes.json()) as Array<{
+        id?: string;
+        thread_id?: string;
+        parent_id?: string | null;
+      }>;
+      const parent = parents[0];
+      if (!parent || String(parent.thread_id) !== String(threadId))
+        throw new HttpError(400, "invalid_parent", "Invalid parent comment for this thread");
+      if (parent.parent_id != null && String(parent.parent_id).length > 0)
+        throw new HttpError(400, "invalid_parent", "Replies can only be one level deep");
+      parentId = String(parent.id);
+    }
+  }
+
+  const insert: Record<string, unknown> = {
+    thread_id: threadId,
+    body: content,
+    images,
+    user_id: authed.userId,
+  };
+  if (parentId) insert.parent_id = parentId;
+
   const r = await supabaseFetch(env, "comments", {
     method: "POST",
     jwt: authed.jwt,
@@ -1851,6 +1900,16 @@ async function handlePatchThread(
   if (typeof body.is_locked === "boolean") allowed.is_locked = body.is_locked;
   if (typeof body.is_pinned === "boolean") allowed.is_pinned = body.is_pinned;
 
+  if (Object.prototype.hasOwnProperty.call(body, "accepted_comment_id")) {
+    if (body.accepted_comment_id !== null)
+      throw new HttpError(
+        400,
+        "accepted_comment_id_invalid",
+        "Only null is allowed; use POST /comments/:id/accept to set an accepted answer",
+      );
+    allowed.accepted_comment_id = null;
+  }
+
   if (!Object.keys(allowed).length) throw new HttpError(400, "no_fields", "No valid fields to update");
 
   allowed.updated_at = new Date().toISOString();
@@ -1875,7 +1934,14 @@ async function handlePatchThread(
   const updated = (await r.json()) as Record<string, unknown>[];
   if (!updated.length) return json({ error: "not_found" }, { status: 404 });
 
-  console.log(`[AdminAudit] action=patch_thread target=${threadId} fields=${Object.keys(allowed).join(",")} admin=${asString(authed.claims.email)}`);
+  const auditFields = Object.keys(allowed).join(",");
+  if (Object.prototype.hasOwnProperty.call(allowed, "accepted_comment_id") && allowed.accepted_comment_id === null) {
+    console.log(
+      `[AdminAudit] action=patch_thread target=${threadId} fields=${auditFields} accepted_comment_id_cleared=1 admin=${asString(authed.claims.email)}`,
+    );
+  } else {
+    console.log(`[AdminAudit] action=patch_thread target=${threadId} fields=${auditFields} admin=${asString(authed.claims.email)}`);
+  }
 
   return json({ data: updated[0] }, { status: 200 });
 }

@@ -273,6 +273,14 @@ body.tpu-forum-page {
     box-shadow: $tpu-shadow-md;
 }
 
+.tpu-forum__accepted-replies {
+    display: flex;
+    flex-direction: column;
+    gap: $tpu-space-2;
+    padding-top: 0;
+    border-top: 1px solid $tpu-border-secondary;
+}
+
 .tpu-forum__drawer-body {
     padding: $tpu-space-4 $tpu-space-6;
     display: flex;

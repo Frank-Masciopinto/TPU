@@ -14,11 +14,11 @@ import re
 # when shown to plain-language personas. Covers tire sizes, bearing numbers,
 # bolt dimensions, and similar catalog codes.
 _SPEC_CODE_STRIP = re.compile(
-    r"\b(?:ST)?\d{3}/\d{2,3}[RD]\d{2}(?:\.\d)?\b"   # tire sizes: ST235/85R16
-    r"|\b\d{2}R\d{2}\.\d\b"                             # truck tires: 11R22.5
-    r"|\bL\d{4,6}(?:/L\d{4,6})?\b"                      # bearing numbers: L44649
-    r"|\b\d+(?:\.\d+)?\"[-x]\d+(?:\.\d+)?\"?\b"         # dimensions: 1-3/4"x25-1/4"
-    r"|\b\d{1,2}-[Pp]ly\b",                              # ply ratings: 14-Ply (keep as "14-ply" → handled separately)
+    r"\b(?:ST)?\d{3}/\d{2,3}[RD]\d{2}(?:\.\d)?\b"  # tire sizes: ST235/85R16
+    r"|\b\d{2}R\d{2}\.\d\b"  # truck tires: 11R22.5
+    r"|\bL\d{4,6}(?:/L\d{4,6})?\b"  # bearing numbers: L44649
+    r"|\b\d+(?:\.\d+)?\"[-x]\d+(?:\.\d+)?\"?\b"  # dimensions: 1-3/4"x25-1/4"
+    r"|\b\d{1,2}-[Pp]ly\b",  # ply ratings: 14-Ply (keep as "14-ply" → handled separately)
     re.IGNORECASE,
 )
 
@@ -32,11 +32,11 @@ _AXLE_PATTERNS = [
     (16000, re.compile(r"\b16[,.]?000\b|\b16k\b", re.IGNORECASE)),
     (12000, re.compile(r"\b12[,.]?000\b|\b12k\b", re.IGNORECASE)),
     (10000, re.compile(r"\b10[,.]?000\b|\b10k\b", re.IGNORECASE)),
-    (8000,  re.compile(r"\b8[,.]?000\b|\b8k\b", re.IGNORECASE)),
-    (7000,  re.compile(r"\b7[,.]?000\b|\b7k\b", re.IGNORECASE)),
-    (6000,  re.compile(r"\b6[,.]?000\b|\b6k\b", re.IGNORECASE)),
-    (5200,  re.compile(r"\b5[,.]?200\b|\b5\.2k\b", re.IGNORECASE)),
-    (3500,  re.compile(r"\b3[,.]?500\b|\b3\.5k\b", re.IGNORECASE)),
+    (8000, re.compile(r"\b8[,.]?000\b|\b8k\b", re.IGNORECASE)),
+    (7000, re.compile(r"\b7[,.]?000\b|\b7k\b", re.IGNORECASE)),
+    (6000, re.compile(r"\b6[,.]?000\b|\b6k\b", re.IGNORECASE)),
+    (5200, re.compile(r"\b5[,.]?200\b|\b5\.2k\b", re.IGNORECASE)),
+    (3500, re.compile(r"\b3[,.]?500\b|\b3\.5k\b", re.IGNORECASE)),
 ]
 
 
@@ -111,10 +111,10 @@ def get_trailer_context(product_name: str) -> str | None:
 # Detect rim/wheel diameter from product names.
 # Handles: "R17.5", "17.5 inch", "17.5\"", "R16", "16 inch", "R15", "15 inch"
 _TIRE_17_5 = re.compile(r"\bR?17\.5\b|17\.5[\"\s]", re.IGNORECASE)
-_TIRE_16   = re.compile(r"\bR?16\b|16[\"\s-]|16\"", re.IGNORECASE)
-_TIRE_15   = re.compile(r"\bR?15\b|15[\"\s-]|15\"", re.IGNORECASE)
-_TIRE_14   = re.compile(r"\bR?14\b|14[\"\s-]", re.IGNORECASE)
-_TIRE_13   = re.compile(r"\bR?13\b|13[\"\s-]", re.IGNORECASE)
+_TIRE_16 = re.compile(r"\bR?16\b|16[\"\s-]|16\"", re.IGNORECASE)
+_TIRE_15 = re.compile(r"\bR?15\b|15[\"\s-]|15\"", re.IGNORECASE)
+_TIRE_14 = re.compile(r"\bR?14\b|14[\"\s-]", re.IGNORECASE)
+_TIRE_13 = re.compile(r"\bR?13\b|13[\"\s-]", re.IGNORECASE)
 
 # Commercial truck tire sizes (22.5-inch and 24.5-inch semi/heavy truck fitments)
 _TRUCK_TIRE = re.compile(
@@ -125,11 +125,11 @@ _TRUCK_TIRE = re.compile(
 )
 
 # Detect dual-wheel configuration
-_DUAL      = re.compile(r"\bdual\b", re.IGNORECASE)
+_DUAL = re.compile(r"\bdual\b", re.IGNORECASE)
 
 # Detect lug count (for 15" differentiation)
-_LUG_5     = re.compile(r"\b5[\s-]?lug\b", re.IGNORECASE)
-_LUG_6     = re.compile(r"\b6[\s-]?lug\b", re.IGNORECASE)
+_LUG_5 = re.compile(r"\b5[\s-]?lug\b", re.IGNORECASE)
+_LUG_6 = re.compile(r"\b6[\s-]?lug\b", re.IGNORECASE)
 
 # Tire size code patterns like "ST205/75R15", "235/80R16", "215/75R17.5"
 _TIRE_CODE = re.compile(
@@ -191,55 +191,55 @@ def get_tire_wheel_context(product_name: str) -> str | None:
 
     size = info["size"]
     dual = info["dual"]
-    lug  = info["lug"]
+    lug = info["lug"]
 
     if size == "17.5":
         if dual:
             return (
-                "TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 17.5\" dual wheels/tires. "
+                'TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 17.5" dual wheels/tires. '
                 "They are used on 10k and 12k axles only — gooseneck trailers, hotshot "
                 "trailers, heavy flatbeds, and commercial trailers. "
                 "NEVER reference a small trailer, utility trailer, or axle under 10k. "
-                "Many reviewers upgraded from 16\" singles to these for more load capacity "
+                'Many reviewers upgraded from 16" singles to these for more load capacity '
                 "and fewer blowouts — that is a realistic and natural thing to mention."
             )
         else:
             return (
-                "TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 17.5\" single wheels/tires. "
+                'TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 17.5" single wheels/tires. '
                 "They are used on 7k through 12k axles — car haulers, flatbeds, goosenecks, "
                 "equipment trailers, and hotshot trailers. "
                 "A very common and realistic scenario to mention: the reviewer upgraded "
-                "from 16\" tires to 17.5\" for more hauling power and fewer blowouts. "
+                'from 16" tires to 17.5" for more hauling power and fewer blowouts. '
                 "This is something real customers do all the time and it reads naturally "
                 "in reviews. NEVER reference axles under 7k or small utility/boat trailers."
             )
     elif size == "16":
         if dual:
             return (
-                "TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 16\" dual wheels/tires. "
+                'TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 16" dual wheels/tires. '
                 "They work with 10k and 12k axles on gooseneck trailers, hotshot trailers, "
                 "and heavy commercial flatbeds. NEVER reference axles under 10k or small "
                 "trailers."
             )
         else:
             return (
-                "TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 16\" single wheels/tires. "
+                'TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 16" single wheels/tires. '
                 "They work with 5.2k through 8k axles — landscape trailers, cargo trailers, "
                 "car haulers, utility trailers, and medium equipment trailers. "
-                "NEVER reference 10k+ axles (those need 17.5\" or dual configuration) "
+                'NEVER reference 10k+ axles (those need 17.5" or dual configuration) '
                 "or very light axles under 5k."
             )
     elif size == "15":
         if lug == 5:
             return (
-                "TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 15\" 5-lug wheels/tires. "
+                'TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 15" 5-lug wheels/tires. '
                 "They work with 2k and 3.5k axles — small utility trailers, boat trailers, "
                 "ATV trailers, and light cargo trailers. NEVER reference axles over 3.5k "
-                "for 5-lug 15\" wheels."
+                'for 5-lug 15" wheels.'
             )
         elif lug == 6:
             return (
-                "TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 15\" 6-lug wheels/tires. "
+                'TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 15" 6-lug wheels/tires. '
                 "They work with 5.2k and 6k axles — utility trailers, cargo trailers, "
                 "landscape trailers, and medium-duty setups. NEVER reference 3.5k or "
                 "under (those need 5-lug), or axles over 7k."
@@ -247,14 +247,14 @@ def get_tire_wheel_context(product_name: str) -> str | None:
         else:
             # 15" without clear lug count — give general guidance
             return (
-                "TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 15\" wheels/tires. "
-                "15\" 5-lug fit 2k–3.5k axles; 15\" 6-lug fit 5.2k–6k axles. "
+                'TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are 15" wheels/tires. '
+                '15" 5-lug fit 2k–3.5k axles; 15" 6-lug fit 5.2k–6k axles. '
                 "Reference light to medium-duty trailers only (boat, utility, cargo, "
                 "landscape). NEVER reference axles over 7k."
             )
     elif size in ("13", "14"):
         return (
-            f"TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are {size}\" wheels/tires. "
+            f'TIRE/WHEEL COMPATIBILITY CONSTRAINT: These are {size}" wheels/tires. '
             "They are used on very light trailers: small boat trailers, personal watercraft, "
             "utility trailers under 3,500 lbs, and small cargo trailers. "
             "NEVER reference heavy axles or large trailers."
@@ -461,12 +461,45 @@ an array of exactly N review objects. Each review object has these exact keys:
 # These openers are distributed across reviews in round-robin order.
 # Words that were historically dominant ("Got", "These", "Ordered", "Been") are excluded.
 _OPENER_POOL = [
-    "My", "Had", "Just", "Bought", "Running", "Needed", "Put", "Used",
-    "Picked", "Finally", "Shop", "Third", "Grabbed", "Replaced", "Switched",
-    "Ran", "Pulled", "Mounted", "Tried", "After", "First", "Back", "Second",
-    "We", "Always", "Upgraded", "Swapped", "Fast", "Spent", "Checked",
-    "Looked", "Figured", "Wanted", "Hauled", "Loaded", "Built", "Fixed",
-    "Needed", "Found",
+    "My",
+    "Had",
+    "Just",
+    "Bought",
+    "Running",
+    "Needed",
+    "Put",
+    "Used",
+    "Picked",
+    "Finally",
+    "Shop",
+    "Third",
+    "Grabbed",
+    "Replaced",
+    "Switched",
+    "Ran",
+    "Pulled",
+    "Mounted",
+    "Tried",
+    "After",
+    "First",
+    "Back",
+    "Second",
+    "We",
+    "Always",
+    "Upgraded",
+    "Swapped",
+    "Fast",
+    "Spent",
+    "Checked",
+    "Looked",
+    "Figured",
+    "Wanted",
+    "Hauled",
+    "Loaded",
+    "Built",
+    "Fixed",
+    "Needed",
+    "Found",
 ]
 
 _opener_counter = 0
@@ -552,7 +585,7 @@ def _plain_product_name(product: dict) -> str:
     cleaned = _SPEC_CODE_STRIP.sub("", name)
     # Collapse extra whitespace left by stripping
     cleaned = re.sub(r"\s{2,}", " ", cleaned).strip()
-    return cleaned or name   # fallback to original if cleaning empties the string
+    return cleaned or name  # fallback to original if cleaning empties the string
 
 
 def _plain_description(product: dict) -> str:
@@ -631,9 +664,7 @@ def build_user_prompt(
                 "No full alphanumeric catalog codes."
             )
         else:
-            spec_lang_note = (
-                "spec_language=codes — exact technical notation is natural for this person."
-            )
+            spec_lang_note = "spec_language=codes — exact technical notation is natural for this person."
 
         slang = persona.get("regional_slang", [])
         slang_note = (

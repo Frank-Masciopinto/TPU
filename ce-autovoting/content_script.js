@@ -40,6 +40,94 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/**
+ * Wait for button.voting-button via MutationObserver — runs as soon as it hits the DOM
+ * (or when ssButtonDisabled is removed). No fixed Ember sleep before this.
+ */
+function waitForVoteButton(timeoutMs = 45000) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    let firstSeenAt = null;
+    let disabledFallbackTimer = null;
+    const DISABLED_GRACE_MS = 12000;
+    let hardTimeout;
+    let observer;
+
+    const cleanup = () => {
+      if (disabledFallbackTimer) {
+        clearTimeout(disabledFallbackTimer);
+        disabledFallbackTimer = null;
+      }
+      if (observer) observer.disconnect();
+    };
+
+    const finish = (btn, warnDisabled) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      clearTimeout(hardTimeout);
+      btn.scrollIntoView({ block: 'center', behavior: 'instant' });
+      if (warnDisabled) {
+        console.warn('[autoVote] voting-button still ssButtonDisabled after wait — clicking anyway');
+      }
+      resolve(btn);
+    };
+
+    const tryPick = () => {
+      if (settled) return;
+      const enabled = document.querySelector('button.voting-button:not(.ssButtonDisabled)');
+      if (enabled) {
+        finish(enabled, false);
+        return;
+      }
+      const any = document.querySelector('button.voting-button');
+      if (!any) return;
+
+      if (firstSeenAt === null) {
+        firstSeenAt = Date.now();
+        if (any.classList.contains('ssButtonDisabled') && !disabledFallbackTimer) {
+          disabledFallbackTimer = setTimeout(() => tryPick(), DISABLED_GRACE_MS);
+        }
+      }
+
+      if (firstSeenAt !== null && Date.now() - firstSeenAt >= DISABLED_GRACE_MS) {
+        finish(any, true);
+      }
+    };
+
+    hardTimeout = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      const vb = document.querySelectorAll('button.voting-button');
+      console.warn(`[autoVote] Timeout. button.voting-button count=${vb.length}`);
+      vb.forEach((b, i) => console.warn(`  [${i}] class="${b.className}"`));
+      reject(new Error('[autoVote] Timeout waiting for button.voting-button'));
+    }, timeoutMs);
+
+    observer = new MutationObserver(() => { tryPick(); });
+    const obsOpts = {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'disabled'],
+    };
+
+    const attach = () => {
+      const root = document.body;
+      if (root) observer.observe(root, obsOpts);
+      else {
+        document.addEventListener('DOMContentLoaded', () => {
+          observer.observe(document.body, obsOpts);
+          tryPick();
+        }, { once: true });
+      }
+    };
+    attach();
+    tryPick();
+  });
+}
+
 function waitForElement(selector, timeoutMs = 10000) {
   return new Promise((resolve, reject) => {
     const existing = document.querySelector(selector);
@@ -184,19 +272,13 @@ async function autoVote() {
     const email     = await getNextEmail();
     await dbg(`Identity: ${firstName} ${lastName} <${email}>`);
 
-    await dbg('Waiting for Ember render...');
-    await sleep(3000);
-
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    await sleep(1500);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    await sleep(500);
-    await dbg('Scroll complete');
+    // No fixed Ember/scroll delay — MutationObserver starts as soon as voting-button exists
+    await dbg('Watching DOM for vote button (observer)...');
 
     // ----------------------------------------------------------
     // Step 2 — Click vote button
     // ----------------------------------------------------------
-    const voteBtn = await waitForElement('button.voting-button:not(.ssButtonDisabled)', 30000);
+    const voteBtn = await waitForVoteButton(45000);
     voteBtn.click();
     await dbg('Vote button clicked');
     await sleep(2000);

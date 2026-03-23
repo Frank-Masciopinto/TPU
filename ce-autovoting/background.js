@@ -292,6 +292,57 @@ async function scheduleNextBatch() {
 }
 
 // ============================================================
+// Wait for main-frame DOMContentLoaded (not "complete" — that waits for
+// every image, analytics, and third-party script and can take 60s+).
+// ============================================================
+
+function waitForMainFrameDomReady(tabId, timeoutMs = 45000) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const cleanup = () => {
+      chrome.webNavigation.onDOMContentLoaded.removeListener(onDom);
+      chrome.tabs.onUpdated.removeListener(onUpd);
+    };
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      cleanup();
+      resolve();
+    };
+    const fail = (msg) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      cleanup();
+      reject(new Error(msg));
+    };
+
+    const timer = setTimeout(() => fail('DOMContentLoaded timeout'), timeoutMs);
+
+    function onDom(details) {
+      if (details.tabId === tabId && details.frameId === 0) finish();
+    }
+    // Fallback: very fast/cached navigations can fire DCL before listener attaches
+    function onUpd(id, info) {
+      if (id === tabId && info.status === 'complete') finish();
+    }
+
+    chrome.webNavigation.onDOMContentLoaded.addListener(onDom);
+    chrome.tabs.onUpdated.addListener(onUpd);
+
+    // Probe: tab may already be interactive if listener was late
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => document.readyState
+    }).then((results) => {
+      const rs = results && results[0] && results[0].result;
+      if (rs === 'interactive' || rs === 'complete') finish();
+    }).catch(() => {});
+  });
+}
+
+// ============================================================
 // TAB VOTE EXECUTION
 // When called from popup: tabId is provided (popup already opened tab)
 // When called from alarm loop: no tabId, we open it ourselves
@@ -302,6 +353,10 @@ async function executeVoteInTab() {
 
   let tabId;
   try {
+    // Clear BEFORE opening the tab — avoids racing the first navigation (stale cookies
+    // → ssButtonDisabled on Vote) and avoids "Frame 0 removed" from clearing mid-load.
+    await clearAllOriginData().catch(e => console.warn('[bg] pre-clear:', e.message));
+
     const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
     tabId = tab.id;
     console.log(`[bg] Tab ${tabId} opened`);
@@ -318,19 +373,19 @@ async function executeVoteInTab() {
       emailPromise = Promise.resolve();
     }
 
-    const clearPromise = clearAllOriginData().catch(e => console.warn('[bg] clear:', e.message));
-    const pagePromise  = new Promise((resolve, reject) => {
-      const timer = setTimeout(() => { chrome.tabs.onUpdated.removeListener(fn); reject(new Error('page load 60s timeout')); }, 60000);
-      function fn(id, info) {
-        if (id === tabId && info.status === 'complete') { clearTimeout(timer); chrome.tabs.onUpdated.removeListener(fn); resolve(); }
+    const domPromise = waitForMainFrameDomReady(tabId);
+
+    await Promise.all([emailPromise, domPromise]);
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await chrome.scripting.executeScript({ target: { tabId }, files: ['content_script.js'] });
+        break;
+      } catch (e) {
+        if (attempt === 2 || !String(e.message || '').includes('removed')) throw e;
+        await new Promise(r => setTimeout(r, 400));
       }
-      chrome.tabs.onUpdated.addListener(fn);
-      chrome.tabs.get(tabId).then(t => { if (t.status === 'complete') { clearTimeout(timer); chrome.tabs.onUpdated.removeListener(fn); resolve(); } }).catch(() => {});
-    });
-
-    await Promise.all([emailPromise, clearPromise, pagePromise]);
-
-    await chrome.scripting.executeScript({ target: { tabId }, files: ['content_script.js'] });
+    }
     chrome.alarms.create(`tab_timeout_${tabId}`, { delayInMinutes: 5 });
     console.log(`[bg] Tab ${tabId} script injected`);
 
