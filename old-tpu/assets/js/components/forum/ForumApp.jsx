@@ -130,6 +130,28 @@ function useRouter() {
   return { route, navigate };
 }
 
+/** Server accepts 1 / -1 / 0; repeat same direction clears vote; opposite direction flips in one request. */
+function voteValue(currentVote, delta) {
+  const cv = Number(currentVote);
+  const d = Number(delta);
+  const c = Number.isFinite(cv) ? cv : 0;
+  const dd = Number.isFinite(d) ? d : 0;
+  return c === dd ? 0 : dd;
+}
+
+/** Prefer API author; avoid legacy "Member" placeholder; fall back to user id label. */
+function formatDisplayAuthor(entity) {
+  if (!entity) return "Community member";
+  const raw = entity.author || entity.authorName || "";
+  const s = String(raw).trim();
+  if (s && s.toLowerCase() !== "member") return s;
+  const uid = entity.user_id || entity.userId;
+  if (uid && /^bc_\d+$/.test(String(uid)))
+    return `Customer ${String(uid).replace(/^bc_/, "")}`;
+  if (uid) return `User ${String(uid).slice(-8)}`;
+  return "Community member";
+}
+
 function ChevronUpIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -154,8 +176,9 @@ function VoteWidget({ score, myVote, onUpvote, onDownvote, disabled }) {
         variant="ghost"
         size="sm"
         onClick={onUpvote}
-        disabled={disabled || myVote === 1}
+        disabled={disabled}
         aria-label="Upvote"
+        aria-pressed={myVote === 1}
         className={myVote === 1 ? "tpu-forum__vote--active" : ""}
       >
         <ChevronUpIcon />
@@ -168,8 +191,9 @@ function VoteWidget({ score, myVote, onUpvote, onDownvote, disabled }) {
         variant="ghost"
         size="sm"
         onClick={onDownvote}
-        disabled={disabled || myVote === -1}
+        disabled={disabled}
         aria-label="Downvote"
+        aria-pressed={myVote === -1}
         className={myVote === -1 ? "tpu-forum__vote--active" : ""}
       >
         <ChevronDownIcon />
@@ -704,7 +728,7 @@ function ThreadCard({
         />
         <div className="tpu-forum__thread-meta">
           <span className="tpu-forum__author">
-            {thread.author || "Member"}
+            {formatDisplayAuthor(thread)}
           </span>
           <span className="tpu-forum__meta-dot">·</span>
           <span className="tpu-forum__timestamp">
@@ -882,9 +906,13 @@ function CommentCard({
   onDelete,
   showDelete,
   showReply = true,
+  showSetAccepted = false,
+  onSetAsAccepted,
+  /** When non-null, all "Set as accepted" controls are disabled; matching id shows "Updating…". */
+  acceptingCommentId = null,
 }) {
   const bodyHtml = sanitizeUserHtml(comment.bodyHtml || comment.body || "");
-  const authorName = comment.author || comment.authorName || "Member";
+  const authorName = formatDisplayAuthor(comment);
 
   // Determine CSS classes
   const cardClasses = [
@@ -935,6 +963,20 @@ function CommentCard({
               disabled={!canInteract}
             >
               Reply
+            </Button>
+          ) : null}
+          {showSetAccepted && onSetAsAccepted ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onSetAsAccepted}
+              disabled={acceptingCommentId != null}
+            >
+              {acceptingCommentId != null &&
+              String(acceptingCommentId) === String(comment.id)
+                ? "Updating…"
+                : "Set as accepted"}
             </Button>
           ) : null}
           {showDelete && (
@@ -1016,12 +1058,15 @@ export function ForumApp({ config }) {
   const [replyParentId, setReplyParentId] = React.useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
   const [deleteTarget, setDeleteTarget] = React.useState(null); // { type: 'thread'|'comment', id: string }
+  const [acceptingCommentId, setAcceptingCommentId] = React.useState(null);
   const [replyServerError, setReplyServerError] = React.useState("");
   const [askServerError, setAskServerError] = React.useState("");
 
   // Auth state - use state so we can refresh when user returns to tab after login
   const [auth, setAuth] = React.useState(() => getAuth(config));
   const canInteract = !!auth.token;
+
+  const voteRequestLockRef = React.useRef(false);
 
   const logoutUrl = (config && config.logoutUrl) || "/login.php?action=logout";
 
@@ -1345,12 +1390,10 @@ export function ForumApp({ config }) {
         pageSize: 10,
       })
       .then((data) => {
-        console.log("[ForumApp] listThreads response:", data);
         if (cancelled) return;
         const itemsRaw =
           (data && (data.data || data.items || data.threads)) || [];
         const items = Array.isArray(itemsRaw) ? itemsRaw : [];
-        console.log("[ForumApp] Extracted items:", items.length, "items");
         const hasMore = Boolean(
           data && (data.hasMore || data.has_more || data.nextPage != null),
         );
@@ -1365,7 +1408,6 @@ export function ForumApp({ config }) {
         } else {
           setFeed({ items, page, hasMore, totalCount });
         }
-        console.log("[ForumApp] Feed state updated");
       })
       .catch((e) => {
         if (cancelled) return;
@@ -1523,6 +1565,35 @@ export function ForumApp({ config }) {
     }
   }, [api, isAdmin, thread]);
 
+  const setAcceptedAnswer = React.useCallback(
+    async (commentId) => {
+      if (!isAdmin || !commentId || !thread?.id) return;
+      const idStr = String(commentId);
+      setAcceptingCommentId(idStr);
+      try {
+        await api.acceptComment(commentId);
+        const nextThread = {
+          ...thread,
+          accepted_comment_id: idStr,
+          acceptedCommentId: idStr,
+          acceptedAnswerId: idStr,
+          answered: true,
+        };
+        setThread(nextThread);
+        const acceptedComment = comments.find((c) => String(c.id) === idStr);
+        const suggested = comments
+          .filter((c) => String(c.id) !== idStr)
+          .slice(0, 5);
+        setForumThreadSeo(nextThread, acceptedComment || null, suggested);
+      } catch (e) {
+        alert(e.message || "Could not set accepted answer.");
+      } finally {
+        setAcceptingCommentId(null);
+      }
+    },
+    [api, isAdmin, thread, comments],
+  );
+
   const submitThread = async (payload) => {
     if (!requireAuth()) return;
     setPosting(true);
@@ -1617,9 +1688,10 @@ export function ForumApp({ config }) {
   const voteThread = async (delta) => {
     if (!requireAuth()) return;
     if (!thread || !thread.id) return;
+    if (voteRequestLockRef.current) return;
+    voteRequestLockRef.current = true;
     const currentVote = thread.myVote || 0;
-    if (currentVote === delta) return;
-    const value = currentVote !== 0 ? 0 : delta;
+    const value = voteValue(currentVote, delta);
     try {
       const res = await api.voteThread(thread.id, value);
       const nextScore = res != null ? (res.score ?? null) : null;
@@ -1632,30 +1704,38 @@ export function ForumApp({ config }) {
       }));
     } catch (e) {
       setSignInOpen(true);
+    } finally {
+      voteRequestLockRef.current = false;
     }
   };
 
   const voteComment = async (commentId, delta) => {
     if (!requireAuth()) return;
+    if (voteRequestLockRef.current) return;
     const comment = comments.find((c) => String(c.id) === String(commentId));
     const currentVote = (comment && comment.myVote) || 0;
-    if (currentVote === delta) return;
-    const value = currentVote !== 0 ? 0 : delta;
+    const value = voteValue(currentVote, delta);
+    voteRequestLockRef.current = true;
     try {
       const res = await api.voteComment(commentId, value);
       const nextScore = res != null ? (res.score ?? null) : null;
       const nextMyVote = res != null ? (res.myVote ?? 0) : 0;
-      if (typeof nextScore === "number") {
-        setComments((prev) =>
-          prev.map((c) =>
-            String(c.id) === String(commentId)
-              ? { ...c, votes: nextScore, score: nextScore, myVote: nextMyVote }
-              : c,
-          ),
-        );
-      }
+      setComments((prev) =>
+        prev.map((c) =>
+          String(c.id) === String(commentId)
+            ? {
+                ...c,
+                votes: typeof nextScore === "number" ? nextScore : c.votes,
+                score: typeof nextScore === "number" ? nextScore : c.score,
+                myVote: nextMyVote,
+              }
+            : c,
+        ),
+      );
     } catch (e) {
       setSignInOpen(true);
+    } finally {
+      voteRequestLockRef.current = false;
     }
   };
 
@@ -1830,48 +1910,50 @@ export function ForumApp({ config }) {
       )}
 
       <div className="tpu-forum__list">
-        {console.log(
-          "[ForumApp] Rendering list, feed.items:",
-          feed.items?.length || 0,
-        )}
-        {(feed.items || []).map((t) => {
-          console.log("[ForumApp] Rendering ThreadCard for:", t.id, t.title);
-          return (
-            <ThreadCard
-              key={String(t.id || t.threadId || t.slug || Math.random())}
-              thread={{
-                ...t,
-                votes: t.votes ?? t.score ?? 0,
-                excerpt: t.excerpt || t.summary || "",
-                commentCount:
-                  t.commentCount || t.comment_count || t.replies || 0,
-              }}
-              canInteract={canInteract}
-              onOpen={() => navigate(buildThreadUrl(t, t.slug))}
-              onVote={(delta) => {
-                if (!requireAuth()) return;
-                const currentVote = t.myVote || 0;
-                if (currentVote === delta) return;
-                const value = currentVote !== 0 ? 0 : delta;
-                api
-                  .voteThread(t.id, value)
-                  .then((res) => {
-                    const nextScore = res != null ? (res.score ?? null) : null;
-                    const nextMyVote = res != null ? (res.myVote ?? 0) : 0;
-                    setFeed((prev) => ({
-                      ...prev,
-                      items: (prev.items || []).map((th) =>
-                        String(th.id) === String(t.id)
-                          ? { ...th, votes: typeof nextScore === "number" ? nextScore : th.votes, score: typeof nextScore === "number" ? nextScore : th.score, myVote: nextMyVote }
-                          : th,
-                      ),
-                    }));
-                  })
-                  .catch(() => setSignInOpen(true));
-              }}
-            />
-          );
-        })}
+        {(feed.items || []).map((t) => (
+          <ThreadCard
+            key={String(t.id || t.threadId || t.slug || Math.random())}
+            thread={{
+              ...t,
+              votes: t.votes ?? t.score ?? 0,
+              excerpt: t.excerpt || t.summary || "",
+              commentCount:
+                t.commentCount || t.comment_count || t.replies || 0,
+            }}
+            canInteract={canInteract}
+            onOpen={() => navigate(buildThreadUrl(t, t.slug))}
+            onVote={(delta) => {
+              if (!requireAuth()) return;
+              if (voteRequestLockRef.current) return;
+              voteRequestLockRef.current = true;
+              const currentVote = t.myVote || 0;
+              const value = voteValue(currentVote, delta);
+              api
+                .voteThread(t.id, value)
+                .then((res) => {
+                  const nextScore = res != null ? (res.score ?? null) : null;
+                  const nextMyVote = res != null ? (res.myVote ?? 0) : 0;
+                  setFeed((prev) => ({
+                    ...prev,
+                    items: (prev.items || []).map((th) =>
+                      String(th.id) === String(t.id)
+                        ? {
+                            ...th,
+                            votes: typeof nextScore === "number" ? nextScore : th.votes,
+                            score: typeof nextScore === "number" ? nextScore : th.score,
+                            myVote: nextMyVote,
+                          }
+                        : th,
+                    ),
+                  }));
+                })
+                .catch(() => setSignInOpen(true))
+                .finally(() => {
+                  voteRequestLockRef.current = false;
+                });
+            }}
+          />
+        ))}
       </div>
 
       {feedLoading && (feed.page || 1) > 1 && (
@@ -1999,7 +2081,7 @@ export function ForumApp({ config }) {
               </span>
               <div className="tpu-forum__thread-byline">
                 <span className="tpu-forum__author">
-                  {thread.author || "Member"}
+                  {formatDisplayAuthor(thread)}
                 </span>
                 <span className="tpu-forum__meta-dot">·</span>
                 <span className="tpu-forum__timestamp">
@@ -2170,6 +2252,9 @@ export function ForumApp({ config }) {
                       }
                       isAuthorAdmin={cIsAuthorAdmin}
                       showDelete={isAdmin}
+                      showSetAccepted={isAdmin}
+                      onSetAsAccepted={() => setAcceptedAnswer(c.id)}
+                      acceptingCommentId={acceptingCommentId}
                       onReply={() => {
                         if (!requireAuth()) return;
                         setReplyParentId(c.id);

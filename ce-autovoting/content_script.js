@@ -195,6 +195,30 @@ async function getNextEmail() {
   return email;
 }
 
+/** Remove one bad address from pool (invalid / rejected on email step). */
+async function removeEmailFromPool(badEmail) {
+  const { emailPool = [] } = await chrome.storage.local.get('emailPool');
+  const newPool = emailPool.filter((e) => e !== badEmail);
+  await chrome.storage.local.set({ emailPool: newPool });
+  console.warn(`[autoVote] Removed invalid pool email: ${badEmail} (${newPool.length} remaining)`);
+}
+
+function isRegistrationStepVisible() {
+  const el = document.querySelector('ss-form-field[data-field-id="40"] input.ember-text-field');
+  if (!el || el.disabled) return false;
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.height > 0;
+}
+
+async function waitForRegistrationStepAfterEmailSubmit(timeoutMs = 22000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (isRegistrationStepVisible()) return true;
+    await sleep(200);
+  }
+  return false;
+}
+
 // ============================================================
 // CAPTCHA — solveTurnstile()
 // ============================================================
@@ -269,7 +293,7 @@ async function autoVote() {
     // ----------------------------------------------------------
     const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
     const lastName  = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-    const email     = await getNextEmail();
+    let email       = await getNextEmail();
     await dbg(`Identity: ${firstName} ${lastName} <${email}>`);
 
     // No fixed Ember/scroll delay — MutationObserver starts as soon as voting-button exists
@@ -328,7 +352,69 @@ async function autoVote() {
     }
     page1Btn.click();
     await dbg('Page 1 (email) submitted');
-    await sleep(3000);
+
+    const { emailMode: modeAfterP1 = 'pool' } = await chrome.storage.local.get('emailMode');
+    const maxPoolEmailTries = 40;
+    let poolTries = 0;
+    let reachedRegistration = false;
+
+    while (poolTries < maxPoolEmailTries) {
+      poolTries++;
+      reachedRegistration = await waitForRegistrationStepAfterEmailSubmit(22000);
+      if (reachedRegistration) break;
+
+      if (modeAfterP1 !== 'pool') {
+        throw new Error(
+          '[autoVote] Registration step (name/zip) did not appear — cannot swap email in temp mode'
+        );
+      }
+
+      await dbg(`Pool: no registration fields after email submit — treating as invalid: ${email}`);
+      await removeEmailFromPool(email);
+
+      const { emailPool: poolNow = [] } = await chrome.storage.local.get('emailPool');
+      if (poolNow.length === 0) {
+        throw new Error('[autoVote] Email pool exhausted after removing invalid addresses.');
+      }
+
+      email = poolNow[0];
+      await dbg(`Retrying email step with: ${email}`);
+
+      let retryEmailInput = null;
+      for (const sel of emailSelectors) {
+        const el = document.querySelector(sel);
+        if (el) {
+          retryEmailInput = el;
+          break;
+        }
+      }
+      if (!retryEmailInput) {
+        throw new Error('[autoVote] Email input not found while retrying with next pool address');
+      }
+      fillInput(retryEmailInput, email);
+      await sleep(600);
+
+      if (document.querySelector('.cf-turnstile')) {
+        await dbg('Turnstile present on email retry — solving...');
+        await solveTurnstile();
+        await sleep(800);
+      }
+
+      let retrySubmit = null;
+      for (const sel of page1SubmitSelectors) {
+        retrySubmit = document.querySelector(sel);
+        if (retrySubmit) break;
+      }
+      if (!retrySubmit) {
+        retrySubmit = await waitForElement(page1SubmitSelectors.join(', '), 10000);
+      }
+      retrySubmit.click();
+      await dbg(`Page 1 re-submitted (attempt ${poolTries + 1})`);
+    }
+
+    if (!reachedRegistration) {
+      throw new Error('[autoVote] Could not reach registration step after max pool email attempts');
+    }
 
     // ==========================================================
     // FORM PAGE 2 — Registration
@@ -347,12 +433,14 @@ async function autoVote() {
     if (zipInput) { fillInput(zipInput, '77340'); await sleep(600); }
     await dbg('Zip filled: 77340');
 
-    const checkboxInput = document.querySelector('ss-form-field[data-field-id="594"] input.ssCheckboxField');
-    if (checkboxInput && !checkboxInput.checked) {
-      checkboxInput.checked = true;
-      checkboxInput.dispatchEvent(new Event('click',  { bubbles: true }));
-      checkboxInput.dispatchEvent(new Event('change', { bubbles: true }));
-      await sleep(600);
+    // Do not opt in to promo/marketing email (field 594 — leave unchecked).
+    const promoOptIn = document.querySelector('ss-form-field[data-field-id="594"] input.ssCheckboxField');
+    if (promoOptIn && promoOptIn.checked) {
+      promoOptIn.checked = false;
+      promoOptIn.dispatchEvent(new Event('click', { bubbles: true }));
+      promoOptIn.dispatchEvent(new Event('change', { bubbles: true }));
+      await sleep(400);
+      await dbg('Promo/marketing checkbox left unchecked');
     }
 
     await dbg('Page 2 form fields filled');

@@ -64,7 +64,10 @@ function withCors(req: Request, env: Env, res: Response): Response {
     headers.set("Access-Control-Allow-Credentials", "true");
   }
   headers.set("Vary", appendVary(headers.get("Vary"), "Origin"));
-  headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  headers.set(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+  );
   headers.set(
     "Access-Control-Allow-Headers",
     "Authorization,Content-Type,x-sf-csrf-token,x-xsrf-token,x-csrf-token",
@@ -199,7 +202,10 @@ function rewriteImageUrls(images: unknown, workerOrigin: string): string[] {
 }
 
 /** Rewrites `images` field on each row in-place so old R2-subdomain URLs resolve via the Worker. */
-function rewriteRowImages(rows: Record<string, unknown>[], workerOrigin: string): void {
+function rewriteRowImages(
+  rows: Record<string, unknown>[],
+  workerOrigin: string,
+): void {
   for (const row of rows) {
     if (Array.isArray(row.images) && row.images.length > 0) {
       row.images = rewriteImageUrls(row.images, workerOrigin);
@@ -258,8 +264,7 @@ async function handleImageUpload(
 
   if (!ALLOWED_IMAGE_TYPES.has(file.type))
     throw new HttpError(400, "invalid_file_type");
-  if (file.size > MAX_IMAGE_SIZE)
-    throw new HttpError(400, "file_too_large");
+  if (file.size > MAX_IMAGE_SIZE) throw new HttpError(400, "file_too_large");
 
   const extMap: Record<string, string> = {
     "image/jpeg": "jpg",
@@ -304,7 +309,8 @@ async function handleServeForumImage(
     return new Response("Not Found", { status: 404 });
   }
 
-  if (!key.startsWith("forum/")) return new Response("Not Found", { status: 404 });
+  if (!key.startsWith("forum/"))
+    return new Response("Not Found", { status: 404 });
 
   const obj = await env.FORUM_IMAGES.get(key);
   if (!obj) return new Response("Not Found", { status: 404 });
@@ -354,20 +360,69 @@ function asString(v: unknown): string {
 }
 
 const USERNAME_ADJECTIVES = [
-  "Steady", "Trail", "Road", "Iron", "Axle", "Hitch",
-  "Bolt", "Ridge", "Steel", "Gear", "Haul", "Rig",
-  "Torque", "Ranch", "Field", "Gravel", "Pine", "Oak",
-  "Rust", "Chrome", "Copper", "Timber", "Summit", "Mesa",
+  "Steady",
+  "Trail",
+  "Road",
+  "Iron",
+  "Axle",
+  "Hitch",
+  "Bolt",
+  "Ridge",
+  "Steel",
+  "Gear",
+  "Haul",
+  "Rig",
+  "Torque",
+  "Ranch",
+  "Field",
+  "Gravel",
+  "Pine",
+  "Oak",
+  "Rust",
+  "Chrome",
+  "Copper",
+  "Timber",
+  "Summit",
+  "Mesa",
 ];
 const USERNAME_NOUNS = [
-  "Rider", "Runner", "Hauler", "Builder", "Wrangler", "Fixer",
-  "Ranger", "Scout", "Tracker", "Camper", "Forger", "Welder",
-  "Driver", "Setter", "Maker", "Hiker", "Cruiser", "Liner",
-  "Packer", "Mender", "Roamer", "Trekker", "Hopper", "Roper",
+  "Rider",
+  "Runner",
+  "Hauler",
+  "Builder",
+  "Wrangler",
+  "Fixer",
+  "Ranger",
+  "Scout",
+  "Tracker",
+  "Camper",
+  "Forger",
+  "Welder",
+  "Driver",
+  "Setter",
+  "Maker",
+  "Hiker",
+  "Cruiser",
+  "Liner",
+  "Packer",
+  "Mender",
+  "Roamer",
+  "Trekker",
+  "Hopper",
+  "Roper",
 ];
 const RESERVED_USERNAMES = new Set([
-  "admin", "moderator", "mod", "tpu", "system", "support",
-  "staff", "official", "trailer", "trailerparts", "trailerpartsunlimited",
+  "admin",
+  "moderator",
+  "mod",
+  "tpu",
+  "system",
+  "support",
+  "staff",
+  "official",
+  "trailer",
+  "trailerparts",
+  "trailerpartsunlimited",
 ]);
 
 function hashUserId(userId: string): number {
@@ -381,16 +436,22 @@ function hashUserId(userId: string): number {
 function generateUsername(userId: string, attempt = 0): string {
   const h = hashUserId(userId) + attempt * 7919;
   const adj = USERNAME_ADJECTIVES[h % USERNAME_ADJECTIVES.length]!;
-  const noun = USERNAME_NOUNS[Math.floor(h / USERNAME_ADJECTIVES.length) % USERNAME_NOUNS.length]!;
+  const noun =
+    USERNAME_NOUNS[
+      Math.floor(h / USERNAME_ADJECTIVES.length) % USERNAME_NOUNS.length
+    ]!;
   const suffix = String((h % 90) + 10);
   return `${adj}${noun}${suffix}`;
 }
 
 function validateUsername(username: string): string | null {
   if (typeof username !== "string") return "Username is required.";
-  if (username.length < 3 || username.length > 24) return "Username must be 3–24 characters.";
-  if (!/^[a-zA-Z0-9_]+$/.test(username)) return "Letters, numbers, and underscores only.";
-  if (RESERVED_USERNAMES.has(username.toLowerCase())) return "This username is not available.";
+  if (username.length < 3 || username.length > 24)
+    return "Username must be 3–24 characters.";
+  if (!/^[a-zA-Z0-9_]+$/.test(username))
+    return "Letters, numbers, and underscores only.";
+  if (RESERVED_USERNAMES.has(username.toLowerCase()))
+    return "This username is not available.";
   return null;
 }
 
@@ -411,7 +472,9 @@ async function ensureProfile(env: Env, authed: Authed): Promise<string | null> {
       const r = await supabaseFetch(env, "forum_profiles", {
         method: "POST",
         jwt: authed.jwt,
-        headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
+        headers: {
+          Prefer: "resolution=ignore-duplicates,return=representation",
+        },
         body: JSON.stringify({
           user_id: authed.userId,
           username: name,
@@ -421,7 +484,9 @@ async function ensureProfile(env: Env, authed: Authed): Promise<string | null> {
       if (r.ok) {
         const created = (await r.json()) as { username: string }[];
         if (created[0]) {
-          console.log(`[Forum:Profile] auto-created username=${name} user=${authed.userId}`);
+          console.log(
+            `[Forum:Profile] auto-created username=${name} user=${authed.userId}`,
+          );
           return created[0].username;
         }
         const recheck = await supabaseFetch(
@@ -437,18 +502,26 @@ async function ensureProfile(env: Env, authed: Authed): Promise<string | null> {
     }
     return null;
   } catch (e) {
-    console.warn(`[Forum:Profile] ensureProfile failed user=${authed.userId}`, e instanceof Error ? e.message : e);
+    console.warn(
+      `[Forum:Profile] ensureProfile failed user=${authed.userId}`,
+      e instanceof Error ? e.message : e,
+    );
     return null;
   }
 }
 
-async function fetchAdminMap(
-  env: Env,
-): Promise<Record<string, string>> {
+async function fetchAdminMap(env: Env): Promise<Record<string, string>> {
   try {
-    const r = await supabaseFetch(env, "forum_admins?select=email,display_name", { method: "GET" });
+    const r = await supabaseFetch(
+      env,
+      "forum_admins?select=email,display_name",
+      { method: "GET" },
+    );
     if (!r.ok) return {};
-    const rows = (await r.json()) as Array<{ email: string; display_name: string }>;
+    const rows = (await r.json()) as Array<{
+      email: string;
+      display_name: string;
+    }>;
     const map: Record<string, string> = {};
     for (const row of rows) map[row.email.toLowerCase()] = row.display_name;
     return map;
@@ -461,11 +534,27 @@ async function fetchAdminMap(
  * Cache a user_id → email mapping in KV so enrichWithAuthors can
  * detect admin posts for both Supabase and BigCommerce users.
  */
-async function cacheUserEmail(env: Env, userId: string, email: string): Promise<void> {
+async function cacheUserEmail(
+  env: Env,
+  userId: string,
+  email: string,
+): Promise<void> {
   if (!email || !userId) return;
   try {
-    await env.RATE_LIMIT_KV.put(`email:${userId}`, email.toLowerCase(), { expirationTtl: 86400 * 90 });
-  } catch { /* best effort */ }
+    await env.RATE_LIMIT_KV.put(`email:${userId}`, email.toLowerCase(), {
+      expirationTtl: 86400 * 90,
+    });
+  } catch {
+    /* best effort */
+  }
+}
+
+/** Last-resort label when no profile username or generated username exists. */
+function displayNameFromUserId(uid: string): string {
+  const m = /^bc_(\d+)$/.exec(uid);
+  if (m) return `Customer ${m[1]}`;
+  if (uid.length > 12) return `User ${uid.slice(0, 8)}…`;
+  return `User ${uid}`;
 }
 
 async function enrichWithAuthors(
@@ -476,10 +565,12 @@ async function enrichWithAuthors(
 ): Promise<void> {
   if (workerOrigin) rewriteRowImages(rows, workerOrigin);
   try {
-    const userIds = [...new Set(rows.map((r) => r.user_id as string).filter(Boolean))];
+    const userIds = [
+      ...new Set(rows.map((r) => r.user_id as string).filter(Boolean)),
+    ];
     if (!userIds.length) return;
 
-    const admins = adminMap ?? await fetchAdminMap(env);
+    const admins = adminMap ?? (await fetchAdminMap(env));
 
     const r = await supabaseFetch(
       env,
@@ -487,41 +578,55 @@ async function enrichWithAuthors(
       { method: "GET" },
     );
     if (!r.ok) throw new Error(`profile-lookup-${r.status}`);
-    const profiles = (await r.json()) as { user_id: string; username: string }[];
+    const profiles = (await r.json()) as {
+      user_id: string;
+      username: string;
+    }[];
     const profileMap = new Map(profiles.map((p) => [p.user_id, p.username]));
 
-    // Resolve user_id → email from KV cache (works for both Supabase and BC users)
+    // Resolve user_id → email from KV for display + admin detection (always, not only when admins exist)
     const emailMap = new Map<string, string>();
-    if (Object.keys(admins).length > 0) {
-      const lookups = userIds.map(async (uid) => {
-        try {
-          const cached = await env.RATE_LIMIT_KV.get(`email:${uid}`);
-          if (cached) emailMap.set(uid, cached);
-        } catch { /* ignore */ }
-      });
-      await Promise.all(lookups);
-    }
+    const lookups = userIds.map(async (uid) => {
+      try {
+        const cached = await env.RATE_LIMIT_KV.get(`email:${uid}`);
+        if (cached) emailMap.set(uid, cached);
+      } catch {
+        /* ignore */
+      }
+    });
+    await Promise.all(lookups);
 
     for (const row of rows) {
       const uid = row.user_id as string;
-      const email = emailMap.get(uid) || "";
+      const kvEmail = emailMap.get(uid) || "";
+      const rowEmail = asString(row.author_email).trim().toLowerCase();
+      const email = kvEmail || rowEmail;
       if (email && admins[email]) {
         row.author = admins[email];
         row.author_email = email;
         row.author_is_admin = true;
       } else {
-        row.author = profileMap.get(uid) || "Member";
+        const prof = profileMap.get(uid);
+        if (prof) {
+          row.author = prof;
+        } else {
+          row.author = uid
+            ? generateUsername(uid, 0)
+            : displayNameFromUserId(uid);
+        }
         row.author_is_admin = false;
+        if (email && !row.author_email) row.author_email = email;
       }
     }
   } catch (e) {
     console.warn(
-      `[Forum:Enrich] fallback-to-member count=${rows.length}`,
+      `[Forum:Enrich] fallback display count=${rows.length}`,
       e instanceof Error ? e.message : e,
     );
     for (const row of rows) {
       if (!row.author) {
-        row.author = "Member";
+        const uid = asString(row.user_id);
+        row.author = uid ? displayNameFromUserId(uid) : "Community member";
         row.author_is_admin = false;
       }
     }
@@ -744,7 +849,8 @@ async function handleThreadsFeed(
       }
       const total = getContentRangeCount(r.headers.get("content-range"));
       const data = await r.json();
-      if (Array.isArray(data)) await enrichWithAuthors(env, data, undefined, workerOrigin);
+      if (Array.isArray(data))
+        await enrichWithAuthors(env, data, undefined, workerOrigin);
       return json(
         { data, meta: { sort, page, pageSize, total } },
         { status: 200 },
@@ -770,90 +876,103 @@ async function handleThreadsFeed(
 }
 
 const THREAD_SELECT =
-  "id,title,slug,body,summary,created_at,updated_at,score,comment_count,accepted_comment_id,tags,images,user_id";
+  "id,title,slug,body,summary,created_at,updated_at,score,comment_count,accepted_comment_id,tags,images,user_id,author_email";
 
 async function handleGetThread(
   req: Request,
   env: Env,
-  ctx: ExecutionContext,
+  _ctx: ExecutionContext,
   threadId: string,
   authed: Authed | null,
 ): Promise<Response> {
   const workerOrigin = new URL(req.url).origin;
-  return maybeCached(req, ctx, 30, async () => {
-    const params = new URLSearchParams();
-    params.set("select", THREAD_SELECT);
-    params.set("id", `eq.${threadId}`);
-    const r = await supabaseFetch(env, `threads?${params.toString()}`, {
-      method: "GET",
-    });
-    if (!r.ok)
-      return json(
-        { error: "supabase_error", details: await safeJson(r) },
-        { status: 502 },
-      );
-    const rows = (await r.json()) as unknown[];
-    const thread = rows[0] as Record<string, unknown> | undefined;
-    if (!thread) return json({ error: "not_found" }, { status: 404 });
-
-    let myVote = 0;
-    if (authed) {
-      const vr = await supabaseFetch(
-        env,
-        `thread_votes?thread_id=eq.${threadId}&user_id=eq.${encodeURIComponent(authed.userId)}&select=value`,
-        { method: "GET" },
-      );
-      if (vr.ok) {
-        const vrows = (await vr.json()) as { value: number }[];
-        if (vrows[0]) myVote = vrows[0].value;
-      }
-    }
-
-    await enrichWithAuthors(env, [thread], undefined, workerOrigin);
-    return json({ data: { ...thread, myVote } }, { status: 200 });
+  // No edge cache: body includes per-user myVote (same issue as comment lists).
+  const params = new URLSearchParams();
+  params.set("select", THREAD_SELECT);
+  params.set("id", `eq.${threadId}`);
+  const r = await supabaseFetch(env, `threads?${params.toString()}`, {
+    method: "GET",
   });
+  if (!r.ok)
+    return json(
+      { error: "supabase_error", details: await safeJson(r) },
+      { status: 502 },
+    );
+  const rows = (await r.json()) as unknown[];
+  const thread = rows[0] as Record<string, unknown> | undefined;
+  if (!thread) return json({ error: "not_found" }, { status: 404 });
+
+  let myVote = 0;
+  if (authed) {
+    const vr = await supabaseFetch(
+      env,
+      `thread_votes?thread_id=eq.${threadId}&user_id=eq.${encodeURIComponent(authed.userId)}&select=value`,
+      { method: "GET" },
+    );
+    if (vr.ok) {
+      const vrows = (await vr.json()) as { value: number }[];
+      if (vrows[0]) myVote = vrows[0].value;
+    }
+  }
+
+  await enrichWithAuthors(env, [thread], undefined, workerOrigin);
+  return json(
+    { data: { ...thread, myVote } },
+    {
+      status: 200,
+      headers: {
+        "Cache-Control": "private, max-age=0, must-revalidate",
+      },
+    },
+  );
 }
 
 async function handleGetThreadBySlug(
   req: Request,
   env: Env,
-  ctx: ExecutionContext,
+  _ctx: ExecutionContext,
   slug: string,
   authed: Authed | null,
 ): Promise<Response> {
   const workerOrigin = new URL(req.url).origin;
-  return maybeCached(req, ctx, 30, async () => {
-    const params = new URLSearchParams();
-    params.set("select", THREAD_SELECT);
-    params.set("slug", `eq.${slug}`);
-    const r = await supabaseFetch(env, `threads?${params.toString()}`, {
-      method: "GET",
-    });
-    if (!r.ok)
-      return json(
-        { error: "supabase_error", details: await safeJson(r) },
-        { status: 502 },
-      );
-    const rows = (await r.json()) as unknown[];
-    const thread = rows[0] as Record<string, unknown> | undefined;
-    if (!thread) return json({ error: "not_found" }, { status: 404 });
-
-    let myVote = 0;
-    if (authed && thread.id) {
-      const vr = await supabaseFetch(
-        env,
-        `thread_votes?thread_id=eq.${thread.id}&user_id=eq.${encodeURIComponent(authed.userId)}&select=value`,
-        { method: "GET" },
-      );
-      if (vr.ok) {
-        const vrows = (await vr.json()) as { value: number }[];
-        if (vrows[0]) myVote = vrows[0].value;
-      }
-    }
-
-    await enrichWithAuthors(env, [thread], undefined, workerOrigin);
-    return json({ data: { ...thread, myVote } }, { status: 200 });
+  const params = new URLSearchParams();
+  params.set("select", THREAD_SELECT);
+  params.set("slug", `eq.${slug}`);
+  const r = await supabaseFetch(env, `threads?${params.toString()}`, {
+    method: "GET",
   });
+  if (!r.ok)
+    return json(
+      { error: "supabase_error", details: await safeJson(r) },
+      { status: 502 },
+    );
+  const rows = (await r.json()) as unknown[];
+  const thread = rows[0] as Record<string, unknown> | undefined;
+  if (!thread) return json({ error: "not_found" }, { status: 404 });
+
+  let myVote = 0;
+  if (authed && thread.id) {
+    const vr = await supabaseFetch(
+      env,
+      `thread_votes?thread_id=eq.${thread.id}&user_id=eq.${encodeURIComponent(authed.userId)}&select=value`,
+      { method: "GET" },
+    );
+    if (vr.ok) {
+      const vrows = (await vr.json()) as { value: number }[];
+      if (vrows[0]) myVote = vrows[0].value;
+    }
+  }
+
+  await enrichWithAuthors(env, [thread], undefined, workerOrigin);
+  return json(
+    { data: { ...thread, myVote } },
+    {
+      status: 200,
+      headers: {
+        "Cache-Control": "private, max-age=0, must-revalidate",
+      },
+    },
+  );
 }
 
 async function handleCreateThread(
@@ -886,7 +1005,16 @@ async function handleCreateThread(
 
   const images = validateImageUrls(body.images, workerOrigin);
   const slug = generateSlug(title);
-  const insert = { title, slug, body: content, tags, images, user_id: authed.userId };
+  const authorEmail = asString(authed.claims.email).trim().toLowerCase();
+  const insert: Record<string, unknown> = {
+    title,
+    slug,
+    body: content,
+    tags,
+    images,
+    user_id: authed.userId,
+  };
+  if (authorEmail) insert.author_email = authorEmail;
 
   const r = await supabaseFetch(env, "threads", {
     method: "POST",
@@ -902,10 +1030,13 @@ async function handleCreateThread(
   ctx.waitUntil(
     Promise.all([
       ensureProfile(env, authed).catch((e) =>
-        console.warn(`[Forum:Profile] auto-provision failed user=${authed.userId}`, e instanceof Error ? e.message : e)
+        console.warn(
+          `[Forum:Profile] auto-provision failed user=${authed.userId}`,
+          e instanceof Error ? e.message : e,
+        ),
       ),
       cacheUserEmail(env, authed.userId, asString(authed.claims.email)),
-    ])
+    ]),
   );
   const created = (await r.json()) as unknown[];
   return json({ data: created[0] ?? null }, { status: 201 });
@@ -983,7 +1114,7 @@ async function handleGetThreadComments(
   const params = new URLSearchParams();
   params.set(
     "select",
-    "id,thread_id,parent_id,body,images,created_at,updated_at,score,user_id",
+    "id,thread_id,parent_id,body,images,created_at,updated_at,score,user_id,author_email",
   );
   params.set("thread_id", `eq.${threadId}`);
   params.set("order", "created_at.asc");
@@ -1005,10 +1136,14 @@ async function handleGetThreadComments(
       { method: "GET" },
     );
     if (vr.ok) {
-      const votes = (await vr.json()) as { comment_id: string; value: number }[];
+      const votes = (await vr.json()) as {
+        comment_id: string;
+        value: number;
+      }[];
       const voteMap = new Map(votes.map((v) => [v.comment_id, v.value]));
       for (const c of comments) {
-        (c as Record<string, unknown>).myVote = voteMap.get(c.id as string) ?? 0;
+        (c as Record<string, unknown>).myVote =
+          voteMap.get(c.id as string) ?? 0;
       }
     }
   } else {
@@ -1042,14 +1177,25 @@ async function handleCreateComment(
   const lockParams = new URLSearchParams();
   lockParams.set("select", "is_locked,user_id");
   lockParams.set("id", `eq.${threadId}`);
-  const lockRes = await supabaseFetch(env, `threads?${lockParams.toString()}`, { method: "GET" });
+  const lockRes = await supabaseFetch(env, `threads?${lockParams.toString()}`, {
+    method: "GET",
+  });
   if (lockRes.ok) {
-    const lockRows = (await lockRes.json()) as Array<{ is_locked?: boolean; user_id?: string }>;
+    const lockRows = (await lockRes.json()) as Array<{
+      is_locked?: boolean;
+      user_id?: string;
+    }>;
     if (lockRows[0]?.is_locked) {
       const adminEmail = asString(authed.claims.email);
-      const adminStatus = adminEmail ? await checkAdminStatus(env, adminEmail) : { isAdmin: false };
+      const adminStatus = adminEmail
+        ? await checkAdminStatus(env, adminEmail)
+        : { isAdmin: false };
       if (!adminStatus.isAdmin) {
-        throw new HttpError(423, "thread_locked", "This thread is locked and not accepting new replies");
+        throw new HttpError(
+          423,
+          "thread_locked",
+          "This thread is locked and not accepting new replies",
+        );
       }
     }
   }
@@ -1092,9 +1238,17 @@ async function handleCreateComment(
       }>;
       const parent = parents[0];
       if (!parent || String(parent.thread_id) !== String(threadId))
-        throw new HttpError(400, "invalid_parent", "Invalid parent comment for this thread");
+        throw new HttpError(
+          400,
+          "invalid_parent",
+          "Invalid parent comment for this thread",
+        );
       if (parent.parent_id != null && String(parent.parent_id).length > 0)
-        throw new HttpError(400, "invalid_parent", "Replies can only be one level deep");
+        throw new HttpError(
+          400,
+          "invalid_parent",
+          "Replies can only be one level deep",
+        );
       parentId = String(parent.id);
     }
   }
@@ -1106,6 +1260,8 @@ async function handleCreateComment(
     user_id: authed.userId,
   };
   if (parentId) insert.parent_id = parentId;
+  const authorEmail = asString(authed.claims.email).trim().toLowerCase();
+  if (authorEmail) insert.author_email = authorEmail;
 
   const r = await supabaseFetch(env, "comments", {
     method: "POST",
@@ -1121,10 +1277,13 @@ async function handleCreateComment(
   ctx.waitUntil(
     Promise.all([
       ensureProfile(env, authed).catch((e) =>
-        console.warn(`[Forum:Profile] auto-provision failed user=${authed.userId}`, e instanceof Error ? e.message : e)
+        console.warn(
+          `[Forum:Profile] auto-provision failed user=${authed.userId}`,
+          e instanceof Error ? e.message : e,
+        ),
       ),
       cacheUserEmail(env, authed.userId, asString(authed.claims.email)),
-    ])
+    ]),
   );
   const created = (await r.json()) as unknown[];
   return json({ data: created[0] ?? null }, { status: 201 });
@@ -1217,15 +1376,25 @@ async function handleAcceptComment(
   const ownerParams = new URLSearchParams();
   ownerParams.set("select", "user_id");
   ownerParams.set("id", `eq.${threadId}`);
-  const ownerRes = await supabaseFetch(env, `threads?${ownerParams.toString()}`, { method: "GET" });
+  const ownerRes = await supabaseFetch(
+    env,
+    `threads?${ownerParams.toString()}`,
+    { method: "GET" },
+  );
   if (ownerRes.ok) {
     const ownerRows = (await ownerRes.json()) as Array<{ user_id?: string }>;
     const threadOwnerId = ownerRows[0]?.user_id;
     if (threadOwnerId && threadOwnerId !== authed.userId) {
       const adminEmail = asString(authed.claims.email);
-      const adminStatus = adminEmail ? await checkAdminStatus(env, adminEmail) : { isAdmin: false };
+      const adminStatus = adminEmail
+        ? await checkAdminStatus(env, adminEmail)
+        : { isAdmin: false };
       if (!adminStatus.isAdmin) {
-        throw new HttpError(403, "not_thread_owner", "Only the thread author or an admin can accept answers");
+        throw new HttpError(
+          403,
+          "not_thread_owner",
+          "Only the thread author or an admin can accept answers",
+        );
       }
       isAdminAction = true;
     }
@@ -1455,13 +1624,22 @@ async function handleGetProfile(
   );
   if (!r.ok) {
     const details = await safeJson(r);
-    console.error("[Forum:Profile] GET profile Supabase error:", r.status, JSON.stringify(details));
-    return json({ error: "supabase_error", message: "Profile lookup failed" }, { status: 502 });
+    console.error(
+      "[Forum:Profile] GET profile Supabase error:",
+      r.status,
+      JSON.stringify(details),
+    );
+    return json(
+      { error: "supabase_error", message: "Profile lookup failed" },
+      { status: 502 },
+    );
   }
   const rows = (await r.json()) as { username: string; created_at: string }[];
-  if (!rows[0])
-    return json({ error: "profile_not_found" }, { status: 404 });
-  return json({ username: rows[0].username, createdAt: rows[0].created_at }, { status: 200 });
+  if (!rows[0]) return json({ error: "profile_not_found" }, { status: 404 });
+  return json(
+    { username: rows[0].username, createdAt: rows[0].created_at },
+    { status: 200 },
+  );
 }
 
 async function handleUpdateProfile(
@@ -1469,7 +1647,10 @@ async function handleUpdateProfile(
   env: Env,
   authed: Authed,
 ): Promise<Response> {
-  const body = (await req.json().catch(() => null)) as null | Record<string, unknown>;
+  const body = (await req.json().catch(() => null)) as null | Record<
+    string,
+    unknown
+  >;
   if (!body) throw new HttpError(400, "invalid_json");
 
   if (body.auto === true) {
@@ -1480,15 +1661,24 @@ async function handleUpdateProfile(
 
   const requested = asString(body.username).trim();
   const validationError = validateUsername(requested);
-  if (validationError) throw new HttpError(400, "invalid_username", validationError);
+  if (validationError)
+    throw new HttpError(400, "invalid_username", validationError);
 
   try {
-    const adminRes = await supabaseFetch(env, "forum_admins?select=display_name", { method: "GET" });
+    const adminRes = await supabaseFetch(
+      env,
+      "forum_admins?select=display_name",
+      { method: "GET" },
+    );
     if (adminRes.ok) {
       const admins = (await adminRes.json()) as { display_name: string }[];
       const lower = requested.toLowerCase();
       if (admins.some((a) => a.display_name.toLowerCase() === lower)) {
-        throw new HttpError(400, "reserved_username", "This username is not available.");
+        throw new HttpError(
+          400,
+          "reserved_username",
+          "This username is not available.",
+        );
       }
     }
   } catch (e) {
@@ -1498,7 +1688,12 @@ async function handleUpdateProfile(
   const rlKey = `profile-change:${authed.userId}`;
   const rlVal = await env.RATE_LIMIT_KV.get(rlKey);
   const rlCount = rlVal ? parseInt(rlVal, 10) : 0;
-  if (rlCount >= 3) throw new HttpError(429, "rate_limited", "You can change your username up to 3 times per day.");
+  if (rlCount >= 3)
+    throw new HttpError(
+      429,
+      "rate_limited",
+      "You can change your username up to 3 times per day.",
+    );
 
   const r = await supabaseFetch(env, "forum_profiles", {
     method: "POST",
@@ -1514,17 +1709,38 @@ async function handleUpdateProfile(
   if (!r.ok) {
     const data = await safeJson(r);
     const detail = JSON.stringify(data);
-    if (r.status === 409 || detail.includes("23505") || detail.includes("unique") || detail.includes("duplicate")) {
-      return json({ error: "username_taken", message: "That username is already taken." }, { status: 409 });
+    if (
+      r.status === 409 ||
+      detail.includes("23505") ||
+      detail.includes("unique") ||
+      detail.includes("duplicate")
+    ) {
+      return json(
+        { error: "username_taken", message: "That username is already taken." },
+        { status: 409 },
+      );
     }
     return json({ error: "supabase_error", details: data }, { status: 502 });
   }
 
-  await env.RATE_LIMIT_KV.put(rlKey, String(rlCount + 1), { expirationTtl: 86400 });
+  await env.RATE_LIMIT_KV.put(rlKey, String(rlCount + 1), {
+    expirationTtl: 86400,
+  });
 
-  console.log(`[Forum:Profile] updated username=${requested} user=${authed.userId}`);
-  const created = (await r.json()) as { username: string; created_at: string }[];
-  return json({ username: created[0]?.username || requested, createdAt: created[0]?.created_at }, { status: 200 });
+  console.log(
+    `[Forum:Profile] updated username=${requested} user=${authed.userId}`,
+  );
+  const created = (await r.json()) as {
+    username: string;
+    created_at: string;
+  }[];
+  return json(
+    {
+      username: created[0]?.username || requested,
+      createdAt: created[0]?.created_at,
+    },
+    { status: 200 },
+  );
 }
 
 /**
@@ -1588,7 +1804,9 @@ async function handleDeleteThread(
   // Clean up thread images from R2
   cleanupR2Images(env, ctx, deleted[0]?.images);
 
-  console.log(`[AdminAudit] action=delete_thread target=${threadId} admin=${asString(authed.claims.email)}`);
+  console.log(
+    `[AdminAudit] action=delete_thread target=${threadId} admin=${asString(authed.claims.email)}`,
+  );
 
   return json({ success: true, deleted: deleted[0] }, { status: 200 });
 }
@@ -1640,7 +1858,9 @@ async function handleDeleteComment(
   // Clean up comment images from R2
   cleanupR2Images(env, ctx, deleted[0]?.images);
 
-  console.log(`[AdminAudit] action=delete_comment target=${commentId} admin=${asString(authed.claims.email)}`);
+  console.log(
+    `[AdminAudit] action=delete_comment target=${commentId} admin=${asString(authed.claims.email)}`,
+  );
 
   return json({ success: true, deleted: deleted[0] }, { status: 200 });
 }
@@ -1694,7 +1914,8 @@ type AdminThreadSort = "oldest" | "newest" | "score";
 
 function parseAdminFilter(v: string | null): AdminThreadFilter {
   const s = (v || "all").toLowerCase();
-  if (s === "unreplied" || s === "recent" || s === "locked" || s === "pinned") return s;
+  if (s === "unreplied" || s === "recent" || s === "locked" || s === "pinned")
+    return s;
   return "all";
 }
 
@@ -1716,12 +1937,18 @@ async function handleAdminThreads(
   const filter = parseAdminFilter(url.searchParams.get("filter"));
   const sort = parseAdminSort(url.searchParams.get("sort"));
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
-  const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get("limit") || "20", 10)));
+  const limit = Math.min(
+    50,
+    Math.max(1, parseInt(url.searchParams.get("limit") || "20", 10)),
+  );
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
   const params = new URLSearchParams();
-  params.set("select", "id,title,slug,comment_count,score,is_locked,is_pinned,created_at,user_id,images");
+  params.set(
+    "select",
+    "id,title,slug,comment_count,score,is_locked,is_pinned,created_at,user_id,images",
+  );
 
   switch (filter) {
     case "unreplied":
@@ -1758,20 +1985,27 @@ async function handleAdminThreads(
   });
 
   if (!r.ok) {
-    return json({ error: "supabase_error", details: await safeJson(r) }, { status: 502 });
+    return json(
+      { error: "supabase_error", details: await safeJson(r) },
+      { status: 502 },
+    );
   }
 
   const rows = (await r.json()) as Array<Record<string, unknown>>;
-  const total = getContentRangeCount(r.headers.get("Content-Range")) ?? rows.length;
+  const total =
+    getContentRangeCount(r.headers.get("Content-Range")) ?? rows.length;
 
   await enrichWithAuthors(env, rows, undefined, workerOrigin);
 
-  return json({
-    threads: rows,
-    total,
-    page,
-    has_more: from + rows.length < total,
-  }, { status: 200 });
+  return json(
+    {
+      threads: rows,
+      total,
+      page,
+      has_more: from + rows.length < total,
+    },
+    { status: 200 },
+  );
 }
 
 // =============================================================================
@@ -1782,7 +2016,8 @@ type QuoteSearchField = "all" | "email" | "quote_number" | "phone";
 
 function parseQuoteSearchField(v: string | null): QuoteSearchField | null {
   const s = (v || "").toLowerCase();
-  if (s === "all" || s === "email" || s === "quote_number" || s === "phone") return s;
+  if (s === "all" || s === "email" || s === "quote_number" || s === "phone")
+    return s;
   return null;
 }
 
@@ -1804,7 +2039,12 @@ async function handleAdminQuotes(
   const url = new URL(req.url);
   const q = (url.searchParams.get("q") || "").trim();
 
-  if (q.length > 200) throw new HttpError(400, "query_too_long", "q must be under 200 characters");
+  if (q.length > 200)
+    throw new HttpError(
+      400,
+      "query_too_long",
+      "q must be under 200 characters",
+    );
 
   // field is only relevant when a query is present; defaults to "all"
   const rawField = url.searchParams.get("field");
@@ -1816,12 +2056,19 @@ async function handleAdminQuotes(
     // validate named fields
     const allowed: QuoteSearchField[] = ["email", "quote_number", "phone"];
     if (!allowed.includes(field)) {
-      throw new HttpError(400, "invalid_field", "field must be one of: all, email, quote_number, phone");
+      throw new HttpError(
+        400,
+        "invalid_field",
+        "field must be one of: all, email, quote_number, phone",
+      );
     }
   }
 
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
-  const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get("limit") || "20", 10)));
+  const limit = Math.min(
+    50,
+    Math.max(1, parseInt(url.searchParams.get("limit") || "20", 10)),
+  );
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -1866,7 +2113,9 @@ async function handleAdminQuotes(
   }
 
   const data = await r.json();
-  const total = getContentRangeCount(r.headers.get("Content-Range")) ?? (Array.isArray(data) ? data.length : 0);
+  const total =
+    getContentRangeCount(r.headers.get("Content-Range")) ??
+    (Array.isArray(data) ? data.length : 0);
 
   console.log(
     `[AdminAudit] action=quote_browse field=${field} q=${q || "(all)"} admin=${asString(authed.claims.email)} results=${Array.isArray(data) ? data.length : 0}`,
@@ -1883,18 +2132,31 @@ async function handlePatchThread(
 ): Promise<Response> {
   const admin = await requireAdmin(env, authed);
 
-  const body = (await req.json().catch(() => null)) as null | Record<string, unknown>;
+  const body = (await req.json().catch(() => null)) as null | Record<
+    string,
+    unknown
+  >;
   if (!body) throw new HttpError(400, "invalid_json");
 
   const allowed: Record<string, unknown> = {};
   if (typeof body.title === "string") {
     const t = body.title.trim();
-    if (t.length < 5 || t.length > 300) throw new HttpError(400, "title_length", "Title must be 5–300 characters");
+    if (t.length < 5 || t.length > 300)
+      throw new HttpError(
+        400,
+        "title_length",
+        "Title must be 5–300 characters",
+      );
     allowed.title = t;
   }
   if (typeof body.summary === "string") {
     const s = body.summary.trim();
-    if (s.length > 500) throw new HttpError(400, "summary_length", "Summary must be under 500 characters");
+    if (s.length > 500)
+      throw new HttpError(
+        400,
+        "summary_length",
+        "Summary must be under 500 characters",
+      );
     allowed.summary = s;
   }
   if (typeof body.is_locked === "boolean") allowed.is_locked = body.is_locked;
@@ -1910,7 +2172,8 @@ async function handlePatchThread(
     allowed.accepted_comment_id = null;
   }
 
-  if (!Object.keys(allowed).length) throw new HttpError(400, "no_fields", "No valid fields to update");
+  if (!Object.keys(allowed).length)
+    throw new HttpError(400, "no_fields", "No valid fields to update");
 
   allowed.updated_at = new Date().toISOString();
 
@@ -1928,19 +2191,27 @@ async function handlePatchThread(
   });
 
   if (!r.ok) {
-    return json({ error: "supabase_error", details: await safeJson(r) }, { status: 502 });
+    return json(
+      { error: "supabase_error", details: await safeJson(r) },
+      { status: 502 },
+    );
   }
 
   const updated = (await r.json()) as Record<string, unknown>[];
   if (!updated.length) return json({ error: "not_found" }, { status: 404 });
 
   const auditFields = Object.keys(allowed).join(",");
-  if (Object.prototype.hasOwnProperty.call(allowed, "accepted_comment_id") && allowed.accepted_comment_id === null) {
+  if (
+    Object.prototype.hasOwnProperty.call(allowed, "accepted_comment_id") &&
+    allowed.accepted_comment_id === null
+  ) {
     console.log(
       `[AdminAudit] action=patch_thread target=${threadId} fields=${auditFields} accepted_comment_id_cleared=1 admin=${asString(authed.claims.email)}`,
     );
   } else {
-    console.log(`[AdminAudit] action=patch_thread target=${threadId} fields=${auditFields} admin=${asString(authed.claims.email)}`);
+    console.log(
+      `[AdminAudit] action=patch_thread target=${threadId} fields=${auditFields} admin=${asString(authed.claims.email)}`,
+    );
   }
 
   return json({ data: updated[0] }, { status: 200 });
@@ -1954,7 +2225,10 @@ async function handlePatchComment(
 ): Promise<Response> {
   await requireAdmin(env, authed);
 
-  const raw = (await req.json().catch(() => null)) as null | Record<string, unknown>;
+  const raw = (await req.json().catch(() => null)) as null | Record<
+    string,
+    unknown
+  >;
   if (!raw) throw new HttpError(400, "invalid_json");
 
   const content = asString(raw.body).trim();
@@ -1971,17 +2245,25 @@ async function handlePatchComment(
     method: "PATCH",
     jwt: svcJwt,
     headers: { Prefer: "return=representation" },
-    body: JSON.stringify({ body: content, updated_at: new Date().toISOString() }),
+    body: JSON.stringify({
+      body: content,
+      updated_at: new Date().toISOString(),
+    }),
   });
 
   if (!r.ok) {
-    return json({ error: "supabase_error", details: await safeJson(r) }, { status: 502 });
+    return json(
+      { error: "supabase_error", details: await safeJson(r) },
+      { status: 502 },
+    );
   }
 
   const updated = (await r.json()) as Record<string, unknown>[];
   if (!updated.length) return json({ error: "not_found" }, { status: 404 });
 
-  console.log(`[AdminAudit] action=patch_comment target=${commentId} admin=${asString(authed.claims.email)}`);
+  console.log(
+    `[AdminAudit] action=patch_comment target=${commentId} admin=${asString(authed.claims.email)}`,
+  );
 
   return json({ data: updated[0] }, { status: 200 });
 }
@@ -1997,7 +2279,9 @@ async function handleAdminUserLookup(
   const email = (url.searchParams.get("email") || "").trim().toLowerCase();
   if (!email) throw new HttpError(400, "email_required");
 
-  console.log(`[AdminAudit] action=user_lookup email=${email} admin=${asString(authed.claims.email)}`);
+  console.log(
+    `[AdminAudit] action=user_lookup email=${email} admin=${asString(authed.claims.email)}`,
+  );
 
   // Look up threads by this user via author_email field in enrichment
   // We need to find user_id from forum_profiles or threads/comments
@@ -2041,13 +2325,16 @@ async function handleAdminUserLookup(
 
   // Return what we have — profile info will be limited since email→user_id
   // mapping isn't stored in a queryable table
-  return json({
-    email,
-    is_admin: adminStatus.isAdmin,
-    admin_display_name: adminStatus.displayName || null,
-    is_revoked: isRevoked,
-    note: "Email-to-user mapping requires Supabase auth admin API access. Thread/comment counts by email are not directly queryable.",
-  }, { status: 200 });
+  return json(
+    {
+      email,
+      is_admin: adminStatus.isAdmin,
+      admin_display_name: adminStatus.displayName || null,
+      is_revoked: isRevoked,
+      note: "Email-to-user mapping requires Supabase auth admin API access. Thread/comment counts by email are not directly queryable.",
+    },
+    { status: 200 },
+  );
 }
 
 // =============================================================================
@@ -2283,10 +2570,7 @@ async function handleBCLogin(
  * Every 6th refresh re-validates the BC customer. Enforces a 7-day hard ceiling.
  * Checks for revocation via KV.
  */
-async function handleAuthRefresh(
-  req: Request,
-  env: Env,
-): Promise<Response> {
+async function handleAuthRefresh(req: Request, env: Env): Promise<Response> {
   const bearer = getBearer(req);
   if (!bearer) throw new HttpError(401, "missing_bearer_token");
 
@@ -2308,9 +2592,10 @@ async function handleAuthRefresh(
   if (!sub) throw new HttpError(401, "invalid_token_sub");
 
   // Hard ceiling: max_refresh_until
-  const maxRefreshUntil = typeof payload.max_refresh_until === "number"
-    ? payload.max_refresh_until
-    : 0;
+  const maxRefreshUntil =
+    typeof payload.max_refresh_until === "number"
+      ? payload.max_refresh_until
+      : 0;
   const now = Math.floor(Date.now() / 1000);
   if (maxRefreshUntil > 0 && now > maxRefreshUntil) {
     throw new HttpError(401, "token_max_lifetime_exceeded");
@@ -2327,9 +2612,8 @@ async function handleAuthRefresh(
   await rateLimitOrThrow(env, `refresh:${sub}`, 20, 60);
 
   // Increment refresh count
-  const prevCount = typeof payload.refresh_count === "number"
-    ? payload.refresh_count
-    : 0;
+  const prevCount =
+    typeof payload.refresh_count === "number" ? payload.refresh_count : 0;
   const refreshCount = prevCount + 1;
 
   // Every 6th refresh, re-validate the BC customer
@@ -2339,10 +2623,21 @@ async function handleAuthRefresh(
     );
     const customer = await getBCCustomerById(env, payload.bc_customer_id);
     if (!customer) {
-      throw new HttpError(401, "customer_invalid", "BC customer no longer exists");
+      throw new HttpError(
+        401,
+        "customer_invalid",
+        "BC customer no longer exists",
+      );
     }
-    if (typeof payload.email === "string" && customer.email.toLowerCase() !== payload.email.toLowerCase()) {
-      throw new HttpError(401, "customer_invalid", "Customer email has changed");
+    if (
+      typeof payload.email === "string" &&
+      customer.email.toLowerCase() !== payload.email.toLowerCase()
+    ) {
+      throw new HttpError(
+        401,
+        "customer_invalid",
+        "Customer email has changed",
+      );
     }
   }
 
@@ -2397,7 +2692,9 @@ async function handleAuthRevoke(
     expirationTtl: 8 * 24 * 60 * 60, // 8 days
   });
 
-  console.log(`[Auth:Sync] revoked user=${userId} by admin=${asString(authed.claims.email)}`);
+  console.log(
+    `[Auth:Sync] revoked user=${userId} by admin=${asString(authed.claims.email)}`,
+  );
 
   return json({ success: true }, { status: 200 });
 }
@@ -3257,7 +3554,7 @@ function generateQuoteEmailHtml(
                     </p>
                     <p style="margin: 0; color: #999; font-size: 13px; line-height: 1.6;">
                       Questions? Contact us at<br>
-                      <a href="mailto:sales@trailerpartsunlimited.com" style="color: #e62223; text-decoration: none;">sales@trailerpartsunlimited.com</a><br>
+                      <a href="mailto:carter@trailerpartsunlimited.com" style="color: #e62223; text-decoration: none;">carter@trailerpartsunlimited.com</a><br>
                       <a href="tel:+18448988687" style="color: #e62223; text-decoration: none;">844-898-8687</a>
                     </p>
                   </td>
@@ -3337,7 +3634,7 @@ Or call us at 844-898-8687
 
 ---
 Trailer Parts Unlimited
-sales@trailerpartsunlimited.com
+carter@trailerpartsunlimited.com
 trailerpartsunlimited.com
 
 This quote is valid for 30 days. Prices and availability subject to change.
@@ -3374,7 +3671,7 @@ async function sendEmailViaResend(
       subject,
       html,
       text,
-      reply_to: "sales@trailerpartsunlimited.com",
+      reply_to: "carter@trailerpartsunlimited.com",
       tags: [{ name: "type", value: "quote" }],
     }),
   });
@@ -3442,11 +3739,17 @@ interface ContactFields {
 function generateContactStaffHtml(f: ContactFields): string {
   const rows = [
     ["Name", f.name],
-    ["Email", `<a href="mailto:${f.email}" style="color:#d42020;">${f.email}</a>`],
+    [
+      "Email",
+      `<a href="mailto:${f.email}" style="color:#d42020;">${f.email}</a>`,
+    ],
     ...(f.phone ? [["Phone", f.phone] as [string, string]] : []),
     ["Subject", f.subject],
     ...(f.order ? [["Order #", f.order] as [string, string]] : []),
-    ["Message", `<div style="white-space:pre-wrap;word-break:break-word;">${f.message}</div>`],
+    [
+      "Message",
+      `<div style="white-space:pre-wrap;word-break:break-word;">${f.message}</div>`,
+    ],
   ] as [string, string][];
 
   const rowsHtml = rows
@@ -3700,7 +4003,8 @@ async function handleContactForm(req: Request, env: Env): Promise<Response> {
   const ip =
     req.headers.get("CF-Connecting-IP") ??
     req.headers.get("X-Forwarded-For")?.split(",")[0]?.trim();
-  if (ip && !isLocalIp(ip)) await rateLimitOrThrow(env, `contact:${ip}`, 5, 3600);
+  if (ip && !isLocalIp(ip))
+    await rateLimitOrThrow(env, `contact:${ip}`, 5, 3600);
 
   // Validate + sanitize
   const name = asString(body.name ?? "")
@@ -4077,8 +4381,7 @@ async function handleSeedThreads(
   const email =
     typeof authed.claims.email === "string" ? authed.claims.email : "";
   const adminCheck = await checkAdminStatus(env, email);
-  if (!adminCheck.isAdmin)
-    throw new HttpError(403, "admin_required");
+  if (!adminCheck.isAdmin) throw new HttpError(403, "admin_required");
 
   const body = (await req.json().catch(() => null)) as null | {
     threads?: Array<{
@@ -4313,17 +4616,25 @@ async function handleSeoThread(
       ],
     };
 
-    const threadImages = Array.isArray(thread.images) ? thread.images as string[] : [];
+    const threadImages = Array.isArray(thread.images)
+      ? (thread.images as string[])
+      : [];
     const threadImagesHtml = threadImages
-      .map((url) => `<img src="${escapeAttr(url)}" alt="${escapeAttr(title)}" loading="lazy">`)
+      .map(
+        (url) =>
+          `<img src="${escapeAttr(url)}" alt="${escapeAttr(title)}" loading="lazy">`,
+      )
       .join("\n");
 
     const commentsHtml = comments
       .map((c) => {
         const cBody = String(c.body ?? "");
-        const cImages = Array.isArray(c.images) ? c.images as string[] : [];
+        const cImages = Array.isArray(c.images) ? (c.images as string[]) : [];
         const cImagesHtml = cImages
-          .map((url) => `<img src="${escapeAttr(String(url))}" alt="Reply attachment" loading="lazy">`)
+          .map(
+            (url) =>
+              `<img src="${escapeAttr(String(url))}" alt="Reply attachment" loading="lazy">`,
+          )
           .join("\n");
         const isAccepted = c === accepted;
         return `<div class="answer"${isAccepted ? ' data-accepted="true"' : ""}>${isAccepted ? "<strong>Accepted Answer</strong>" : ""}<div>${cBody}</div>${cImagesHtml}</div>`;
@@ -4498,16 +4809,23 @@ export default {
       const isPut = req.method === "PUT";
       const isPatch = req.method === "PATCH";
 
-      const isWrite = (req.method === "POST" && !isPublicPost) || isDelete || isPut || isPatch;
+      const isWrite =
+        (req.method === "POST" && !isPublicPost) ||
+        isDelete ||
+        isPut ||
+        isPatch;
       if (isWrite) {
         authed = await requireSupabaseJwt(req, env);
         // Tight write limits.
         await rateLimitOrThrow(env, `${ip}:${authed.userId}:write`, 20, 60);
         // Cache user_id → email mapping for admin badge detection
-        ctx.waitUntil(cacheUserEmail(env, authed.userId, asString(authed.claims.email)));
+        ctx.waitUntil(
+          cacheUserEmail(env, authed.userId, asString(authed.claims.email)),
+        );
       } else if (isPublicPost) {
         // Public POST endpoints - rate limit by IP only (skip for local dev)
-        if (!isLocalIp(ip)) await rateLimitOrThrow(env, `${ip}:public:write`, 30, 60);
+        if (!isLocalIp(ip))
+          await rateLimitOrThrow(env, `${ip}:public:write`, 30, 60);
       } else {
         // Reads are rate limited by IP + (optional) user id.
         // If a JWT is present, we verify it and key by the user.
@@ -4592,7 +4910,11 @@ export default {
       }
 
       if (req.method === "POST" && path === "/threads") {
-        return withCors(req, env, await handleCreateThread(req, env, ctx, authed!));
+        return withCors(
+          req,
+          env,
+          await handleCreateThread(req, env, ctx, authed!),
+        );
       }
 
       // Admin endpoint: check admin status (requires auth)
@@ -4618,7 +4940,11 @@ export default {
       // Admin: User lookup (GET /admin/users)
       if (req.method === "GET" && path === "/admin/users") {
         if (!authed) authed = await requireSupabaseJwt(req, env);
-        return withCors(req, env, await handleAdminUserLookup(req, env, authed));
+        return withCors(
+          req,
+          env,
+          await handleAdminUserLookup(req, env, authed),
+        );
       }
 
       // Admin: Quote search (GET /admin/quotes)

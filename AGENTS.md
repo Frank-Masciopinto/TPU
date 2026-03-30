@@ -20,7 +20,7 @@ This repo contains multiple products for Trailer Parts Unlimited:
 - The extension uses **mail.tm** API for disposable temp emails. Domains rotate; current active domain is fetched dynamically from `GET https://api.mail.tm/domains`.
 - **mail.tm gotcha**: mail.tm normalizes email addresses (strips dots from local part). The code uses the address from the create-account response for token requests — do not change this.
 - CapSolver API key must be saved in the popup before voting works.
-- **MV3 Service Worker lifecycle**: The popup uses `chrome.storage.local.set({voteCommand: ...})` to trigger votes instead of `chrome.runtime.sendMessage`, because the popup closing kills the message channel and Chrome terminates the SW. The SW listens on `chrome.storage.onChanged` and opens the vote tab itself. A keepalive alarm (`sw_keepalive`, period 0.4 min) prevents SW termination during long operations.
+- **MV3 Service Worker lifecycle**: The popup uses `chrome.runtime.sendMessage({ type: 'EXECUTE_VOTE_ONCE' })` to start a vote (reliably wakes the SW). A legacy `storage.onChanged` listener still handles `voteCommand` if something writes it. A keepalive alarm (`sw_keepalive`, period 0.4 min) prevents SW termination during long operations.
 - `background.js` is a service worker — its console logs disappear when it goes inactive. To debug, open the service worker DevTools via `chrome://extensions` **before** triggering a vote. Content script logs go to the **page console** of the vote tab.
 - Persistent debug log: after a vote attempt, check `chrome.storage.local` key `debugLog` for step-by-step content script logs.
 - **Cloud VM testing**: To test interactively, use Playwright to connect to Chrome via CDP (`http://localhost:9222`), navigate to `chrome-extension://{EXT_ID}/popup.html` as a full page tab (not popup), set the API key, then click Vote Once. The popup as a page stays open, unlike the real popup which auto-closes.
@@ -38,3 +38,4 @@ This repo contains multiple products for Trailer Parts Unlimited:
 
 - Python deps: `pip install -r requirements.txt` (from `reviews_generator/`).
 - Requires `.env` with `BC_STORE_HASH`, `BC_API_KEY`, `OPENAI_API_KEY`.
+- OpenAI **multi-chunk batch** resume: keep `output/.active_batch.json`; run `python generate_reviews.py --batch` (no `--batch-new-run`). **`--batch-parallel`** keeps up to **`OPENAI_BATCH_MAX_INFLIGHT`** concurrent batch jobs (default **3**), polls them, and refills the window as chunks complete (`parallel_chunk_mode` in the checkpoint).

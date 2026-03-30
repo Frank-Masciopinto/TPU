@@ -7,6 +7,7 @@ Also provides the dry-run cost estimator.
 
 from __future__ import annotations
 
+import hashlib
 import math
 import random
 from dataclasses import dataclass
@@ -33,8 +34,8 @@ TIER_RANGES = {
 FULL_RATING_WEIGHTS = {5: 85, 4: 15}
 
 # Cost estimation constants (GPT-4o-mini, Mar 2026 pricing)
-# ~800 input tokens + ~400 output tokens per batch of 10 reviews
-COST_PER_BATCH_USD = 0.0003   # conservative estimate per 10-review batch
+# Input is large (system + user); output ~200–400 tokens/review batch — conservative.
+COST_PER_BATCH_USD = 0.00045   # per 10-review batch (slightly conservative vs old 0.0003)
 
 BATCH_SIZE = 10
 
@@ -61,15 +62,124 @@ def get_tier(price: float) -> int:
 
 
 def get_review_count(tier: int) -> int:
+    """Random count (legacy); prefer deterministic_review_count for stable plans."""
     lo, hi = TIER_RANGES[tier]
     return random.randint(lo, hi)
+
+
+def deterministic_review_count(product_id: str, tier: int) -> int:
+    """Stable review count for a SKU so prepare/assemble/checkpoint always agree."""
+    lo, hi = TIER_RANGES[tier]
+    span = hi - lo + 1
+    h = int(hashlib.sha256(str(product_id).encode()).hexdigest()[:12], 16)
+    return lo + (h % span)
+
+
+def allocate_content_buckets(total: int) -> tuple[int, int, int]:
+    """
+    Split total reviews into (title_only, short_llm, full).
+    Targets: 25% title-only, 21% short (LLM), remainder full.
+    Adjusts so the three integers sum exactly to total.
+    """
+    if total <= 0:
+        return 0, 0, 0
+    title = round(total * 0.25)
+    short = round(total * 0.21)
+    full = total - title - short
+    if full < 0:
+        excess = -full
+        dt = min(title, excess)
+        title -= dt
+        excess -= dt
+        ds = min(short, excess)
+        short -= ds
+        full = total - title - short
+    # Prefer at least one short LLM slice when product has several reviews
+    if total >= 5 and short < 1 and (title > 0 or full > 1):
+        if title > 0:
+            title -= 1
+        else:
+            full -= 1
+        short += 1
+        full = total - title - short
+    # Fix drift
+    delta = total - (title + short + full)
+    full += delta
+    if full < 0:
+        need = -full
+        ts = min(short, need)
+        short -= ts
+        need -= ts
+        tt = min(title, need)
+        title -= tt
+        full = total - title - short
+    title = max(0, title)
+    short = max(0, short)
+    full = max(0, full)
+    # Final exact sum
+    s2 = title + short + full
+    if s2 != total:
+        full += total - s2
+    return title, short, full
+
+
+@dataclass
+class ProductPlan:
+    """Immutable per-product generation plan (single source of truth)."""
+
+    product_id: str
+    tier: int
+    review_count: int
+    title_only_count: int
+    short_llm_count: int
+    full_count: int
+
+    def to_dict(self) -> dict:
+        return {
+            "product_id": self.product_id,
+            "tier": self.tier,
+            "review_count": self.review_count,
+            "title_only_count": self.title_only_count,
+            "short_llm_count": self.short_llm_count,
+            "full_count": self.full_count,
+        }
+
+    @staticmethod
+    def from_dict(d: dict) -> ProductPlan:
+        return ProductPlan(
+            product_id=str(d["product_id"]),
+            tier=int(d["tier"]),
+            review_count=int(d["review_count"]),
+            title_only_count=int(d["title_only_count"]),
+            short_llm_count=int(d["short_llm_count"]),
+            full_count=int(d["full_count"]),
+        )
+
+
+def plan_product(product: dict) -> ProductPlan:
+    """
+    Compute the generation plan for one product (deterministic counts).
+    """
+    price = product.get("calculated_price", 0) or 0
+    tier = get_tier(price)
+    pid = str(product["id"])
+    n = deterministic_review_count(pid, tier)
+    title, short, full = allocate_content_buckets(n)
+    return ProductPlan(
+        product_id=pid,
+        tier=tier,
+        review_count=n,
+        title_only_count=title,
+        short_llm_count=short,
+        full_count=full,
+    )
 
 
 def get_rating_pool(tier: int, count: int) -> list[int]:
     """
     Return a list of `count` integer scores that match the target distribution.
     Tier 1 always returns all 5s.
-    Tiers 2-4 use FULL_RATING_WEIGHTS (~4.68 average).
+    Tiers 2-4 use FULL_RATING_WEIGHTS (~4.85 average).
     """
     if tier == 1:
         return [5] * count
@@ -96,18 +206,26 @@ def get_rating_pool(tier: int, count: int) -> list[int]:
 
 
 def compute_tier_info(product: dict) -> TierInfo:
-    price = product.get("calculated_price", 0) or 0
-    tier = get_tier(price)
-    review_count = get_review_count(tier)
+    """
+    Tier summary aligned with plan_product: title-only is local (no LLM).
+    Tier 1: LLM only for short_llm_count; silent for title_only + full buckets.
+    Tier 2+: LLM for short + full; title_only local.
+    """
+    p = plan_product(product)
+    tier = p.tier
+    review_count = p.review_count
 
     if tier == 1:
-        llm_count = max(1, round(review_count * 0.10))
-        silent_count = review_count - llm_count
+        llm_count = p.short_llm_count
+        silent_count = p.title_only_count + p.full_count
     else:
-        llm_count = review_count
-        silent_count = 0
+        llm_count = p.short_llm_count + p.full_count
+        silent_count = p.title_only_count
 
-    batches = math.ceil(llm_count / BATCH_SIZE)
+    if llm_count > 0:
+        batches = math.ceil(llm_count / BATCH_SIZE)
+    else:
+        batches = 0
     cost = batches * COST_PER_BATCH_USD
 
     return TierInfo(
@@ -198,7 +316,7 @@ def print_dry_run(summary: DryRunSummary) -> None:
         if b["products"] == 0:
             continue
         label = f"Tier {tier} ({tier_labels[tier]})"
-        note = "  (10% LLM)" if tier == 1 else ""
+        note = "  (short bucket LLM only)" if tier == 1 else ""
         print(
             f"  {label:<24}: {b['products']:>5} products"
             f"  ~{b['reviews']:>8,} reviews"

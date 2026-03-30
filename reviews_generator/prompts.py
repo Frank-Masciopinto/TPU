@@ -366,8 +366,8 @@ minor install issue, missing hardware, unclear fitment info.
 4. NATURAL LANGUAGE AND OPENING VARIETY:
    - Vary sentence structure. Use contractions. Allow occasional minor grammar \
 imperfection (not a typo — just how people write casually in reviews).
-   - BANNED FIRST WORDS for review_content: never start a review with \
-"These", "The", "This", "I ", "Got", "Ordered", or "Been".
+   - BANNED FIRST WORDS for review_content: never start with \
+"These", "The", "This", "Got", "Ordered", or "Been" (required_opener overrides variety).
    - OPENING VARIETY: each review spec will include a required_opener field. \
 Your review_content MUST start with EXACTLY that word. No exceptions.
    - BANNED TITLE FIRST WORDS — THIS IS CRITICAL: the following words may \
@@ -423,34 +423,44 @@ and same product, produce meaningfully different content: different opening angl
 different product aspect discussed, different gripe, different use-case detail.
 
 9. LENGTH — each review has a target_words value. Write to within ±5 words of that \
-exact target. Every review in the batch MUST be a different length — a batch where \
-every review is 40-50 words is a failure. At least one review per batch must be \
-under 32 words (short, punchy) and at least one must be over 70 words (detailed). \
+exact target. Every review in the batch MUST be a different word count. \
 4-star reviews must average longer than 5-star reviews. \
-Vary from very short (~24 words) to long (~120 words) across the batch.
+Vary lengths across the batch per the assigned target_words values.
 
-10. REVIEWER NAMES AND EMAILS — will be provided. Use them exactly as given.
+10. REVIEWER NAMES AND EMAILS — will be provided in the user message for context only. \
+Do NOT repeat them in JSON output (saves tokens).
 
-11. DATES — will be provided. Use them exactly as given in YYYY-MM-DD format.
+11. DATES — same as names: provided for context only; do NOT echo in JSON.
 
 12. OUTPUT FORMAT — return a single JSON object with key "reviews" containing \
-an array of exactly N review objects. Each review object has these exact keys:
+an array of exactly N review objects. Each object MUST have ONLY these keys:
    {
      "reviews": [
        {
          "review_title": "...",
          "review_content": "...",
-         "review_score": 5,
-         "display_name": "...",
-         "email": "...",
-         "date": "YYYY-MM-DD",
-         "user_type": "Verified Buyer"
+         "review_score": 5
        },
        ...
      ]
    }
    Do not include any text outside this JSON object. No markdown fences. \
    The "reviews" array must contain EXACTLY the number of reviews requested.
+"""
+
+
+# Shorter system prompt for ≤12-word review batches (token savings).
+SYSTEM_PROMPT_SHORT = """\
+You write ultra-short 5-star product reviews for trailerpartsunlimited.com (Huntsville, TX).
+
+Rules:
+- BANNED in title and content: perfect, perfectly, amazing, excellent, outstanding, \
+great product, highly recommend, fantastic, flawless, five stars, 10/10.
+- MAX 12 words per review_content. One quick sentence. Casual tone.
+- Do NOT start content with: These, The, This, Got, Ordered, Been.
+- Titles: 3-6 words, specific (not generic praise words as first word).
+- Output JSON ONLY: {"reviews": [{"review_title":"...","review_content":"...","review_score":5}, ...]} \
+with exactly N items as requested. No display_name, email, or date in output.
 """
 
 
@@ -518,7 +528,7 @@ def _next_opener() -> str:
 # ---------------------------------------------------------------------------
 
 _WORD_TARGETS = {
-    5: [38, 45, 52, 58, 65, 70],
+    5: [24, 28, 32, 38, 45, 52, 58, 65, 70, 78, 92, 105],
     4: [65, 75, 88, 100, 112, 120],
 }
 
@@ -729,22 +739,22 @@ def build_tier1_text_prompt(
         "",
         f"VARIATION SEED: {variation_seed}",
         "",
-        f"Generate exactly {len(reviews_spec)} VERY SHORT 5-star reviews as a JSON array.",
-        "Rules for these reviews:",
-        "- Score is always 5.",
-        "- MAXIMUM 12 words per review. NEVER exceed 12 words. Hit the target_words value exactly.",
-        "- These are lazy reviewers — one quick sentence, no punctuation fuss.",
-        "- Examples: 'Fit my trailer, fast shipping', 'Held up fine so far', 'Did the job'.",
-        "- Do NOT use banned words: perfect, perfectly, amazing, excellent, outstanding.",
-        "- Do NOT start with 'These', 'The', 'This', or 'I '.",
-        "- Titles: 3-6 words, specific and casual (not 'Good product' or 'Solid item').",
+        f"Generate exactly {len(reviews_spec)} VERY SHORT reviews as a JSON array.",
+        "Rules:",
+        "- Use the score given per review (4 or 5). 4-star: one quick gripe but still okay overall.",
+        "- MAXIMUM 12 words per review_content. Hit target_words exactly.",
+        "- Lazy reviewer voice — one quick sentence.",
+        "- Banned words: perfect, perfectly, amazing, excellent, outstanding.",
+        "- Do NOT start content with: These, The, This, Got, Ordered, Been (not 'I').",
+        "- Titles: 3-6 words, specific; do NOT start title with Good/Solid/Nice/Works/Great.",
+        "- JSON output: only review_title, review_content, review_score per item (no email/date in JSON).",
         "",
     ]
 
     for i, spec in enumerate(reviews_spec):
         lines += [
             f"--- Review {i + 1} ---",
-            f"score: 5",
+            f"score: {spec['score']}",
             f"target_words: {random.choice([5, 6, 8, 10])}",
             f"display_name: {spec['display_name']}",
             f"email: {spec['email']}",
@@ -753,7 +763,7 @@ def build_tier1_text_prompt(
         ]
 
     lines.append(
-        'Return only a JSON object: {"reviews": [...]} with exactly '
-        f"{len(reviews_spec)} review objects inside. No markdown fences."
+        'Return only: {"reviews": [...]} with exactly '
+        f"{len(reviews_spec)} objects, keys review_title, review_content, review_score only."
     )
     return "\n".join(lines)

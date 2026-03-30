@@ -34,7 +34,8 @@ BANNED_WORDS = [
     "can't go wrong", "cannot be happier", "five stars", "10/10",
 ]
 
-BANNED_CONTENT_OPENERS = {"these", "the", "this", "i"}
+# "i" omitted — legitimate English reviews often start with "I".
+BANNED_CONTENT_OPENERS = {"these", "the", "this", "got", "ordered", "been"}
 
 BANNED_TITLE_OPENERS = {
     "good", "solid", "decent", "nice", "works", "great",

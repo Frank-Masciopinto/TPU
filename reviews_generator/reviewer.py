@@ -13,6 +13,8 @@ import json
 import logging
 import math
 import random
+import sys
+from collections.abc import Callable
 from typing import Any
 
 from dates import build_date_pool
@@ -22,6 +24,7 @@ from personas import PERSONAS, get_random_persona
 from prompts import (
     _TRUCK_TIRE,
     SYSTEM_PROMPT,
+    SYSTEM_PROMPT_SHORT,
     build_tier1_text_prompt,
     build_user_prompt,
     detect_axle_weight,
@@ -104,6 +107,54 @@ def _get_eligible_personas(product_name: str) -> list[dict]:
 
 logger = logging.getLogger(__name__)
 
+# Optional hook (e.g. flush CSV) before sys.exit on hard rate-limit stop.
+_rate_limit_exit_hook: Callable[[], None] | None = None
+
+
+def set_rate_limit_exit_hook(hook: Callable[[], None] | None) -> None:
+    """Register a callback run immediately before process exit on 429 (e.g. CSV finalize)."""
+    global _rate_limit_exit_hook
+    _rate_limit_exit_hook = hook
+
+
+def _rate_limit_info_from_exc(exc: RateLimitError) -> dict[str, str]:
+    headers = getattr(exc, "response", None)
+    headers = getattr(headers, "headers", {}) if headers else {}
+    return {
+        "limit_requests": headers.get("x-ratelimit-limit-requests", "?"),
+        "limit_tokens": headers.get("x-ratelimit-limit-tokens", "?"),
+        "remaining_requests": headers.get("x-ratelimit-remaining-requests", "?"),
+        "remaining_tokens": headers.get("x-ratelimit-remaining-tokens", "?"),
+        "reset_requests": headers.get("x-ratelimit-reset-requests", "?"),
+        "reset_tokens": headers.get("x-ratelimit-reset-tokens", "?"),
+    }
+
+
+def _abort_on_rate_limit(exc: RateLimitError) -> None:
+    rl_info = _rate_limit_info_from_exc(exc)
+    sep = "─" * 56
+    print(f"\n{sep}")
+    print("  RATE LIMITED — stopping script")
+    print(f"{sep}")
+    print(
+        f"  Request limit   : {rl_info['remaining_requests']} / {rl_info['limit_requests']} remaining"
+    )
+    print(
+        f"  Token limit     : {rl_info['remaining_tokens']} / {rl_info['limit_tokens']} remaining"
+    )
+    print(f"  Reset requests  : {rl_info['reset_requests']}")
+    print(f"  Reset tokens    : {rl_info['reset_tokens']}")
+    print(f"{sep}")
+    print("  Progress is saved. Re-run the same command to resume.\n")
+    hook = _rate_limit_exit_hook
+    if hook is not None:
+        try:
+            hook()
+        except Exception:
+            logger.exception("Rate-limit exit hook failed")
+    sys.exit(1)
+
+
 # Lazily initialized — must NOT be created at module level because
 # asyncio.run() creates a new event loop each invocation and a
 # module-level Semaphore would be bound to a dead loop (Python 3.9+).
@@ -113,7 +164,7 @@ _LLM_SEM: asyncio.Semaphore | None = None
 def _llm_sem() -> asyncio.Semaphore:
     global _LLM_SEM
     if _LLM_SEM is None:
-        _LLM_SEM = asyncio.Semaphore(10)
+        _LLM_SEM = asyncio.Semaphore(3)
     return _LLM_SEM
 
 
@@ -154,13 +205,15 @@ def _base_row(product: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def generate_silent_reviews(product: dict, count: int) -> list[dict]:
+def generate_silent_reviews(
+    product: dict, count: int, identity_pool: IdentityPool | None = None
+) -> list[dict]:
     """
     Generate `count` silent 5-star reviews (no title, no content).
     Used for the residual Tier 1 bucket only.
     """
     dates = build_date_pool(count)
-    pool = IdentityPool(product["id"])
+    pool = identity_pool or IdentityPool(product["id"])
 
     rows: list[dict] = []
     for date_str in dates:
@@ -181,14 +234,15 @@ def generate_silent_reviews(product: dict, count: int) -> list[dict]:
     return rows
 
 
-def generate_title_only_reviews(product: dict, count: int) -> list[dict]:
+def generate_title_only_reviews(
+    product: dict, count: int, identity_pool: IdentityPool | None = None
+) -> list[dict]:
     """
-    Generate `count` title-only 5-star reviews (title present, content empty).
-    Zero LLM cost. Represents the 10% of lazy reviewers who just type a quick title.
-    Applied universally across all product tiers.
+    Generate `count` title-only 5-star reviews (title present, content whitespace).
+    Zero LLM cost.
     """
     dates = build_date_pool(count)
-    pool = IdentityPool(product["id"])
+    pool = identity_pool or IdentityPool(product["id"])
 
     rows: list[dict] = []
     for date_str in dates:
@@ -214,11 +268,19 @@ def generate_title_only_reviews(product: dict, count: int) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 
+# Output caps — reduce wasted completion tokens
+_MAX_COMPLETION_FULL_BATCH = 4500
+_MAX_COMPLETION_SHORT_BATCH = 900
+
+
 async def _call_llm_with_retry(
     client: AsyncOpenAI,
     model: str,
     user_prompt: str,
     batch_size: int,
+    *,
+    system_prompt: str | None = None,
+    max_completion_tokens: int | None = None,
 ) -> list[dict]:
     """
     Call the OpenAI chat completion API, returning a list of review dicts.
@@ -228,18 +290,23 @@ async def _call_llm_with_retry(
     backoff = INITIAL_BACKOFF
     last_exc: Exception | None = None
 
+    sys_msg = system_prompt or SYSTEM_PROMPT
+    max_tokens = max_completion_tokens or _MAX_COMPLETION_FULL_BATCH
+
     for attempt in range(MAX_RETRIES):
         try:
             async with _llm_sem():
-                response = await client.chat.completions.create(
-                    model=model,
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
+                kwargs: dict = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": sys_msg},
                         {"role": "user", "content": user_prompt},
                     ],
-                    response_format={"type": "json_object"},
-                    temperature=0.9,
-                )
+                    "response_format": {"type": "json_object"},
+                    "temperature": 0.9,
+                }
+                kwargs["max_completion_tokens"] = max_tokens
+                response = await client.chat.completions.create(**kwargs)
 
             raw = response.choices[0].message.content or ""
 
@@ -273,12 +340,7 @@ async def _call_llm_with_retry(
             continue
 
         except RateLimitError as exc:
-            logger.warning(
-                f"Rate limit hit (attempt {attempt + 1}/{MAX_RETRIES}). Sleeping {backoff:.1f}s..."
-            )
-            last_exc = exc
-            await asyncio.sleep(backoff)
-            backoff = min(backoff * 2, MAX_BACKOFF)
+            _abort_on_rate_limit(exc)
 
         except APIStatusError as exc:
             if exc.status_code and exc.status_code >= 500:
@@ -353,7 +415,8 @@ _BANNED_CONTENT_WORDS = [
     "fit perfect",
 ]
 
-_BANNED_CONTENT_OPENERS = {"these", "the", "this", "i ", "got", "ordered", "been"}
+# Do not ban "i" — most real sentences start with "I"; required_opener handles variety.
+_BANNED_CONTENT_OPENERS = {"these", "the", "this", "got", "ordered", "been"}
 
 
 def _has_title_violation(title: str) -> bool:
@@ -447,18 +510,23 @@ async def _fix_violations(
                         messages=[{"role": "user", "content": prompt}],
                         response_format={"type": "json_object"},
                         temperature=0.7,
+                        max_completion_tokens=500,
                     )
                 raw = resp.choices[0].message.content or ""
                 fixed = json.loads(raw)
                 new_title = fixed.get("review_title", title)
                 new_content = fixed.get("review_content", content)
 
-                if not _has_title_violation(new_title) and not _has_content_violation(
-                    new_content
+                if (
+                    not _has_title_violation(new_title)
+                    and not _has_content_violation(new_content)
+                    and not _has_content_opener_violation(new_content)
                 ):
                     rows[idx]["review_title"] = new_title
                     rows[idx]["review_content"] = new_content
                     break
+            except RateLimitError as exc:
+                _abort_on_rate_limit(exc)
             except Exception as exc:
                 logger.warning(f"Violation fix attempt {attempt + 1} failed: {exc}")
 
@@ -480,12 +548,13 @@ def _llm_reviews_to_rows(
             break
         spec = specs[i]
         row = _base_row(product)
+        content = str(result.get("review_content", "")).strip() or " "
         row.update(
             {
                 "date": spec["date"],
                 "review_score": str(result.get("review_score", spec["score"])),
                 "review_title": str(result.get("review_title", "")),
-                "review_content": str(result.get("review_content", "")),
+                "review_content": content,
                 "display_name": spec["display_name"],
                 "email": spec["email"],
             }
@@ -526,11 +595,22 @@ async def generate_llm_reviews(
 
         if is_tier1_text:
             user_prompt = build_tier1_text_prompt(product, specs, variation_seed)
+            sys_p = SYSTEM_PROMPT_SHORT if tier == 1 else SYSTEM_PROMPT
+            max_out = _MAX_COMPLETION_SHORT_BATCH
         else:
             user_prompt = build_user_prompt(product, specs, variation_seed)
+            sys_p = SYSTEM_PROMPT
+            max_out = _MAX_COMPLETION_FULL_BATCH
 
         # First attempt with full batch size
-        results = await _call_llm_with_retry(client, model, user_prompt, len(specs))
+        results = await _call_llm_with_retry(
+            client,
+            model,
+            user_prompt,
+            len(specs),
+            system_prompt=sys_p,
+            max_completion_tokens=max_out,
+        )
 
         # If parse failed partially, retry with smaller batch
         if len(results) < len(specs) * 0.5 and len(specs) > 5:
@@ -551,6 +631,8 @@ async def generate_llm_reviews(
                     )
                 ),
                 mid,
+                system_prompt=sys_p,
+                max_completion_tokens=max_out,
             )
             r2 = await _call_llm_with_retry(
                 client,
@@ -563,6 +645,8 @@ async def generate_llm_reviews(
                     )
                 ),
                 len(specs) - mid,
+                system_prompt=sys_p,
+                max_completion_tokens=max_out,
             )
             results = r1 + r2
 

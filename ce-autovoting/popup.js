@@ -211,15 +211,19 @@ function setStatus(state, text) {
 // SINGLE VOTE
 // ============================================================
 
-singleVoteBtn.addEventListener('click', () => {
+singleVoteBtn.addEventListener('click', async () => {
   singleVoteBtn.disabled = true;
   setStatus('yellow', 'Opening tab...');
 
-  // Write storage FIRST (sync call — fires before popup closes).
-  // storage.onChanged in background.js picks this up and opens the tab.
-  chrome.storage.local.set({
-    voteCommand: { action: 'execute', ts: Date.now() }
-  });
+  try {
+    // sendMessage wakes the MV3 service worker reliably; storage.onChanged can be missed
+    // if the worker was not running when the popup wrote storage.
+    await chrome.runtime.sendMessage({ type: 'EXECUTE_VOTE_ONCE' });
+  } catch (e) {
+    setStatus('red', 'Could not start — reload the extension');
+    singleVoteBtn.disabled = false;
+    return;
+  }
 
   setTimeout(() => {
     if (singleVoteBtn.disabled) {
@@ -242,7 +246,7 @@ startLoopBtn.addEventListener('click', async () => {
     return;
   }
 
-  const confirmed = confirm(`Schedule ${totalVotes} votes (up to 100/day)?`);
+  const confirmed = confirm(`Schedule ${totalVotes} votes (up to 300/day)?`);
   if (!confirmed) return;
 
   try {

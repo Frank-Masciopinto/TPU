@@ -12,6 +12,7 @@ from __future__ import annotations
 import csv
 import logging
 import os
+import threading
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -46,6 +47,22 @@ YOTPO_COLUMNS = [
     "cf_Y__X",
 ]
 
+# Title-only / silent reviews use whitespace-only body in memory; Yotpo CSV uses this placeholder.
+_EMPTY_REVIEW_CONTENT_PLACEHOLDER = " - "
+
+
+def yotpo_row_for_export(row: dict) -> dict[str, str]:
+    """
+    Normalize a row for Yotpo CSV: strip NULs; whitespace-only review_content → " - ".
+    """
+    out: dict[str, str] = {}
+    for col in YOTPO_COLUMNS:
+        s = str(row.get(col, "") or "").replace("\x00", "")
+        if col == "review_content" and not s.strip():
+            s = _EMPTY_REVIEW_CONTENT_PLACEHOLDER
+        out[col] = s
+    return out
+
 
 class YotpoCSVWriter:
     """
@@ -59,6 +76,8 @@ class YotpoCSVWriter:
         self._part = 1
         self._total_written = 0
         self._files_written: list[str] = []
+        # Async tasks share one writer; 429 hook may finalize while another task writes.
+        self._lock = threading.Lock()
         os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     def _part_path(self) -> str:
@@ -77,9 +96,7 @@ class YotpoCSVWriter:
             )
             writer.writeheader()
             for row in rows:
-                # Ensure all columns present, fill missing with empty string
-                full_row = {col: row.get(col, "") for col in YOTPO_COLUMNS}
-                writer.writerow(full_row)
+                writer.writerow(yotpo_row_for_export(row))
 
         self._files_written.append(path)
         self._total_written += len(rows)
@@ -88,24 +105,36 @@ class YotpoCSVWriter:
 
     def write_rows(self, rows: list[dict]) -> None:
         """Add rows to the buffer, flushing complete 10k-row files as needed."""
-        self._buffer.extend(rows)
+        with self._lock:
+            self._buffer.extend(rows)
 
-        while len(self._buffer) >= ROWS_PER_FILE:
-            chunk = self._buffer[:ROWS_PER_FILE]
-            self._buffer = self._buffer[ROWS_PER_FILE:]
-            self._flush(chunk)
+            while len(self._buffer) >= ROWS_PER_FILE:
+                chunk = self._buffer[:ROWS_PER_FILE]
+                self._buffer = self._buffer[ROWS_PER_FILE:]
+                self._flush(chunk)
+
+    def flush_pending(self) -> None:
+        """
+        Write any buffered rows to the next part file immediately (partial chunk).
+        Safe to call after each product so crashes / 429 do not lose in-memory rows.
+        """
+        with self._lock:
+            if self._buffer:
+                self._flush(self._buffer)
+                self._buffer = []
 
     def finalize(self) -> list[str]:
         """Flush any remaining buffered rows. Returns list of file paths written."""
-        if self._buffer:
-            self._flush(self._buffer)
-            self._buffer = []
-        return self._files_written
+        self.flush_pending()
+        with self._lock:
+            return list(self._files_written)
 
     @property
     def total_written(self) -> int:
-        return self._total_written + len(self._buffer)
+        with self._lock:
+            return self._total_written + len(self._buffer)
 
     @property
     def files_written(self) -> list[str]:
-        return list(self._files_written)
+        with self._lock:
+            return list(self._files_written)

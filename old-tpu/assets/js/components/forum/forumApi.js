@@ -191,6 +191,14 @@ export function forumApi(config) {
             return request(config, `/comments/${encodeURIComponent(commentId)}/vote`, { method: 'POST', body: { value: delta }, needsAuth: true });
         },
 
+        /**
+         * Mark a comment as the thread's accepted answer (thread author or admin).
+         * Replaces any previous accepted_comment_id on the thread.
+         */
+        async acceptComment(commentId) {
+            return request(config, `/comments/${encodeURIComponent(commentId)}/accept`, { method: 'POST', body: {}, needsAuth: true });
+        },
+
         // =====================================================================
         // Admin API Methods
         // =====================================================================

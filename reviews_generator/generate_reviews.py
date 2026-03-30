@@ -11,6 +11,10 @@ Usage:
   python generate_reviews.py --max-cost-usd 20
   python generate_reviews.py --retry-incomplete
   python generate_reviews.py --reset
+  python generate_reviews.py --batch
+
+Catalog: by default only products with inventory > 0 are loaded (variants summed).
+  --include-out-of-stock   or   BC_INCLUDE_OUT_OF_STOCK=1   to include OOS SKUs.
 """
 
 from __future__ import annotations
@@ -22,10 +26,6 @@ import os
 import sys
 from datetime import datetime
 
-from dotenv import load_dotenv
-from openai import AsyncOpenAI
-from tqdm.asyncio import tqdm as async_tqdm
-
 from bc_client import fetch_all_products
 from checkpoint import (
     add_incomplete,
@@ -33,10 +33,20 @@ from checkpoint import (
     load_processed,
     mark_processed,
     reset_processed,
+    save_processed,
 )
 from csv_writer import YotpoCSVWriter
-from reviewer import generate_llm_reviews, generate_silent_reviews, generate_title_only_reviews
-from tier import compute_tier_info, estimate_run, print_dry_run
+from dotenv import load_dotenv
+from openai import AsyncOpenAI
+from reviewer import (
+    generate_llm_reviews,
+    generate_silent_reviews,
+    generate_title_only_reviews,
+    set_rate_limit_exit_hook,
+)
+from identity import IdentityPool
+from tier import estimate_run, plan_product, print_dry_run
+from tqdm.asyncio import tqdm as async_tqdm
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -53,6 +63,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Environment
 # ---------------------------------------------------------------------------
+
 
 def _load_env() -> dict[str, str]:
     load_dotenv()
@@ -73,6 +84,7 @@ def _load_env() -> dict[str, str]:
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -107,12 +119,48 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Clear the processed-IDs checkpoint (prompts for confirmation)",
     )
+    parser.add_argument(
+        "--batch",
+        action="store_true",
+        help="Use OpenAI Batch API (50%% cheaper, separate rate limits, ~24h turnaround)",
+    )
+    parser.add_argument(
+        "--batch-new-run",
+        action="store_true",
+        help=(
+            "Remove output/.active_batch.json and rebuild batch JSONL/specs "
+            "(keeps .processed_ids.json). Use after a failed batch or to pick up new chunking limits."
+        ),
+    )
+    parser.add_argument(
+        "--batch-parallel",
+        action="store_true",
+        help=(
+            "Multi-chunk batch only: keep up to OPENAI_BATCH_MAX_INFLIGHT (default 3) OpenAI "
+            "batch jobs in flight; poll and refill the window until all parts finish "
+            "(parallel_chunk_mode stored in .active_batch.json for resume)."
+        ),
+    )
+    parser.add_argument(
+        "--include-out-of-stock",
+        action="store_true",
+        help="Include BigCommerce products with zero inventory (default: in-stock only)",
+    )
     return parser.parse_args()
+
+
+def _catalog_in_stock_only(args: argparse.Namespace) -> bool:
+    if getattr(args, "include_out_of_stock", False):
+        return False
+    if os.getenv("BC_INCLUDE_OUT_OF_STOCK", "").strip().lower() in ("1", "true", "yes"):
+        return False
+    return True
 
 
 # ---------------------------------------------------------------------------
 # Per-product processor
 # ---------------------------------------------------------------------------
+
 
 async def process_product(
     product: dict,
@@ -127,23 +175,23 @@ async def process_product(
     Generate all reviews for one product, write to CSV, update checkpoints.
     Returns (reviews_generated, reviews_expected).
     """
-    info = compute_tier_info(product)
-    tier = info.tier
-    expected = info.review_count
+    plan = plan_product(product)
+    tier = plan.tier
+    expected = plan.review_count
     rows: list[dict] = []
+    pool = IdentityPool(product["id"])
 
-    # Universal 2-bucket split across ALL tiers:
-    #   46% → short text ≤12 words (LLM) — lazy reviewers
-    #   54% → full content (LLM for Tier 2-4; local silent for Tier 1)
-    short_count = max(1, round(expected * 0.46))
-    full_count  = max(0, expected - short_count)
-
+    # 25% title-only (local), 21% short LLM, 54% full (LLM or Tier 1 silent)
     try:
-        # Bucket 1: short text — ≤12 words (all tiers, LLM)
-        if short_count > 0:
+        if plan.title_only_count > 0:
+            rows.extend(
+                generate_title_only_reviews(product, plan.title_only_count, pool)
+            )
+
+        if plan.short_llm_count > 0:
             short_rows = await generate_llm_reviews(
                 product=product,
-                total_count=short_count,
+                total_count=plan.short_llm_count,
                 tier=tier,
                 client=client,
                 model=model,
@@ -151,15 +199,13 @@ async def process_product(
             )
             rows.extend(short_rows)
 
-        # Bucket 3: full reviews
-        if full_count > 0:
+        if plan.full_count > 0:
             if tier == 1:
-                # Tier 1: remaining 80% stays local-silent (cost-efficient)
-                rows.extend(generate_silent_reviews(product, full_count))
+                rows.extend(generate_silent_reviews(product, plan.full_count, pool))
             else:
                 full_rows = await generate_llm_reviews(
                     product=product,
-                    total_count=full_count,
+                    total_count=plan.full_count,
                     tier=tier,
                     client=client,
                     model=model,
@@ -167,7 +213,9 @@ async def process_product(
                 rows.extend(full_rows)
 
     except Exception as exc:
-        logger.error(f"Product {product['id']} ({product['name']}) failed: {exc}", exc_info=True)
+        logger.error(
+            f"Product {product['id']} ({product['name']}) failed: {exc}", exc_info=True
+        )
 
     got = len(rows)
     threshold = expected * 0.95
@@ -175,6 +223,8 @@ async def process_product(
     async with file_lock:
         if rows:
             csv_writer.write_rows(rows)
+            # Persist after each product so 429/crash does not lose buffered rows
+            csv_writer.flush_pending()
 
         if got >= threshold:
             mark_processed(product["id"], processed_ids)
@@ -188,12 +238,15 @@ async def process_product(
 # Main orchestration
 # ---------------------------------------------------------------------------
 
+
 async def run(args: argparse.Namespace) -> None:
     env = _load_env()
 
     # --- Reset checkpoint ---
     if args.reset:
-        answer = input("Reset the .processed_ids.json checkpoint? This cannot be undone. [y/N]: ")
+        answer = input(
+            "Reset the .processed_ids.json checkpoint? This cannot be undone. [y/N]: "
+        )
         if answer.strip().lower() == "y":
             reset_processed(confirm=True)
             print("Checkpoint reset.")
@@ -204,6 +257,20 @@ async def run(args: argparse.Namespace) -> None:
     # --- Load checkpoints ---
     processed_ids = load_processed()
     incomplete_list = load_incomplete()
+
+    try:
+        await _run_inner(args, env, processed_ids, incomplete_list)
+    finally:
+        # Ensure processed IDs hit disk after interrupt / 429 / normal exit
+        save_processed(processed_ids)
+
+
+async def _run_inner(
+    args: argparse.Namespace,
+    env: dict[str, str],
+    processed_ids: set[str],
+    incomplete_list: list[dict],
+) -> None:
 
     # --- Retry-incomplete mode ---
     if args.retry_incomplete:
@@ -217,7 +284,11 @@ async def run(args: argparse.Namespace) -> None:
             processed_ids.discard(str(entry.get("product_id", "")))
         # Fetch products and filter to only the incomplete ones
         incomplete_ids = {str(e["product_id"]) for e in incomplete_list}
-        all_products = await fetch_all_products(env["store_hash"], env["api_key"])
+        all_products = await fetch_all_products(
+            env["store_hash"],
+            env["api_key"],
+            in_stock_only=_catalog_in_stock_only(args),
+        )
         products_to_run = [p for p in all_products if p["id"] in incomplete_ids]
 
         if not products_to_run:
@@ -226,10 +297,16 @@ async def run(args: argparse.Namespace) -> None:
     else:
         # --- Normal mode: fetch and filter ---
         print("\nFetching product catalog from BigCommerce...")
-        all_products = await fetch_all_products(env["store_hash"], env["api_key"])
+        all_products = await fetch_all_products(
+            env["store_hash"],
+            env["api_key"],
+            in_stock_only=_catalog_in_stock_only(args),
+        )
 
         if not all_products:
-            print("No products returned from BigCommerce. Check your credentials and store hash.")
+            print(
+                "No products returned from BigCommerce. Check your credentials and store hash."
+            )
             return
 
         limit: int | None = None
@@ -237,7 +314,9 @@ async def run(args: argparse.Namespace) -> None:
             try:
                 limit = int(args.products)
             except ValueError:
-                print(f"Invalid --products value: {args.products!r}. Use a number or 'all'.")
+                print(
+                    f"Invalid --products value: {args.products!r}. Use a number or 'all'."
+                )
                 sys.exit(1)
 
         unprocessed = [p for p in all_products if p["id"] not in processed_ids]
@@ -247,8 +326,12 @@ async def run(args: argparse.Namespace) -> None:
 
     # --- Dry run ---
     if args.dry_run:
-        summary = estimate_run(all_products if not args.retry_incomplete else products_to_run,
-                               processed_ids, limit if not args.retry_incomplete else None, model)
+        summary = estimate_run(
+            all_products if not args.retry_incomplete else products_to_run,
+            processed_ids,
+            limit if not args.retry_incomplete else None,
+            model,
+        )
         print_dry_run(summary)
         return
 
@@ -269,6 +352,22 @@ async def run(args: argparse.Namespace) -> None:
         print(f"Use --reset to clear the checkpoint, or check output/.incomplete.json")
         return
 
+    # --- Batch API mode ---
+    if args.batch:
+        from batch_runner import run_batch
+
+        run_batch(
+            products=all_products,
+            processed_ids=processed_ids,
+            incomplete_list=incomplete_list,
+            limit=limit if not args.retry_incomplete else None,
+            model=model,
+            api_key=env["openai_key"],
+            new_run=args.batch_new_run,
+            batch_parallel=args.batch_parallel,
+        )
+        return
+
     # --- Summary banner ---
     sep = "─" * 50
     print()
@@ -284,47 +383,55 @@ async def run(args: argparse.Namespace) -> None:
     client = AsyncOpenAI(api_key=env["openai_key"])
     file_lock = asyncio.Lock()
     csv_writer = YotpoCSVWriter()
+    set_rate_limit_exit_hook(lambda: csv_writer.finalize())
 
     total_generated = 0
     total_expected = 0
 
-    tasks = [
-        process_product(
-            product=p,
-            client=client,
-            model=model,
-            processed_ids=processed_ids,
-            incomplete_list=incomplete_list,
-            file_lock=file_lock,
-            csv_writer=csv_writer,
+    try:
+        tasks = [
+            process_product(
+                product=p,
+                client=client,
+                model=model,
+                processed_ids=processed_ids,
+                incomplete_list=incomplete_list,
+                file_lock=file_lock,
+                csv_writer=csv_writer,
+            )
+            for p in products_to_run
+        ]
+
+        results = await async_tqdm.gather(
+            *tasks,
+            desc="Generating reviews",
+            unit="product",
         )
-        for p in products_to_run
-    ]
 
-    results = await async_tqdm.gather(
-        *tasks,
-        desc="Generating reviews",
-        unit="product",
-    )
+        for got, expected in results:
+            total_generated += got
+            total_expected += expected
 
-    for got, expected in results:
-        total_generated += got
-        total_expected += expected
-
-    # Flush remaining rows to final CSV part
-    files = csv_writer.finalize()
+        # Buffer is usually empty (flush_pending per product); idempotent if not
+        files = csv_writer.finalize()
+    finally:
+        set_rate_limit_exit_hook(None)
 
     # --- Final summary ---
     print()
     print(sep)
     print(f"{'Products processed':<30}: {len(products_to_run):,}")
-    print(f"{'Reviews generated':<30}: {total_generated:,}  (expected ~{total_expected:,})")
+    print(
+        f"{'Reviews generated':<30}: {total_generated:,}  (expected ~{total_expected:,})"
+    )
     print(f"{'Output files':<30}: {len(files)}")
     for f in files:
         print(f"  → {f}")
 
     if incomplete_list:
-        print(f"\n  {len(incomplete_list)} product(s) in output/.incomplete.json (run with --retry-incomplete)")
+        print(
+            f"\n  {len(incomplete_list)} product(s) in output/.incomplete.json (run with --retry-incomplete)"
+        )
 
     print(sep)
     print()

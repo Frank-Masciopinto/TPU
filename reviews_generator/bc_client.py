@@ -80,6 +80,31 @@ def _strip_html(text: str) -> str:
     return re.sub(r"<[^>]+>", " ", text).strip()
 
 
+def _is_in_stock(raw: dict) -> bool:
+    """
+    True if the product should be treated as available for sale (has sellable qty).
+
+    - inventory_tracking=none → always True (store does not track stock for this SKU).
+    - Variants present → sum variant inventory_level > 0.
+    - Else → product-level inventory_level > 0.
+    - If tracking is on but levels are missing from payload → True (avoid false negatives).
+    """
+    tracking = (raw.get("inventory_tracking") or "none").lower()
+    if tracking == "none":
+        return True
+
+    variants = raw.get("variants") or []
+    if variants:
+        total = sum(int(v.get("inventory_level") or 0) for v in variants)
+        return total > 0
+
+    level = raw.get("inventory_level")
+    if level is not None:
+        return int(level) > 0
+
+    return True
+
+
 async def _fetch_page(
     client: httpx.AsyncClient,
     url: str,
@@ -96,19 +121,29 @@ async def fetch_all_products(
     store_hash: str,
     api_key: str,
     include_inactive: bool = False,
+    in_stock_only: bool = True,
 ) -> list[dict]:
     """
     Fetch every product in the BigCommerce catalog.
     Returns a list of normalised product dicts.
+
+    When ``in_stock_only`` is True (default), only products with inventory > 0 are
+    returned (requires ``include=variants`` for multi-variant SKUs). Products with
+    ``inventory_tracking: none`` are always kept.
     """
     base = _base_url(store_hash)
     url = f"{base}/catalog/products"
     headers = _bc_headers(api_key)
 
+    include_parts = ["images"]
+    if in_stock_only:
+        include_parts.append("variants")
+    include = ",".join(include_parts)
+
     params: dict[str, Any] = {
         "limit": PAGE_SIZE,
         "page": 1,
-        "include": "images",
+        "include": include,
         "is_visible": "true" if not include_inactive else None,
     }
     # Remove None values
@@ -125,9 +160,24 @@ async def fetch_all_products(
 
         logger.info(f"BigCommerce catalog: {total_count} products across {total_pages} pages")
 
-        products: list[dict] = [_normalise_product(p) for p in first.get("data", [])]
+        def normalise_page(raw_items: list[dict]) -> list[dict]:
+            out: list[dict] = []
+            for p in raw_items:
+                if in_stock_only and not _is_in_stock(p):
+                    continue
+                out.append(_normalise_product(p))
+            return out
+
+        raw_first = first.get("data", [])
+        products: list[dict] = normalise_page(raw_first)
 
         if total_pages <= 1:
+            if in_stock_only:
+                logger.info(
+                    f"After in-stock filter: {len(products)} products "
+                    f"(dropped {len(raw_first) - len(products)} OOS of {len(raw_first)} fetched)"
+                )
+            logger.info(f"Fetched {len(products)} products total")
             return products
 
         # Fetch remaining pages concurrently
@@ -135,12 +185,17 @@ async def fetch_all_products(
             p = dict(params)
             p["page"] = page
             data = await _fetch_page(client, url, headers, p)
-            return [_normalise_product(item) for item in data.get("data", [])]
+            return normalise_page(data.get("data", []))
 
         tasks = [fetch_page_n(page) for page in range(2, total_pages + 1)]
         pages = await asyncio.gather(*tasks)
         for page_products in pages:
             products.extend(page_products)
 
+    if in_stock_only:
+        logger.info(
+            f"After in-stock filter: {len(products)} products "
+            f"(from {total_count} visible in catalog)"
+        )
     logger.info(f"Fetched {len(products)} products total")
     return products

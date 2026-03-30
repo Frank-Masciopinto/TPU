@@ -9,8 +9,20 @@ const TARGET_ORIGINS = [
 ];
 const VOTE_WINDOW   = { start: 8, end: 22 };
 const TIMEZONE      = 'America/Chicago';
-const MAX_PER_DAY   = 100;
-const MIN_GAP_MS    = 5 * 60 * 1000;
+/** Max votes scheduled per calendar day (America/Chicago vote window). */
+const MAX_PER_DAY   = 300;
+const VOTE_WINDOW_MINUTES = (VOTE_WINDOW.end - VOTE_WINDOW.start) * 60;
+/** >1 packs more votes into the same window (shorter gaps between alarms). */
+const LOOP_SCHEDULE_SPEED = 10;
+/** Minimum spacing between scheduled vote times (base gap ÷ LOOP_SCHEDULE_SPEED). */
+const MIN_GAP_MS    = Math.max(
+  10_000,
+  Math.floor((VOTE_WINDOW_MINUTES / MAX_PER_DAY) * 60 * 1000 / LOOP_SCHEDULE_SPEED)
+);
+/** Do not block tab creation longer than this while clearing site data (browsingData can be very slow). */
+const PRE_CLEAR_MAX_MS = 5000;
+/** Kill switch if content script never finishes (Turnstile + temp mail can exceed 5 min). */
+const TAB_TIMEOUT_MINUTES = 15;
 
 // ============================================================
 // TEMP EMAIL CONFIG (mail.tm)
@@ -88,6 +100,14 @@ async function clearVoteAlarms() {
   await Promise.all(
     all.filter(a => a.name.startsWith('vote_') || a.name.startsWith('tab_timeout_'))
        .map(a => chrome.alarms.clear(a.name))
+  );
+}
+
+/** Alarms survive browser restarts; stale tab_timeout_* targets wrong/missing tabs → spurious warnings. */
+async function clearStaleTabTimeoutAlarms() {
+  const all = await chrome.alarms.getAll();
+  await Promise.all(
+    all.filter((a) => a.name.startsWith('tab_timeout_')).map((a) => chrome.alarms.clear(a.name))
   );
 }
 
@@ -263,14 +283,18 @@ async function scheduleNextBatch() {
     if (curMins >= windowEnd) {
       startFromNow = (24 * 60 - curMins) + windowStart;
     } else {
-      startFromNow = 1;
+      startFromNow = 1 / LOOP_SCHEDULE_SPEED;
     }
     const avail = Math.max(1, windowEnd - Math.max(curMins, windowStart));
-    const baseInterval = Math.max(5, avail / todayBatch);
+    // Minutes between slots; ÷ LOOP_SCHEDULE_SPEED tightens the schedule (e.g. 10× faster).
+    const baseInterval = Math.max(
+      MIN_GAP_MS / 60000,
+      avail / todayBatch / LOOP_SCHEDULE_SPEED
+    );
     const times = [];
     let cursor = nowMs + startFromNow * 60000;
     for (let i = 0; i < todayBatch; i++) {
-      cursor += Math.max(naturalDelay(baseInterval), MIN_GAP_MS, 60000);
+      cursor += Math.max(naturalDelay(baseInterval), MIN_GAP_MS);
       const cp = new Intl.DateTimeFormat('en-US', {
         timeZone: TIMEZONE, hour: 'numeric', minute: 'numeric', hour12: false
       }).formatToParts(new Date(cursor));
@@ -292,53 +316,62 @@ async function scheduleNextBatch() {
 }
 
 // ============================================================
-// Wait for main-frame DOMContentLoaded (not "complete" — that waits for
-// every image, analytics, and third-party script and can take 60s+).
+// Wait until the main frame can run script and DOM is interactive.
+// Do NOT use tabs.onUpdated status "complete" — that waits for all assets (minutes on heavy pages).
+// Poll document.readyState + webNavigation DCL so injection runs as soon as the document is usable.
 // ============================================================
 
-function waitForMainFrameDomReady(tabId, timeoutMs = 45000) {
+function waitForMainFrameDomReady(tabId, timeoutMs = 25000) {
   return new Promise((resolve, reject) => {
     let settled = false;
+    let pollIv = null;
+
     const cleanup = () => {
+      clearTimeout(timer);
+      if (pollIv !== null) {
+        clearInterval(pollIv);
+        pollIv = null;
+      }
       chrome.webNavigation.onDOMContentLoaded.removeListener(onDom);
-      chrome.tabs.onUpdated.removeListener(onUpd);
     };
+
     const finish = () => {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
       cleanup();
       resolve();
     };
+
     const fail = (msg) => {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
       cleanup();
       reject(new Error(msg));
     };
 
-    const timer = setTimeout(() => fail('DOMContentLoaded timeout'), timeoutMs);
+    const timer = setTimeout(() => fail('Main frame DOM ready timeout'), timeoutMs);
 
     function onDom(details) {
       if (details.tabId === tabId && details.frameId === 0) finish();
     }
-    // Fallback: very fast/cached navigations can fire DCL before listener attaches
-    function onUpd(id, info) {
-      if (id === tabId && info.status === 'complete') finish();
-    }
 
     chrome.webNavigation.onDOMContentLoaded.addListener(onDom);
-    chrome.tabs.onUpdated.addListener(onUpd);
 
-    // Probe: tab may already be interactive if listener was late
-    chrome.scripting.executeScript({
-      target: { tabId },
-      func: () => document.readyState
-    }).then((results) => {
-      const rs = results && results[0] && results[0].result;
-      if (rs === 'interactive' || rs === 'complete') finish();
-    }).catch(() => {});
+    const probeReadyState = () => {
+      chrome.scripting
+        .executeScript({
+          target: { tabId },
+          func: () => document.readyState,
+        })
+        .then((results) => {
+          const rs = results && results[0] && results[0].result;
+          if (rs === 'interactive' || rs === 'complete') finish();
+        })
+        .catch(() => {});
+    };
+
+    probeReadyState();
+    pollIv = setInterval(probeReadyState, 120);
   });
 }
 
@@ -348,14 +381,32 @@ function waitForMainFrameDomReady(tabId, timeoutMs = 45000) {
 // When called from alarm loop: no tabId, we open it ourselves
 // ============================================================
 
+let voteTabBusy = false;
+
 async function executeVoteInTab() {
-  await startKeepalive();
+  if (voteTabBusy) {
+    console.warn('[bg] executeVoteInTab skipped — already running');
+    return;
+  }
+  voteTabBusy = true;
 
   let tabId;
   try {
-    // Clear BEFORE opening the tab — avoids racing the first navigation (stale cookies
-    // → ssButtonDisabled on Vote) and avoids "Frame 0 removed" from clearing mid-load.
-    await clearAllOriginData().catch(e => console.warn('[bg] pre-clear:', e.message));
+    // Avoid storage.onChanged re-firing a leftover voteCommand from an older build / manual writes.
+    await chrome.storage.local.remove('voteCommand').catch(() => {});
+
+    await startKeepalive();
+
+    const { emailMode = 'pool' } = await chrome.storage.local.get('emailMode');
+    const emailPromise =
+      emailMode === 'temp' ? generateTempEmailWithRetry() : Promise.resolve();
+
+    // Clear before navigate, but never wait many minutes on browsingData.remove.
+    const clearDone = clearAllOriginData().catch((e) => console.warn('[bg] pre-clear:', e.message));
+    await Promise.race([
+      clearDone,
+      new Promise((r) => setTimeout(r, PRE_CLEAR_MAX_MS)),
+    ]);
 
     const tab = await chrome.tabs.create({ url: TARGET_URL, active: true });
     tabId = tab.id;
@@ -363,19 +414,8 @@ async function executeVoteInTab() {
 
     await saveStats({ autoVoteEnabled: true, verificationStatus: null, activeTabId: tabId });
 
-    const { emailMode = 'pool' } = await chrome.storage.local.get('emailMode');
-
-    let emailPromise;
-    if (emailMode === 'temp') {
-      emailPromise = generateTempEmailWithRetry();
-    } else {
-      // Pool mode: content_script reads directly from emailPool in storage; nothing to generate
-      emailPromise = Promise.resolve();
-    }
-
-    const domPromise = waitForMainFrameDomReady(tabId);
-
-    await Promise.all([emailPromise, domPromise]);
+    // Overlap temp-mail setup with first navigation (was serial before → long idle tab).
+    await Promise.all([emailPromise, waitForMainFrameDomReady(tabId)]);
 
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
@@ -386,7 +426,7 @@ async function executeVoteInTab() {
         await new Promise(r => setTimeout(r, 400));
       }
     }
-    chrome.alarms.create(`tab_timeout_${tabId}`, { delayInMinutes: 5 });
+    chrome.alarms.create(`tab_timeout_${tabId}`, { delayInMinutes: TAB_TIMEOUT_MINUTES });
     console.log(`[bg] Tab ${tabId} script injected`);
 
   } catch (err) {
@@ -395,6 +435,8 @@ async function executeVoteInTab() {
     if (tabId) { try { await chrome.tabs.remove(tabId); } catch (_) {} }
     await saveStats({ activeTabId: null, autoVoteEnabled: false, verificationStatus: null });
     await stopKeepalive();
+  } finally {
+    voteTabBusy = false;
   }
 }
 
@@ -406,8 +448,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local' || !changes.voteCommand) return;
   const cmd = changes.voteCommand.newValue;
   if (!cmd || cmd.action !== 'execute') return;
-  console.log('[bg] voteCommand received via storage');
-  executeVoteInTab();
+  console.log('[bg] voteCommand received via storage (legacy path — prefer popup sendMessage)');
+  void executeVoteInTab().catch((e) => console.error('[bg] voteCommand run:', e));
 });
 
 async function closeVoteTab(tabId) {
@@ -469,6 +511,13 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     const stats = await getStats();
 
     switch (msg.type) {
+
+      // Wakes the service worker reliably (storage.onChanged can be missed if SW was asleep).
+      case 'EXECUTE_VOTE_ONCE': {
+        void executeVoteInTab().catch((e) => console.error('[bg] EXECUTE_VOTE_ONCE:', e));
+        sendResponse({ ok: true });
+        break;
+      }
 
       case 'VOTE_SUCCESS': {
         // In pool mode, consume the used email from the pool
@@ -587,9 +636,17 @@ chrome.alarms.onAlarm.addListener(async alarm => {
 
   if (alarm.name.startsWith('tab_timeout_')) {
     const tabId = parseInt(alarm.name.split('tab_timeout_')[1], 10);
-    console.warn(`[bg] Tab timeout ${tabId}`);
+    const tab = await chrome.tabs.get(tabId).catch(() => null);
+    if (!tab) {
+      console.log(`[bg] Tab timeout alarm for missing tab ${tabId} (stale after restart/close — ignored)`);
+      await chrome.alarms.clear(alarm.name).catch(() => {});
+      return;
+    }
+    console.warn(
+      `[bg] Tab timeout ${tabId}: no VOTE_SUCCESS / VOTE_ERROR / VOTE_NEEDS_VERIFICATION within ${TAB_TIMEOUT_MINUTES}m (Turnstile, mail, or stuck page)`
+    );
     await closeVoteTab(tabId);
-    await recordError('Tab timeout: vote did not complete within 5 minutes');
+    await recordError(`Tab timeout: vote did not complete within ${TAB_TIMEOUT_MINUTES} minutes`);
     return;
   }
 
@@ -613,5 +670,9 @@ chrome.alarms.onAlarm.addListener(async alarm => {
 // STARTUP / INSTALL HOOKS
 // ============================================================
 
-chrome.runtime.onInstalled.addListener(() => restoreAlarms());
-chrome.runtime.onStartup.addListener(() => restoreAlarms());
+chrome.runtime.onInstalled.addListener(() => {
+  void clearStaleTabTimeoutAlarms().then(() => restoreAlarms());
+});
+chrome.runtime.onStartup.addListener(() => {
+  void clearStaleTabTimeoutAlarms().then(() => restoreAlarms());
+});
